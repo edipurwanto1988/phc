@@ -55,6 +55,11 @@
             visibility: hidden;
             transform: translateY(10px);
             transition: all 0.2s ease;
+            min-width: 12rem;
+            width: max-content;
+        }
+        .nav-dropdown-menu a {
+            white-space: nowrap;
         }
         .nav-dropdown:hover .nav-dropdown-menu {
             opacity: 1;
@@ -153,7 +158,7 @@
                                         {{ $hMenu->nama }}
                                         <i class="ri-arrow-down-s-line"></i>
                                     </a>
-                                    <div class="absolute left-0 top-full -mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden nav-dropdown-menu">
+                                    <div class="absolute left-0 top-full -mt-2 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden nav-dropdown-menu">
                                         <div class="py-1">
                                             @foreach($hMenu->children as $child)
                                                 <a href="{{ $child->url }}" target="{{ $child->target }}" class="block px-4 py-2.5 text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
