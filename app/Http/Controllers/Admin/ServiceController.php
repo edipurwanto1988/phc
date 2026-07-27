@@ -17,6 +17,17 @@ class ServiceController extends Controller
         return view('admin.services.index', compact('services'));
     }
 
+    public function reorder(Request $request)
+    {
+        $order = $request->input('order');
+        if (is_array($order)) {
+            foreach ($order as $item) {
+                Service::where('id', $item['id'])->update(['urutan' => $item['urutan']]);
+            }
+        }
+        return response()->json(['success' => true]);
+    }
+
     public function create()
     {
         $categories = ServiceCategory::where('is_active', true)->orderBy('urutan')->get();

@@ -24,10 +24,12 @@
                     <th class="py-3 px-6 text-sm font-semibold text-gray-600 w-28 text-center">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="droppable-zone">
                 <?php $__empty_1 = true; $__currentLoopData = $services; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="py-4 px-6 text-sm text-gray-500 text-center font-medium"><?php echo e($service->urutan); ?></td>
+                <tr class="service-item border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-grab active:cursor-grabbing group" data-id="<?php echo e($service->id); ?>" draggable="true">
+                    <td class="py-4 px-6 text-center">
+                        <i class="ri-drag-move-2-line text-gray-400 group-hover:text-gray-600 text-lg"></i>
+                    </td>
                     <td class="py-4 px-6">
                         <?php if($service->gambar): ?>
                         <img src="<?php echo e(asset('storage/' . $service->gambar)); ?>" alt="<?php echo e($service->nama); ?>" class="w-12 h-12 object-cover rounded-lg border border-gray-200">
@@ -81,6 +83,49 @@
         </table>
     </div>
 </div>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('scripts'); ?>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.droppable-zone');
+    
+    if (container) {
+        new Sortable(container, {
+            animation: 150,
+            handle: '.cursor-grab', // The class that allows grabbing
+            ghostClass: 'bg-gray-100', // Class added to the dragged item
+            onEnd: function (evt) {
+                const orderData = [];
+                container.querySelectorAll('.service-item').forEach((item, index) => {
+                    orderData.push({
+                        id: item.dataset.id,
+                        urutan: index + 1
+                    });
+                });
+
+                fetch('<?php echo e(route("admin.services.reorder")); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ order: orderData })
+                }).then(res => res.json())
+                  .then(data => {
+                      if(data.success) {
+                          console.log('Order saved successfully');
+                      }
+                  }).catch(err => {
+                      console.error('Failed to save order', err);
+                  });
+            }
+        });
+    }
+});
+</script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/macbook/CascadeProjects/PHC/laravel/resources/views/admin/services/index.blade.php ENDPATH**/ ?>

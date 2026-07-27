@@ -78,6 +78,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         // CRUD Routes
         Route::resource('/customers', AdminCustomerController::class)->names('admin.customers');
         Route::resource('/orders', AdminOrderController::class)->names('admin.orders');
+        Route::post('/services/reorder', [AdminServiceController::class, 'reorder'])->name('admin.services.reorder');
         Route::resource('/services', AdminServiceController::class)->names('admin.services');
         Route::resource('/service-categories', AdminServiceCategoryController::class)->names('admin.service-categories');
         Route::resource('/users', AdminUserController::class)->names('admin.users');
