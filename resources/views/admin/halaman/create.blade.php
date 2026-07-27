@@ -34,7 +34,7 @@
                 <!-- Isi Konten Laman (TinyMCE) -->
                 <div>
                     <label for="tinymce" class="block text-sm font-semibold text-gray-700 mb-1">Isi Konten Laman</label>
-                    <textarea name="isi" id="tinymce" rows="16" required></textarea>
+                    <textarea name="isi" id="tinymce" rows="16"></textarea>
                 </div>
             </div>
 
