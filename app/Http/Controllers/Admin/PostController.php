@@ -128,9 +128,6 @@ class PostController extends Controller
         return redirect()->route('admin.posts.index')->with('success', 'Artikel berhasil diperbarui.');
     }
 
-        }
-        return response()->json(['success' => false, 'message' => 'Tidak ada artikel yang dipilih.'], 400);
-    }
 
     public function destroy(Post $post)
     {
