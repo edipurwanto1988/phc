@@ -3,7 +3,7 @@
 @section('title', $halaman->judul . ' - PHC Pekanbaru')
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
     <!-- Breadcrumb -->
     <nav class="flex text-xs text-gray-500 mb-6 font-medium">
         <a href="/" class="hover:text-primary transition-colors">Home</a>
