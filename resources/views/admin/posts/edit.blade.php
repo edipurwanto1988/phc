@@ -41,7 +41,7 @@
                     <!-- Konten / TinyMCE -->
                     <div>
                         <label for="tinymce" class="block text-sm font-semibold text-gray-700 mb-1">Isi Konten Artikel</label>
-                        <textarea name="konten" id="tinymce" rows="14" data-rich-text="true" required>{{ $post->konten }}</textarea>
+                        <textarea name="konten" id="tinymce" rows="14" data-rich-text="true">{{ old('konten', $post->konten) }}</textarea>
                     </div>
                 </div>
 
