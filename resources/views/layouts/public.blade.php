@@ -49,6 +49,19 @@
         .mobile-menu { display: none; }
         .mobile-menu.active { display: block; }
 
+        /* Dropdown Menu */
+        .nav-dropdown-menu {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+        }
+        .nav-dropdown:hover .nav-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
         /* WA button pulse */
         @keyframes pulse-ring {
             0% { transform: scale(0.9); opacity: 1; }
@@ -133,10 +146,30 @@
                     <!-- Desktop Nav Links -->
                     <div class="flex items-center gap-8">
                         @forelse($headerMenus as $hMenu)
-                            <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5">
-                                @if($hMenu->icon)<i class="{{ $hMenu->icon }} text-base"></i>@endif
-                                {{ $hMenu->nama }}
-                            </a>
+                            @if($hMenu->children && $hMenu->children->count() > 0)
+                                <div class="relative nav-dropdown">
+                                    <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5 py-4">
+                                        @if($hMenu->icon)<i class="{{ $hMenu->icon }} text-base"></i>@endif
+                                        {{ $hMenu->nama }}
+                                        <i class="ri-arrow-down-s-line"></i>
+                                    </a>
+                                    <div class="absolute left-0 top-full -mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden nav-dropdown-menu">
+                                        <div class="py-1">
+                                            @foreach($hMenu->children as $child)
+                                                <a href="{{ $child->url }}" target="{{ $child->target }}" class="block px-4 py-2.5 text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                                                    @if($child->icon)<i class="{{ $child->icon }} mr-1"></i>@endif
+                                                    {{ $child->nama }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5 py-4">
+                                    @if($hMenu->icon)<i class="{{ $hMenu->icon }} text-base"></i>@endif
+                                    {{ $hMenu->nama }}
+                                </a>
+                            @endif
                         @empty
                             <a href="/#layanan" class="nav-link text-sm text-text-secondary font-medium">Layanan</a>
                             <a href="/#tentang" class="nav-link text-sm text-text-secondary font-medium">Tentang</a>
@@ -176,10 +209,30 @@
         <div class="mobile-menu md:hidden border-t border-border" id="mobile-menu">
             <div class="px-4 py-3 space-y-1 bg-white">
                 @forelse($headerMenus as $hMenu)
-                    <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
-                        @if($hMenu->icon)<i class="{{ $hMenu->icon }} mr-1"></i>@endif
-                        {{ $hMenu->nama }}
-                    </a>
+                    @if($hMenu->children && $hMenu->children->count() > 0)
+                        <div class="space-y-1">
+                            <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="flex items-center justify-between px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                                <span class="flex items-center">
+                                    @if($hMenu->icon)<i class="{{ $hMenu->icon }} mr-1.5"></i>@endif
+                                    {{ $hMenu->nama }}
+                                </span>
+                                <i class="ri-arrow-down-s-line"></i>
+                            </a>
+                            <div class="pl-4 space-y-1 pb-1">
+                                @foreach($hMenu->children as $child)
+                                    <a href="{{ $child->url }}" target="{{ $child->target }}" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                                        @if($child->icon)<i class="{{ $child->icon }} mr-1.5"></i>@endif
+                                        {{ $child->nama }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                            @if($hMenu->icon)<i class="{{ $hMenu->icon }} mr-1.5"></i>@endif
+                            {{ $hMenu->nama }}
+                        </a>
+                    @endif
                 @empty
                     <a href="/#layanan" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">Layanan</a>
                     <a href="/#tentang" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">Tentang</a>

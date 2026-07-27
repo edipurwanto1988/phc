@@ -42,7 +42,7 @@
                 <!-- Right Photo (1/3) -->
                 <div class="w-full md:w-1/3 flex justify-center md:justify-end">
                     <div class="relative">
-                        <img src="{{ asset('images/phc-team.png') }}"
+                        <img src="{{ asset('images/phc-team.webp') }}"
                              alt="Tim profesional PHC Pekanbaru Home Cleaning"
                              class="w-full max-w-xs md:max-w-none rounded-2xl shadow-lg object-cover aspect-[3/4]"
                              loading="eager">

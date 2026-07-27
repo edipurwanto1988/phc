@@ -49,6 +49,19 @@
         .mobile-menu { display: none; }
         .mobile-menu.active { display: block; }
 
+        /* Dropdown Menu */
+        .nav-dropdown-menu {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+        }
+        .nav-dropdown:hover .nav-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
         /* WA button pulse */
         @keyframes pulse-ring {
             0% { transform: scale(0.9); opacity: 1; }
@@ -133,11 +146,33 @@
                     <!-- Desktop Nav Links -->
                     <div class="flex items-center gap-8">
                         <?php $__empty_1 = true; $__currentLoopData = $headerMenus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $hMenu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                            <a href="<?php echo e($hMenu->url); ?>" target="<?php echo e($hMenu->target); ?>" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5">
-                                <?php if($hMenu->icon): ?><i class="<?php echo e($hMenu->icon); ?> text-base"></i><?php endif; ?>
-                                <?php echo e($hMenu->nama); ?>
+                            <?php if($hMenu->children && $hMenu->children->count() > 0): ?>
+                                <div class="relative nav-dropdown">
+                                    <a href="<?php echo e($hMenu->url); ?>" target="<?php echo e($hMenu->target); ?>" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5 py-4">
+                                        <?php if($hMenu->icon): ?><i class="<?php echo e($hMenu->icon); ?> text-base"></i><?php endif; ?>
+                                        <?php echo e($hMenu->nama); ?>
 
-                            </a>
+                                        <i class="ri-arrow-down-s-line"></i>
+                                    </a>
+                                    <div class="absolute left-0 top-full -mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden nav-dropdown-menu">
+                                        <div class="py-1">
+                                            <?php $__currentLoopData = $hMenu->children; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <a href="<?php echo e($child->url); ?>" target="<?php echo e($child->target); ?>" class="block px-4 py-2.5 text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                                                    <?php if($child->icon): ?><i class="<?php echo e($child->icon); ?> mr-1"></i><?php endif; ?>
+                                                    <?php echo e($child->nama); ?>
+
+                                                </a>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <a href="<?php echo e($hMenu->url); ?>" target="<?php echo e($hMenu->target); ?>" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5 py-4">
+                                    <?php if($hMenu->icon): ?><i class="<?php echo e($hMenu->icon); ?> text-base"></i><?php endif; ?>
+                                    <?php echo e($hMenu->nama); ?>
+
+                                </a>
+                            <?php endif; ?>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <a href="/#layanan" class="nav-link text-sm text-text-secondary font-medium">Layanan</a>
                             <a href="/#tentang" class="nav-link text-sm text-text-secondary font-medium">Tentang</a>
@@ -177,11 +212,33 @@
         <div class="mobile-menu md:hidden border-t border-border" id="mobile-menu">
             <div class="px-4 py-3 space-y-1 bg-white">
                 <?php $__empty_1 = true; $__currentLoopData = $headerMenus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $hMenu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                    <a href="<?php echo e($hMenu->url); ?>" target="<?php echo e($hMenu->target); ?>" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
-                        <?php if($hMenu->icon): ?><i class="<?php echo e($hMenu->icon); ?> mr-1"></i><?php endif; ?>
-                        <?php echo e($hMenu->nama); ?>
+                    <?php if($hMenu->children && $hMenu->children->count() > 0): ?>
+                        <div class="space-y-1">
+                            <a href="<?php echo e($hMenu->url); ?>" target="<?php echo e($hMenu->target); ?>" class="flex items-center justify-between px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                                <span class="flex items-center">
+                                    <?php if($hMenu->icon): ?><i class="<?php echo e($hMenu->icon); ?> mr-1.5"></i><?php endif; ?>
+                                    <?php echo e($hMenu->nama); ?>
 
-                    </a>
+                                </span>
+                                <i class="ri-arrow-down-s-line"></i>
+                            </a>
+                            <div class="pl-4 space-y-1 pb-1">
+                                <?php $__currentLoopData = $hMenu->children; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <a href="<?php echo e($child->url); ?>" target="<?php echo e($child->target); ?>" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                                        <?php if($child->icon): ?><i class="<?php echo e($child->icon); ?> mr-1.5"></i><?php endif; ?>
+                                        <?php echo e($child->nama); ?>
+
+                                    </a>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <a href="<?php echo e($hMenu->url); ?>" target="<?php echo e($hMenu->target); ?>" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                            <?php if($hMenu->icon): ?><i class="<?php echo e($hMenu->icon); ?> mr-1.5"></i><?php endif; ?>
+                            <?php echo e($hMenu->nama); ?>
+
+                        </a>
+                    <?php endif; ?>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <a href="/#layanan" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">Layanan</a>
                     <a href="/#tentang" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">Tentang</a>
