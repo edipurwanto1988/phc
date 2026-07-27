@@ -37,7 +37,7 @@
                         </div>
                         @endif
                         <h3 class="text-base font-bold text-text-primary group-hover:text-primary transition-colors">{{ $service->nama }}</h3>
-                        <p class="mt-2 text-xs text-text-secondary leading-relaxed leading-normal">{{ $service->deskripsi }}</p>
+                        <p class="mt-2 text-xs text-text-secondary leading-relaxed leading-normal">{{ \Illuminate\Support\Str::words(strip_tags($service->deskripsi_singkat ?? $service->deskripsi), 50, '...') }}</p>
                     </a>
                     <div class="mt-6 pt-4 border-t border-gray-150 flex items-center justify-between">
                         <div>
