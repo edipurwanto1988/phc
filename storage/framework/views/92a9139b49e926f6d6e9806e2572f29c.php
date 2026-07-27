@@ -58,7 +58,7 @@
                 <!-- Description -->
                 <div class="space-y-4">
                     <h3 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-1.5">Deskripsi Layanan</h3>
-                    <p class="text-sm text-gray-650 leading-relaxed"><?php echo e($service->deskripsi); ?></p>
+                    <div class="text-sm text-gray-650 leading-relaxed wysiwyg-content"><?php echo $service->deskripsi; ?></div>
                 </div>
             </div>
         </div>

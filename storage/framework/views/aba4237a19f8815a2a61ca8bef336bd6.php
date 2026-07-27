@@ -67,6 +67,19 @@
             transform: translateY(0);
         }
 
+        /* WYSIWYG Content Styles */
+        .wysiwyg-content h1 { font-size: 1.75rem; font-weight: 800; margin-top: 1.5rem; margin-bottom: 1rem; color: #111827; }
+        .wysiwyg-content h2 { font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #1f2937; }
+        .wysiwyg-content h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #1f2937; }
+        .wysiwyg-content p { margin-bottom: 1rem; }
+        .wysiwyg-content p:last-child { margin-bottom: 0; }
+        .wysiwyg-content ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        .wysiwyg-content ol { list-style-type: decimal; margin-left: 1.5rem; margin-bottom: 1rem; }
+        .wysiwyg-content li { margin-bottom: 0.25rem; }
+        .wysiwyg-content strong, .wysiwyg-content b { font-weight: 700; color: #111827; }
+        .wysiwyg-content a { color: #2563eb; text-decoration: underline; }
+        .wysiwyg-content blockquote { border-left: 4px solid #e5e7eb; padding-left: 1rem; font-style: italic; color: #4b5563; margin-top: 1rem; margin-bottom: 1rem; }
+
         /* WA button pulse */
         @keyframes pulse-ring {
             0% { transform: scale(0.9); opacity: 1; }
