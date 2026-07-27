@@ -98,7 +98,7 @@
                             <i class="<?php echo e($iconClass); ?> text-xl"></i>
                         </div>
                         <h3 class="text-base font-semibold text-text-primary group-hover:text-primary transition-colors"><?php echo e($service->nama); ?></h3>
-                        <p class="mt-1 text-sm text-text-secondary leading-relaxed line-clamp-3"><?php echo e($service->deskripsi_singkat ?? $service->deskripsi); ?></p>
+                        <p class="mt-1 text-sm text-text-secondary leading-relaxed line-clamp-3"><?php echo e(strip_tags($service->deskripsi_singkat ?? $service->deskripsi)); ?></p>
                     </a>
                     <div class="mt-4 flex items-baseline gap-1 pt-4 border-t border-gray-50">
                         <span class="text-lg font-bold text-primary">Rp <?php echo e(number_format($service->harga, 0, ',', '.')); ?></span>
@@ -238,7 +238,7 @@
                             <?php endfor; ?>
                         </div>
                         <p class="text-sm text-text-secondary leading-relaxed italic">
-                            "<?php echo e($testimonial->konten); ?>"
+                            "<?php echo e(strip_tags($testimonial->konten)); ?>"
                         </p>
                     </div>
                     <div class="mt-6 flex items-center gap-3 pt-4 border-t border-gray-100">
@@ -287,7 +287,7 @@
                                 <span class="text-xs text-primary font-bold">Kebersihan</span>
                             </div>
                             <h3 class="text-base font-bold text-text-primary leading-snug line-clamp-2"><?php echo e($post->judul); ?></h3>
-                            <p class="mt-2 text-sm text-text-secondary leading-relaxed line-clamp-2"><?php echo e($post->excerpt); ?></p>
+                            <p class="mt-2 text-sm text-text-secondary leading-relaxed line-clamp-2"><?php echo e(strip_tags($post->excerpt ?? $post->konten)); ?></p>
                         </div>
                     </div>
                     <div class="px-5 pb-5 pt-2">
