@@ -33,7 +33,7 @@ class ServiceController extends Controller
             'harga' => 'required|numeric|min:0',
             'satuan' => 'required|string|max:50',
             'durasi_estimasi' => 'nullable|integer|min:0',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'urutan' => 'integer',
         ]);
 
@@ -75,7 +75,7 @@ class ServiceController extends Controller
             'harga' => 'required|numeric|min:0',
             'satuan' => 'required|string|max:50',
             'durasi_estimasi' => 'nullable|integer|min:0',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'urutan' => 'integer',
         ]);
 
