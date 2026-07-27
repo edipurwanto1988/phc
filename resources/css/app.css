@@ -1,0 +1,177 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@import 'remixicon/fonts/remixicon.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Inter', 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    --color-primary-50: #eff6ff;
+    --color-primary-100: #dbeafe;
+    --color-primary-200: #bfdbfe;
+    --color-primary-300: #93c5fd;
+    --color-primary-400: #60a5fa;
+    --color-primary-500: #3b82f6;
+    --color-primary-600: #2563eb;
+    --color-primary-700: #1d4ed8;
+    --color-primary-800: #1e40af;
+    --color-primary-900: #1e3a8a;
+    --color-primary: #1b456f;
+    --color-primary-dark: #0f2a4d;
+    --color-secondary: #0058be;
+    --color-secondary-dark: #004395;
+    --color-accent: #f3af3d;
+    --color-accent-dark: #e09e2e;
+    --color-tertiary: #1e2e42;
+    --color-tertiary-dark: #141f2e;
+    --color-surface-container-lowest: #ffffff;
+    --color-surface-container-low: #f3f4f5;
+    --color-surface-container: #edeeef;
+    --color-surface-container-high: #e7e8e9;
+    --color-surface-container-highest: #e1e3e4;
+    --color-surface: #f8f9fa;
+    --color-on-surface: #191c1d;
+    --color-on-surface-variant: #42474e;
+    --color-outline: #73777f;
+    --color-outline-variant: #c3c6d0;
+    --color-error: #ba1a1a;
+    --color-dark-bg: #06233f;
+
+    /* Public layout tokens (sebelumnya di CDN Tailwind config) */
+    --color-text-primary: #202124;
+    --color-text-secondary: #5F6368;
+    --color-border: #DADCE0;
+    --color-warning: #FBBC04;
+}
+
+html {
+    scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+    max-width: 100%;
+    overflow-x: hidden;
+    background: linear-gradient(180deg, rgba(248,249,250,0.96) 0%, rgba(255,255,255,1) 44%, rgba(248,249,250,1) 100%);
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none !important;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'liga';
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    width: 1em;
+    height: 1em;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+
+
+
+[x-cloak] {
+    display: none !important;
+}
+
+.btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200;
+}
+
+.btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark;
+}
+
+.btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+}
+
+.btn-outline {
+    @apply border border-gray-300 bg-white text-gray-700 hover:bg-gray-50;
+}
+
+.input {
+    @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm;
+}
+
+.card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100;
+}
+
+.icon-item {
+    @apply flex items-center justify-center aspect-square rounded-lg cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors text-lg;
+}
+
+.grid-template {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.nav-glass {
+    backdrop-filter: blur(18px);
+    background: rgba(255,255,255,0.92);
+}
+
+.soft-card {
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.lift-card {
+    transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+}
+
+.lift-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+}
+
+.section-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity .7s ease, transform .7s ease;
+}
+
+.section-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes bounce-slow {
+    0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+    50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+}
+
+.animate-bounce-slow {
+    animation: bounce-slow 3s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .section-reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+    .animate-bounce-slow {
+        animation: none;
+    }
+}
