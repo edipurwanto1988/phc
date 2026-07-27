@@ -83,6 +83,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::resource('/service-categories', AdminServiceCategoryController::class)->names('admin.service-categories');
         Route::resource('/users', AdminUserController::class)->names('admin.users');
         Route::resource('/roles', AdminRoleController::class)->names('admin.roles');
+        Route::post('/posts/bulk-destroy', [AdminPostController::class, 'bulkDestroy'])->name('admin.posts.bulk-destroy');
         Route::resource('/posts', AdminPostController::class)->names('admin.posts');
         Route::resource('/testimonials', AdminTestimonialController::class)->names('admin.testimonials');
         Route::resource('/halaman', AdminHalamanController::class)->names('admin.halaman');

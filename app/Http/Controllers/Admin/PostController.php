@@ -128,6 +128,25 @@ class PostController extends Controller
         return redirect()->route('admin.posts.index')->with('success', 'Artikel berhasil diperbarui.');
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (is_array($ids) && count($ids) > 0) {
+            $posts = Post::whereIn('id', $ids)->get();
+            foreach ($posts as $post) {
+                if ($post->gambar_utama) {
+                    Storage::disk('public')->delete($post->gambar_utama);
+                }
+                if ($post->gambar_utama_thumbnail) {
+                    Storage::disk('public')->delete($post->gambar_utama_thumbnail);
+                }
+                $post->delete();
+            }
+            return response()->json(['success' => true, 'message' => count($posts) . ' artikel berhasil dihapus.']);
+        }
+        return response()->json(['success' => false, 'message' => 'Tidak ada artikel yang dipilih.'], 400);
+    }
+
     public function destroy(Post $post)
     {
         if ($post->gambar_utama) {

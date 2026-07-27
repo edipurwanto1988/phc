@@ -19,14 +19,22 @@
             </a>
             @endif
         </form>
-        <a href="{{ route('admin.posts.create') }}" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-sm text-sm">
-            <i class="ri-add-line text-lg"></i> Tulis Artikel Baru
-        </a>
+        <div class="flex items-center gap-2">
+            <button type="button" id="btnBulkDelete" class="btn bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg items-center gap-1.5 shadow-sm text-sm hidden" onclick="confirmBulkDelete()">
+                <i class="ri-delete-bin-line text-lg"></i> Hapus Terpilih (<span id="selectedCount">0</span>)
+            </button>
+            <a href="{{ route('admin.posts.create') }}" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-sm text-sm">
+                <i class="ri-add-line text-lg"></i> Tulis Artikel Baru
+            </a>
+        </div>
     </div>
     <div class="overflow-x-auto bg-white rounded-b-xl">
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
+                    <th class="py-3.5 px-6 w-12 text-center">
+                        <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    </th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 w-24">Gambar</th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Judul Artikel</th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Penulis</th>
@@ -38,6 +46,9 @@
             <tbody>
                 @forelse($posts as $post)
                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td class="py-4 px-6 text-center">
+                        <input type="checkbox" class="post-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" value="{{ $post->id }}">
+                    </td>
                     <td class="py-4 px-6">
                         @if($post->gambar_utama)
                             <img src="{{ asset('storage/' . $post->gambar_utama) }}" alt="{{ $post->judul }}" class="w-16 h-10 object-cover rounded border border-gray-200">
@@ -75,7 +86,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="py-8 text-center text-sm text-gray-500 font-medium">Belum ada artikel yang ditulis.</td>
+                    <td colspan="7" class="py-8 text-center text-sm text-gray-500 font-medium">Belum ada artikel yang ditulis.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -87,4 +98,72 @@
     </div>
     @endif
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.post-checkbox');
+    const btnBulkDelete = document.getElementById('btnBulkDelete');
+    const selectedCount = document.getElementById('selectedCount');
+
+    function updateBulkDeleteButton() {
+        const checkedCount = document.querySelectorAll('.post-checkbox:checked').length;
+        if (checkedCount > 0) {
+            btnBulkDelete.classList.remove('hidden');
+            btnBulkDelete.classList.add('flex');
+            selectedCount.textContent = checkedCount;
+        } else {
+            btnBulkDelete.classList.add('hidden');
+            btnBulkDelete.classList.remove('flex');
+        }
+        if (selectAll) {
+            selectAll.checked = (checkedCount === checkboxes.length && checkboxes.length > 0);
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(cb => {
+                cb.checked = this.checked;
+            });
+            updateBulkDeleteButton();
+        });
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkDeleteButton);
+    });
+
+    window.confirmBulkDelete = function() {
+        const checkedBoxes = document.querySelectorAll('.post-checkbox:checked');
+        if (checkedBoxes.length === 0) return;
+
+        if (confirm(`Apakah Anda yakin ingin menghapus ${checkedBoxes.length} artikel yang dipilih?`)) {
+            const ids = Array.from(checkedBoxes).map(cb => cb.value);
+            
+            fetch('{{ route("admin.posts.bulk-destroy") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ ids: ids })
+            }).then(res => res.json())
+              .then(data => {
+                  if(data.success) {
+                      window.location.reload();
+                  } else {
+                      alert(data.message || 'Terjadi kesalahan.');
+                  }
+              }).catch(err => {
+                  console.error(err);
+                  alert('Gagal menghapus data.');
+              });
+        }
+    }
+});
+</script>
 @endsection
