@@ -13,8 +13,14 @@ class OrderAssignment extends Model
         'order_id',
         'user_id',
         'status',
+        'foto_sebelum',
+        'foto_sesudah',
         'started_at',
         'finished_at',
+        'gaji',
+        'status_gaji',
+        'sort_order',
+        'expense_id',
     ];
 
     protected $casts = [

@@ -50,9 +50,11 @@
 <div class="card">
     <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-white rounded-t-xl">
         <h3 class="font-semibold text-gray-800">Daftar Order PHC</h3>
+        @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('create_orders'))
         <a href="{{ route('admin.orders.create') }}" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-sm text-sm">
             <i class="ri-add-line text-lg"></i> Input Order Baru
         </a>
+        @endif
     </div>
     <div class="overflow-x-auto bg-white rounded-b-xl">
         <table class="w-full text-left border-collapse">
@@ -102,11 +104,23 @@
                             {{ ucfirst($order->status_bayar) }}
                         </span>
                     </td>
-                    <td class="py-4 px-6 text-sm text-gray-600">
-                        @php $activeAssignment = $order->assignments->last(); @endphp
-                        @if($activeAssignment)
-                            <div class="font-medium text-gray-800">{{ $activeAssignment->cleaner->name }}</div>
-                            <div class="text-[10px] text-gray-400">status cleaner: {{ $activeAssignment->status }}</div>
+                    <td class="py-4 px-6 text-sm text-gray-650">
+                        @php 
+                            // Sorted assignments (by sort_order then id)
+                            $assignments = $order->assignments;
+                            $pic = $assignments->first();
+                            $totalCleaners = $assignments->count();
+                        @endphp
+                        @if($pic)
+                            <div class="font-bold text-gray-800 flex items-center gap-1.5">
+                                <span>{{ $pic->cleaner->name }}</span>
+                                <span class="px-1.5 py-0.5 text-[9px] font-bold uppercase bg-blue-600 text-white rounded-md tracking-wider">PIC</span>
+                            </div>
+                            @if($totalCleaners > 1)
+                                <div class="text-[10px] text-blue-600 font-bold mt-0.5 flex items-center gap-1">
+                                    <i class="ri-group-line"></i> +{{ $totalCleaners - 1 }} Team
+                                </div>
+                            @endif
                         @else
                             <span class="text-xs text-red-500 font-semibold flex items-center gap-1">
                                 <i class="ri-alert-line"></i> Belum ditugaskan
@@ -115,9 +129,15 @@
                     </td>
                     <td class="py-4 px-6 text-center">
                         <div class="flex items-center justify-center gap-3">
-                            <a href="{{ route('admin.orders.show', $order) }}" class="text-gray-500 hover:text-gray-700 transition-colors" title="Lihat Detail">
+                            <a href="{{ route('admin.orders.show', $order) }}" class="text-gray-500 hover:text-gray-750 transition-colors" title="Lihat Detail">
                                 <i class="ri-eye-line text-lg"></i>
                             </a>
+                            @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
+                            <a href="{{ route('admin.orders.download-invoice', $order) }}" class="text-blue-600 hover:text-blue-800 transition-colors" title="Download Invoice">
+                                <i class="ri-download-2-line text-lg"></i>
+                            </a>
+                            @endif
+                            @if((auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('delete_orders')) && $order->status_bayar !== 'paid')
                             <form method="POST" action="{{ route('admin.orders.destroy', $order) }}" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data order ini?')">
                                 @csrf
                                 @method('DELETE')
@@ -125,6 +145,7 @@
                                     <i class="ri-delete-bin-line text-lg"></i>
                                 </button>
                             </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

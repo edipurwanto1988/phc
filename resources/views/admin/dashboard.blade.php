@@ -66,7 +66,7 @@
     <!-- Revenue Trend Chart (2/3 width on large screens) -->
     <div class="lg:col-span-2 card p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="ri-line-chart-line text-blue-600"></i> Tren Pendapatan Bulanan
+            <i class="ri-line-chart-line text-blue-600"></i> Tren Pendapatan & Pengeluaran Bulanan
         </h3>
         <div style="height: 350px;">
             <canvas id="revenueChart"></canvas>
@@ -179,24 +179,42 @@ document.addEventListener('DOMContentLoaded', function() {
         type: 'line',
         data: {
             labels: @json($months),
-            datasets: [{
-                label: 'Pendapatan (Rp)',
-                data: @json($revenueData),
-                borderColor: '#2563eb', // Blue-600
-                backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                borderWidth: 2.5,
-                fill: true,
-                tension: 0.3,
-                pointBackgroundColor: '#2563eb',
-                pointHoverRadius: 7,
-            }]
+            datasets: [
+                {
+                    label: 'Pendapatan (Rp)',
+                    data: @json($revenueData),
+                    borderColor: '#2563eb', // Blue-600
+                    backgroundColor: 'rgba(37, 99, 235, 0.05)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#2563eb',
+                    pointHoverRadius: 7,
+                },
+                {
+                    label: 'Pengeluaran (Rp)',
+                    data: @json($expenseData),
+                    borderColor: '#dc2626', // Red-600
+                    backgroundColor: 'rgba(220, 38, 38, 0.05)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#dc2626',
+                    pointHoverRadius: 7,
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: false
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        boxWidth: 15,
+                        font: { size: 11, weight: '500' }
+                    }
                 },
                 tooltip: {
                     backgroundColor: '#1e293b',
@@ -205,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     bodyFont: { size: 13 },
                     callbacks: {
                         label: function(context) {
-                            return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                            return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
                         }
                     }
                 }

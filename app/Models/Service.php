@@ -11,6 +11,7 @@ class Service extends Model
     protected $fillable = [
         'kategori_id',
         'nama',
+        'nama_invoice',
         'slug',
         'deskripsi',
         'deskripsi_singkat',

@@ -12,11 +12,16 @@ class RoleController extends Controller
         'manage_services',
         'manage_customers',
         'manage_orders',
+        'create_orders',
+        'edit_orders',
+        'delete_orders',
         'view_orders',
         'update_order_status',
         'view_reports',
         'manage_blog',
         'view_own_profile',
+        'manage_expenses',
+        'view_expenses',
     ];
 
     public function index()

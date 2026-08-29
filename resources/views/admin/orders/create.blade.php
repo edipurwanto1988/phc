@@ -17,13 +17,101 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <!-- Customer Selection -->
                 <div>
-                    <label for="customer_id" class="block text-sm font-semibold text-gray-700 mb-1">Pilih Customer</label>
-                    <select name="customer_id" id="customer_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" x-model="customerId" @change="updateAddress()" required>
-                        <option value="">-- Pilih Customer --</option>
-                        @foreach($customers as $customer)
-                        <option value="{{ $customer->id }}" data-alamat="{{ $customer->alamat }}" data-lat="{{ $customer->latitude }}" data-lng="{{ $customer->longitude }}">{{ $customer->nama }} ({{ $customer->no_wa }})</option>
-                        @endforeach
-                    </select>
+                    <label for="customer_search" class="block text-sm font-semibold text-gray-700 mb-1">Pilih Customer</label>
+                    
+                    <!-- Autocomplete Wrapper -->
+                    <div class="relative" x-data="{
+                        open: false,
+                        search: '',
+                        customers: [
+                            @foreach($customers as $customer)
+                            {
+                                id: '{{ $customer->id }}',
+                                nama: '{{ addslashes($customer->nama) }}',
+                                no_wa: '{{ $customer->no_wa }}',
+                                alamat: '{{ addslashes($customer->alamat) }}',
+                                lat: '{{ $customer->latitude }}',
+                                lng: '{{ $customer->longitude }}'
+                            },
+                            @endforeach
+                        ],
+                        get filteredCustomers() {
+                            if (this.search === '') return this.customers;
+                            return this.customers.filter(c => {
+                                return c.nama.toLowerCase().includes(this.search.toLowerCase()) || 
+                                       c.no_wa.includes(this.search);
+                            });
+                        },
+                        selectCustomer(customer) {
+                            $data.customerId = customer.id;
+                            $data.alamatPengerjaan = customer.alamat;
+                            $data.latitude = customer.lat;
+                            $data.longitude = customer.lng;
+                            this.search = customer.nama + ' (' + customer.no_wa + ')';
+                            this.open = false;
+                        },
+                        clearCustomer() {
+                            $data.customerId = '';
+                            $data.alamatPengerjaan = '';
+                            $data.latitude = '';
+                            $data.longitude = '';
+                            this.search = '';
+                            this.open = false;
+                        }
+                    }" @click.outside="open = false">
+                        
+                        <!-- Hidden Input to store real ID for the form -->
+                        <input type="hidden" name="customer_id" :value="customerId" required>
+
+                        <!-- Input search field -->
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                class="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" 
+                                placeholder="Ketik nama atau No. WA customer..." 
+                                x-model="search"
+                                @focus="open = true"
+                                @input="open = true"
+                                required
+                            >
+                            <!-- Clear button -->
+                            <template x-if="search !== ''">
+                                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" @click="clearCustomer()">
+                                    <i class="ri-close-line text-lg"></i>
+                                </button>
+                            </template>
+                            <!-- Dropdown indicator when empty -->
+                            <template x-if="search === ''">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                                    <i class="ri-arrow-down-s-line text-lg"></i>
+                                </span>
+                            </template>
+                        </div>
+
+                        <!-- Dropdown list -->
+                        <ul 
+                            class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto" 
+                            x-show="open" 
+                            x-cloak
+                            x-transition
+                        >
+                            <template x-for="c in filteredCustomers" :key="c.id">
+                                <li 
+                                    class="px-4 py-2 text-sm hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-0"
+                                    @click="selectCustomer(c)"
+                                >
+                                    <div class="font-semibold text-gray-800" x-text="c.nama"></div>
+                                    <div class="text-xs text-gray-500" x-text="'WA: ' + c.no_wa"></div>
+                                </li>
+                            </template>
+                            <template x-if="filteredCustomers.length === 0">
+                                <li class="px-4 py-3 text-sm text-gray-500 text-center italic">
+                                    Customer tidak ditemukan
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                    
                     <p class="text-xs text-gray-500 mt-1">Customer tidak ada di daftar? <a href="{{ route('admin.customers.create') }}" class="text-blue-600 hover:underline">Tambah customer baru dulu</a>.</p>
                 </div>
 
@@ -61,38 +149,44 @@
                     <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 flex flex-col md:flex-row gap-4 items-end">
                         
                         <!-- Jasa selection -->
-                        <div class="flex-1 w-full">
+                        <div class="w-full md:flex-1">
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Pilih Layanan Jasa</label>
                             <select :name="'items['+index+'][service_id]'" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" x-model="item.service_id" @change="updateItemPrice(index)" required>
                                 <option value="">-- Pilih Layanan Jasa --</option>
                                 @foreach($services as $service)
-                                <option value="{{ $service->id }}" data-harga="{{ $service->harga }}" data-satuan="{{ $service->satuan }}">{{ $service->nama }} (Rp {{ number_format($service->harga, 0, ',', '.') }} / {{ $service->satuan }})</option>
+                                <option value="{{ $service->id }}" data-harga="{{ $service->harga }}" data-satuan="{{ $service->satuan }}">{{ !empty($service->nama_invoice) ? $service->nama_invoice : $service->nama }} (Rp {{ number_format($service->harga, 0, ',', '.') }} / {{ $service->satuan }})</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <!-- Qty -->
-                        <div class="w-full md:w-24">
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Jumlah (Qty)</label>
-                            <input type="number" :name="'items['+index+'][qty]'" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" x-model.number="item.qty" min="1" required>
+                        <div class="w-full md:w-32">
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-1">Qty</label>
+                            <input type="number" :name="'items['+index+'][qty]'" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white text-center" x-model.number="item.qty" min="1" required>
                         </div>
 
                         <!-- Satuan label display -->
-                        <div class="w-full md:w-20 text-center pb-2 text-sm text-gray-500 font-semibold self-center">
+                        <div class="w-full md:w-12 text-center pb-2 text-sm text-gray-500 font-semibold self-center">
                             / <span x-text="item.satuan || '-'"></span>
+                        </div>
+
+                        <!-- Harga Satuan -->
+                        <div class="w-full md:w-32">
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-1">Harga (Rp)</label>
+                            <input type="number" :name="'items['+index+'][harga]'" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" x-model.number="item.harga" min="0" required>
                         </div>
 
                         <!-- Subtotal -->
                         <div class="w-full md:w-36 text-right">
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Subtotal</label>
-                            <span class="block px-3 py-2 text-sm font-bold text-gray-800 bg-gray-100 rounded-lg border border-gray-200">
+                            <label class="block text-[11px] font-semibold text-gray-600 mb-1">Subtotal</label>
+                            <span class="block px-2 py-2 text-sm font-bold text-gray-800 bg-gray-100 rounded-lg border border-gray-200 truncate" :title="'Rp ' + formatRupiah(item.harga * item.qty)">
                                 Rp <span x-text="formatRupiah(item.harga * item.qty)"></span>
                             </span>
                         </div>
 
                         <!-- Remove button -->
                         <div class="w-full md:w-auto text-center">
-                            <button type="button" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" @click="removeItem(index)" :disabled="items.length === 1">
+                            <button type="button" class="p-2 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors" @click="removeItem(index)" :disabled="items.length === 1">
                                 <i class="ri-delete-bin-line text-lg"></i>
                             </button>
                         </div>
@@ -212,20 +306,6 @@ function orderForm() {
         removeItem(index) {
             if (this.items.length > 1) {
                 this.items.splice(index, 1);
-            }
-        },
-        updateAddress() {
-            const selectEl = document.getElementById('customer_id');
-            const selectedOpt = selectEl.options[selectEl.selectedIndex];
-            
-            if (selectedOpt && selectedOpt.value !== '') {
-                this.alamatPengerjaan = selectedOpt.getAttribute('data-alamat') || '';
-                this.latitude = selectedOpt.getAttribute('data-lat') || '';
-                this.longitude = selectedOpt.getAttribute('data-lng') || '';
-            } else {
-                this.alamatPengerjaan = '';
-                this.latitude = '';
-                this.longitude = '';
             }
         },
         updateItemPrice(index) {

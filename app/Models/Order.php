@@ -51,6 +51,6 @@ class Order extends Model
 
     public function assignments(): HasMany
     {
-        return $this->hasMany(OrderAssignment::class);
+        return $this->hasMany(OrderAssignment::class)->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
     }
 }

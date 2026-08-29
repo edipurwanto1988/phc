@@ -20,8 +20,9 @@
                     $groupedPerms = [
                         'Layanan / Jasa' => ['manage_services'],
                         'Customer' => ['manage_customers'],
-                        'Pesanan / Orders' => ['manage_orders', 'view_orders', 'update_order_status'],
-                        'Laporan' => ['view_reports'],
+                        'Pesanan / Orders' => ['manage_orders', 'create_orders', 'edit_orders', 'delete_orders', 'view_orders', 'update_order_status'],
+                        'Laporan & Ringkasan' => ['view_reports'],
+                        'Pengeluaran & Keuangan' => ['manage_expenses', 'view_expenses'],
                         'Blog & Artikel' => ['manage_blog'],
                         'Lainnya' => ['view_own_profile']
                     ];

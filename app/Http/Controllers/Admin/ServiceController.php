@@ -39,6 +39,7 @@ class ServiceController extends Controller
         $request->validate([
             'kategori_id' => 'required|exists:service_categories,id',
             'nama' => 'required|string|max:255',
+            'nama_invoice' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
             'deskripsi_singkat' => 'nullable|string|max:500',
             'harga' => 'required|numeric|min:0',
@@ -56,6 +57,7 @@ class ServiceController extends Controller
         Service::create([
             'kategori_id' => $request->kategori_id,
             'nama' => $request->nama,
+            'nama_invoice' => $request->nama_invoice,
             'slug' => Str::slug($request->nama),
             'deskripsi' => $request->deskripsi,
             'deskripsi_singkat' => $request->deskripsi_singkat,
@@ -81,6 +83,7 @@ class ServiceController extends Controller
         $request->validate([
             'kategori_id' => 'required|exists:service_categories,id',
             'nama' => 'required|string|max:255',
+            'nama_invoice' => 'nullable|string|max:255',
             'deskripsi' => 'nullable|string',
             'deskripsi_singkat' => 'nullable|string|max:500',
             'harga' => 'required|numeric|min:0',
@@ -101,6 +104,7 @@ class ServiceController extends Controller
         $service->update([
             'kategori_id' => $request->kategori_id,
             'nama' => $request->nama,
+            'nama_invoice' => $request->nama_invoice,
             'slug' => Str::slug($request->nama),
             'deskripsi' => $request->deskripsi,
             'deskripsi_singkat' => $request->deskripsi_singkat,

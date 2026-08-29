@@ -72,30 +72,6 @@
                 </div>
             </div>
 
-            <!-- Koordinat Maps -->
-            <div class="mb-4">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Koordinat Lokasi (opsional)</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="relative flex items-center">
-                            <span class="absolute left-3 text-xs font-bold text-gray-400">LAT</span>
-                            <input type="text" name="latitude" id="latitude" class="w-full pl-11 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" value="{{ $customer->latitude }}" placeholder="Contoh: 0.46820000">
-                        </div>
-                    </div>
-                    <div>
-                        <div class="relative flex items-center gap-2">
-                            <div class="relative flex-1 flex items-center">
-                                <span class="absolute left-3 text-xs font-bold text-gray-400">LNG</span>
-                                <input type="text" name="longitude" id="longitude" class="w-full pl-11 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" value="{{ $customer->longitude }}" placeholder="Contoh: 101.37890000">
-                            </div>
-                            <button type="button" onclick="getCurrentCoordinates()" class="btn border border-gray-300 bg-white hover:bg-gray-50 text-blue-600 font-semibold px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 shrink-0 shadow-sm" title="Deteksi Lokasi GPS">
-                                <i class="ri-map-pin-line text-base"></i> Deteksi Koordinat
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-[11px] text-gray-500 mt-1">Gunakan tombol "Deteksi Koordinat" untuk mendapatkan titik koordinat GPS dari perangkat Anda saat ini.</p>
-            </div>
 
             <!-- Section 3: Data Tambahan -->
             <h4 class="text-sm font-bold text-blue-600 mt-6 mb-4 border-b border-gray-100 pb-2">Informasi Tambahan</h4>
@@ -144,45 +120,4 @@
 @endsection
 
 @section('scripts')
-<script>
-function getCurrentCoordinates() {
-    const btn = document.querySelector('[onclick="getCurrentCoordinates()"]');
-    if (!navigator.geolocation) {
-        alert('Browser Anda tidak mendukung fitur GPS / Geolocation.');
-        return;
-    }
-
-    const originalHtml = btn.innerHTML;
-    btn.innerHTML = '<i class="ri-loader-4-line animate-spin text-base"></i> Mendeteksi...';
-    btn.disabled = true;
-    btn.classList.add('opacity-60');
-
-    navigator.geolocation.getCurrentPosition(
-        function (position) {
-            document.getElementById('latitude').value = position.coords.latitude.toFixed(8);
-            document.getElementById('longitude').value = position.coords.longitude.toFixed(8);
-
-            btn.innerHTML = '<i class="ri-checkbox-circle-line text-base text-green-600"></i> Berhasil!';
-            btn.classList.remove('opacity-60');
-            setTimeout(() => {
-                btn.innerHTML = originalHtml;
-                btn.disabled = false;
-            }, 2000);
-        },
-        function (error) {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-            btn.classList.remove('opacity-60');
-
-            const messages = {
-                1: 'Akses lokasi ditolak. Harap izinkan akses lokasi di browser Anda.',
-                2: 'Lokasi tidak dapat ditentukan. Pastikan GPS aktif.',
-                3: 'Waktu deteksi habis. Coba lagi.',
-            };
-            alert(messages[error.code] || 'Gagal mendeteksi koordinat.');
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-}
-</script>
 @endsection

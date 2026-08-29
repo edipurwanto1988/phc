@@ -20,7 +20,7 @@ class DashboardController extends Controller
             'completed_orders' => Order::where('status', 'completed')->count(),
             'total_customers' => Customer::where('status', 'active')->count(),
             'total_services' => Service::where('is_active', true)->count(),
-            'total_revenue' => Order::where('status', 'completed')->sum('grand_total'),
+            'total_revenue' => Order::where('status_bayar', 'paid')->sum('grand_total'),
             'cleaners_count' => User::whereHas('role', function($q) {
                 $q->where('name', 'Cleaner');
             })->count(),
@@ -34,11 +34,22 @@ class DashboardController extends Controller
 
         // 3. Get monthly revenue statistics for chart/trend
         $revenuePerMonth = Order::select(
-                DB::raw("DATE_FORMAT(tanggal_order, '%Y-%m') as month"),
+                DB::raw("DATE_FORMAT(tanggal_jadwal, '%Y-%m') as month"),
                 DB::raw('SUM(grand_total) as total')
             )
-            ->where('status', 'completed')
-            ->where('tanggal_order', '>=', now()->subMonths(5)->startOfMonth())
+            ->where('status_bayar', 'paid')
+            ->where('tanggal_jadwal', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        // 4. Get monthly expenses statistics for chart/trend
+        $expensePerMonth = \App\Models\Expense::select(
+                DB::raw("DATE_FORMAT(tanggal, '%Y-%m') as month"),
+                DB::raw('SUM(jumlah) as total')
+            )
+            ->where('tanggal', '>=', now()->subMonths(5)->startOfMonth())
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -46,14 +57,16 @@ class DashboardController extends Controller
 
         $months = [];
         $revenueData = [];
+        $expenseData = [];
         
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
             $key = $date->format('Y-m');
             $months[] = $date->translatedFormat('F Y');
             $revenueData[] = $revenuePerMonth->has($key) ? (float) $revenuePerMonth[$key]->total : 0.0;
+            $expenseData[] = $expensePerMonth->has($key) ? (float) $expensePerMonth[$key]->total : 0.0;
         }
 
-        return view('admin.dashboard', compact('stats', 'recentOrders', 'months', 'revenueData'));
+        return view('admin.dashboard', compact('stats', 'recentOrders', 'months', 'revenueData', 'expenseData'));
     }
 }

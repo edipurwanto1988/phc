@@ -58,8 +58,12 @@ html {
 body {
     font-family: 'Inter', 'Poppins', system-ui, sans-serif;
     max-width: 100%;
-    overflow-x: hidden;
+    /* NOTE: overflow-x hidden only on non-admin pages; admin panel uses fixed sidebar */
     background: linear-gradient(180deg, rgba(248,249,250,0.96) 0%, rgba(255,255,255,1) 44%, rgba(248,249,250,1) 100%);
+}
+
+body.admin-layout {
+    overflow-x: unset;
 }
 
 .material-symbols-outlined {
@@ -90,6 +94,41 @@ body {
 
 [x-cloak] {
     display: none !important;
+}
+
+/* ============================================================
+   Admin Sidebar — Mobile Responsive
+   Using raw CSS so Tailwind purge can't remove it
+   ============================================================ */
+
+/* Sidebar always off-screen on mobile by default */
+#admin-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+/* Sidebar visible when .sidebar-is-open class is present (Alpine adds this) */
+#admin-sidebar.sidebar-is-open {
+    transform: translateX(0);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+}
+
+/* On desktop (lg = 1024px+): sidebar always visible, no transition needed */
+@media (min-width: 1024px) {
+    #admin-sidebar {
+        transform: translateX(0) !important;
+        box-shadow: none !important;
+    }
+    #admin-content {
+        margin-left: 16rem; /* w-64 = 256px = 16rem */
+    }
+}
+
+/* Mobile: content area fills full width (no left margin) */
+@media (max-width: 1023px) {
+    #admin-content {
+        margin-left: 0 !important;
+    }
 }
 
 .btn {

@@ -17,7 +17,17 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::query()->with(['customer', 'assignments.cleaner']);
+        $query = Order::query()->with(['customer', 'assignments' => function($q) {
+            $q->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
+        }, 'assignments.cleaner']);
+
+        // Limit visibility for cleaners: only show orders they are assigned to
+        $user = Auth::user();
+        if ($user->role && $user->role->name === 'Cleaner') {
+            $query->whereHas('assignments', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
 
         // Search by Order Number or Customer Name
         if ($request->filled('search')) {
@@ -68,6 +78,7 @@ class OrderController extends Controller
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'required|exists:services,id',
             'items.*.qty' => 'required|integer|min:1',
+            'items.*.harga' => 'required|numeric|min:0',
             'items.*.catatan' => 'nullable|string',
             'diskon' => 'nullable|numeric|min:0',
             'metode_bayar' => 'required|string',
@@ -84,14 +95,15 @@ class OrderController extends Controller
 
             foreach ($request->items as $item) {
                 $service = Service::findOrFail($item['service_id']);
-                $subtotal = $service->harga * $item['qty'];
+                $hargaSatuan = isset($item['harga']) ? (float) $item['harga'] : (float) $service->harga;
+                $subtotal = $hargaSatuan * $item['qty'];
                 $totalHarga += $subtotal;
 
                 $itemsData[] = [
                     'service_id' => $service->id,
                     'qty' => $item['qty'],
                     'satuan' => $service->satuan,
-                    'harga_satuan' => $service->harga,
+                    'harga_satuan' => $hargaSatuan,
                     'subtotal' => $subtotal,
                     'catatan' => $item['catatan'] ?? null,
                 ];
@@ -149,7 +161,9 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['customer', 'items.service', 'assignments.cleaner', 'creator']);
+        $order->load(['customer', 'items.service', 'assignments' => function($q) {
+            $q->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
+        }, 'assignments.cleaner', 'creator']);
         
         $cleaners = User::whereHas('role', function($q) {
             $q->where('name', 'Cleaner');
@@ -177,26 +191,58 @@ class OrderController extends Controller
             'diskon' => 'nullable|numeric|min:0',
             'metode_bayar' => 'required|string',
             'catatan' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.service_id' => 'required|exists:services,id',
+            'items.*.qty' => 'required|integer|min:1',
+            'items.*.harga' => 'required|numeric|min:0',
         ]);
 
         DB::beginTransaction();
         try {
-            $diskon = $request->diskon ?? 0;
-            $grandTotal = max(0, $order->total_harga - $diskon);
+            // Calculate prices and validate new items
+            $totalHarga = 0.0;
+            $itemsData = [];
 
+            foreach ($request->items as $item) {
+                $service = Service::findOrFail($item['service_id']);
+                $hargaSatuan = (float) $item['harga'];
+                $subtotal = $hargaSatuan * $item['qty'];
+                $totalHarga += $subtotal;
+
+                $itemsData[] = [
+                    'service_id' => $service->id,
+                    'qty' => $item['qty'],
+                    'satuan' => $service->satuan,
+                    'harga_satuan' => $hargaSatuan,
+                    'subtotal' => $subtotal,
+                    'catatan' => $item['catatan'] ?? null,
+                ];
+            }
+
+            $diskon = $request->diskon ?? 0;
+            $grandTotal = max(0, $totalHarga - $diskon);
+
+            // Update main order
             $order->update([
                 'tanggal_jadwal' => $request->tanggal_jadwal,
                 'alamat_pengerjaan' => $request->alamat_pengerjaan,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
+                'total_harga' => $totalHarga,
                 'diskon' => $diskon,
                 'grand_total' => $grandTotal,
                 'metode_bayar' => $request->metode_bayar,
                 'catatan' => $request->catatan,
             ]);
 
+            // Sync items: Delete old ones and insert new ones
+            $order->items()->delete();
+            foreach ($itemsData as $itemData) {
+                $order->items()->create($itemData);
+            }
+
             DB::commit();
-            return redirect()->route('admin.orders.show', $order)->with('success', 'Order metadata berhasil diubah.');
+            return redirect()->route('admin.orders.show', $order)->with('success', 'Order berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal mengubah order: ' . $e->getMessage()]);
@@ -215,15 +261,130 @@ class OrderController extends Controller
             'cleaner_id' => 'required|exists:users,id',
         ]);
 
-        // Mark existing cleaner assignments as cancelled or delete them, or support multiple cleaners
+        // Check if the cleaner is already assigned to this order
+        $exists = OrderAssignment::where('order_id', $order->id)
+            ->where('user_id', $request->cleaner_id)
+            ->exists();
+
+        if ($exists) {
+            return redirect()->route('admin.orders.show', $order)->withErrors(['error' => 'Cleaner ini sudah ditugaskan ke order ini.']);
+        }
+
         // For simplicity, we create a new cleaner assignment
+        $maxSort = OrderAssignment::where('order_id', $order->id)->max('sort_order') ?? 0;
         OrderAssignment::create([
             'order_id' => $order->id,
             'user_id' => $request->cleaner_id,
             'status' => 'assigned',
+            'sort_order' => $maxSort + 1,
         ]);
 
         return redirect()->route('admin.orders.show', $order)->with('success', 'Cleaner berhasil ditugaskan ke order ini.');
+    }
+
+    public function updateGaji(Request $request, OrderAssignment $assignment)
+    {
+        $request->validate([
+            'gaji' => 'required|numeric|min:0',
+            'status_gaji' => 'required|in:belum_dibayar,sudah_dibayar',
+        ]);
+
+        $assignment->update([
+            'gaji' => $request->gaji,
+            'status_gaji' => $request->status_gaji,
+        ]);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Informasi gaji cleaner berhasil diperbarui.',
+                'data' => [
+                    'gaji' => $assignment->gaji,
+                    'status_gaji' => $assignment->status_gaji
+                ]
+            ]);
+        }
+
+        return redirect()->route('admin.orders.show', $assignment->order_id)->with('success', 'Informasi gaji cleaner berhasil diperbarui.');
+    }
+
+    public function uploadPhotos(Request $request, OrderAssignment $assignment)
+    {
+        $request->validate([
+            'foto_sebelum' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'foto_sesudah' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        $data = [];
+
+        if ($request->hasFile('foto_sebelum')) {
+            // Delete old photo if exists
+            if ($assignment->foto_sebelum && file_exists(public_path($assignment->foto_sebelum))) {
+                @unlink(public_path($assignment->foto_sebelum));
+            }
+            $file = $request->file('foto_sebelum');
+            $filename = 'before_' . $assignment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/orders'), $filename);
+            $data['foto_sebelum'] = 'uploads/orders/' . $filename;
+        }
+
+        if ($request->hasFile('foto_sesudah')) {
+            // Delete old photo if exists
+            if ($assignment->foto_sesudah && file_exists(public_path($assignment->foto_sesudah))) {
+                @unlink(public_path($assignment->foto_sesudah));
+            }
+            $file = $request->file('foto_sesudah');
+            $filename = 'after_' . $assignment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/orders'), $filename);
+            $data['foto_sesudah'] = 'uploads/orders/' . $filename;
+        }
+
+        if (!empty($data)) {
+            $assignment->update($data);
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto pekerjaan berhasil diunggah.',
+                'data' => $data
+            ]);
+        }
+
+        return redirect()->route('admin.orders.show', $assignment->order_id)->with('success', 'Foto pekerjaan berhasil diunggah.');
+    }
+
+    public function reorderAssignments(Request $request, Order $order)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:order_assignments,id',
+        ]);
+
+        foreach ($request->ids as $index => $id) {
+            OrderAssignment::where('id', $id)
+                ->where('order_id', $order->id)
+                ->update(['sort_order' => $index]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Urutan cleaner / PIC berhasil diperbarui.'
+        ]);
+    }
+
+    public function deleteAssignment(OrderAssignment $assignment)
+    {
+        $orderId = $assignment->order_id;
+        $assignment->delete();
+
+        // Re-adjust sort order for remaining assignments
+        $remaining = OrderAssignment::where('order_id', $orderId)->orderBy('sort_order', 'asc')->get();
+        foreach ($remaining as $index => $assign) {
+            $assign->update(['sort_order' => $index]);
+        }
+
+        return redirect()->route('admin.orders.show', $orderId)->with('success', 'Cleaner berhasil dihapus dari tugas order ini.');
     }
 
     public function updateStatus(Request $request, Order $order)
@@ -257,5 +418,32 @@ class OrderController extends Controller
         $order->save();
 
         return redirect()->route('admin.orders.show', $order)->with('success', 'Status order / pembayaran berhasil diperbarui.');
+    }
+
+    public function updateCoordinates(Request $request, Order $order)
+    {
+        $request->validate([
+            'latitude'  => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+        ]);
+
+        $order->update([
+            'latitude'  => $request->latitude ?: null,
+            'longitude' => $request->longitude ?: null,
+        ]);
+
+        return redirect()->route('admin.orders.show', $order)->with('success', 'Koordinat lokasi berhasil disimpan.');
+    }
+
+    public function downloadInvoice(Order $order)
+    {
+        $order->load(['customer', 'items.service']);
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.invoice', compact('order'));
+        
+        // Custom paper size: 140mm width by 210mm height or A5
+        $pdf->setPaper('a5', 'portrait');
+        
+        return $pdf->download('Nota-' . $order->order_number . '.pdf');
     }
 }
