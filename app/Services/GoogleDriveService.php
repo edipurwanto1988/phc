@@ -132,7 +132,7 @@ class GoogleDriveService
             return [
                 'id' => $file->id,
                 'web_view_link' => $file->webViewLink,
-                'web_content_link' => "https://drive.google.com/uc?export=view&id=" . $file->id
+                'web_content_link' => "https://drive.usercontent.google.com/download?id=" . $file->id . "&export=view&authuser=0"
             ];
         } catch (\Exception $e) {
             \Log::error("Google Drive Upload Error: " . $e->getMessage());

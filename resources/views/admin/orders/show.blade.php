@@ -373,7 +373,7 @@
                                 @if($assignment->foto_sebelum)
                                     <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
                                         <!-- Check if it is a Google Drive link -->
-                                        @if(str_contains($assignment->foto_sebelum, 'drive.google.com'))
+                                        @if(str_contains($assignment->foto_sebelum, 'drive.google.com') || str_contains($assignment->foto_sebelum, 'drive.usercontent.google.com'))
                                             <!-- Friendly Google Drive Placeholder/Mock Graphic -->
                                             <div class="w-full h-full bg-blue-50 flex flex-col items-center justify-center text-center p-1">
                                                 <i class="ri-google-drive-fill text-2xl text-blue-600"></i>
@@ -409,7 +409,7 @@
                                 @if($assignment->foto_sesudah)
                                     <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
                                         <!-- Check if it is a Google Drive link -->
-                                        @if(str_contains($assignment->foto_sesudah, 'drive.google.com'))
+                                        @if(str_contains($assignment->foto_sesudah, 'drive.google.com') || str_contains($assignment->foto_sesudah, 'drive.usercontent.google.com'))
                                             <!-- Friendly Google Drive Placeholder/Mock Graphic -->
                                             <div class="w-full h-full bg-blue-50 flex flex-col items-center justify-center text-center p-1">
                                                 <i class="ri-google-drive-fill text-2xl text-blue-600"></i>
