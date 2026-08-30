@@ -372,8 +372,8 @@
                                 <span class="block text-[8px] font-bold text-gray-400 uppercase">Sebelum</span>
                                 @if($assignment->foto_sebelum)
                                     <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
-                                        <!-- Check if it is a mock Google Drive link -->
-                                        @if(str_contains($assignment->foto_sebelum, 'id=1GDriveFile'))
+                                        <!-- Check if it is a Google Drive link -->
+                                        @if(str_contains($assignment->foto_sebelum, 'drive.google.com'))
                                             <!-- Friendly Google Drive Placeholder/Mock Graphic -->
                                             <div class="w-full h-full bg-blue-50 flex flex-col items-center justify-center text-center p-1">
                                                 <i class="ri-google-drive-fill text-2xl text-blue-600"></i>
@@ -399,7 +399,7 @@
                                         </div>
                                     </div>
                                 @else
-                                    <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" @change="uploadPhoto('foto_sebelum', $event)">
+                                    <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*" @change="uploadPhoto('foto_sebelum', $event)">
                                 @endif
                             </div>
 
@@ -408,8 +408,8 @@
                                 <span class="block text-[8px] font-bold text-gray-400 uppercase">Sesudah</span>
                                 @if($assignment->foto_sesudah)
                                     <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
-                                        <!-- Check if it is a mock Google Drive link -->
-                                        @if(str_contains($assignment->foto_sesudah, 'id=1GDriveFile'))
+                                        <!-- Check if it is a Google Drive link -->
+                                        @if(str_contains($assignment->foto_sesudah, 'drive.google.com'))
                                             <!-- Friendly Google Drive Placeholder/Mock Graphic -->
                                             <div class="w-full h-full bg-blue-50 flex flex-col items-center justify-center text-center p-1">
                                                 <i class="ri-google-drive-fill text-2xl text-blue-600"></i>
@@ -435,7 +435,7 @@
                                         </div>
                                     </div>
                                 @else
-                                    <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" @change="uploadPhoto('foto_sesudah', $event)">
+                                    <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*" @change="uploadPhoto('foto_sesudah', $event)">
                                 @endif
                             </div>
                         </div>
