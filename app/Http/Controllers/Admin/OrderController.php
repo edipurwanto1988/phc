@@ -388,13 +388,68 @@ class OrderController extends Controller
         }
 
         $photoPath = $assignment->{$type};
-        if ($photoPath && file_exists(public_path($photoPath))) {
+        if ($photoPath && !str_starts_with($photoPath, 'http') && file_exists(public_path($photoPath))) {
             @unlink(public_path($photoPath));
         }
 
         $assignment->update([$type => null]);
 
         return redirect()->route('admin.orders.show', $assignment->order_id)->with('success', 'Foto berhasil dihapus.');
+    }
+
+    public function viewDrivePhoto(OrderAssignment $assignment, string $type)
+    {
+        if (!in_array($type, ['foto_sebelum', 'foto_sesudah'])) {
+            return abort(400);
+        }
+
+        $photoUrl = $assignment->{$type};
+        if (!$photoUrl) {
+            return abort(404);
+        }
+
+        // If it's a local file, redirect directly or serve it
+        if (!str_starts_with($photoUrl, 'http')) {
+            return response()->file(public_path($photoUrl));
+        }
+
+        try {
+            // Serve the Google Drive image via Laravel backend (Proxy)
+            // By requesting it server-side, we completely bypass CORS / OpaqueResponseBlocking
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $photoUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+            
+            // If Google Drive requires auth, we could attach OAuth token here
+            $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true';
+            if ($gdriveConnected) {
+                $tokenJson = \App\Models\Setting::get('gdrive_access_token');
+                if ($tokenJson) {
+                    $accessToken = json_decode($tokenJson, true);
+                    if (isset($accessToken['access_token'])) {
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                            'Authorization: Bearer ' . $accessToken['access_token']
+                        ]);
+                    }
+                }
+            }
+
+            $imageData = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+            curl_close($ch);
+
+            if ($httpCode === 200 && $imageData) {
+                return response($imageData)->header('Content-Type', $contentType ?: 'image/jpeg');
+            }
+
+            return abort(404, 'Gagal mengambil gambar dari Google Drive.');
+        } catch (\Exception $e) {
+            \Log::error("Image Proxy error: " . $e->getMessage());
+            return abort(500);
+        }
     }
 
     public function reorderAssignments(Request $request, Order $order)
