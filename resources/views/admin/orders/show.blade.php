@@ -385,7 +385,7 @@
                                         @endif
                                         <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <!-- View Button (Popup) -->
-                                            <button type="button" @click="activeImage = '{{ $assignment->foto_sebelum }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
+                                            <button type="button" @click="activeImage = '{{ str_starts_with($assignment->foto_sebelum, 'http') ? $assignment->foto_sebelum : asset($assignment->foto_sebelum) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
                                                 <i class="ri-eye-line text-sm"></i>
                                             </button>
                                             <!-- Delete Button -->
@@ -421,7 +421,7 @@
                                         @endif
                                         <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <!-- View Button (Popup) -->
-                                            <button type="button" @click="activeImage = '{{ $assignment->foto_sesudah }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
+                                            <button type="button" @click="activeImage = '{{ str_starts_with($assignment->foto_sesudah, 'http') ? $assignment->foto_sesudah : asset($assignment->foto_sesudah) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
                                                 <i class="ri-eye-line text-sm"></i>
                                             </button>
                                             <!-- Delete Button -->
