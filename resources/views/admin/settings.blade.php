@@ -133,11 +133,17 @@
             <div x-show="activeTab === 'gdrive'" x-cloak class="space-y-6">
                 <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
                     <h3 class="text-sm font-bold text-blue-600">Integrasi Google Drive</h3>
-                    @php $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true'; @endphp
+                    @php 
+                        $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true'; 
+                        $gdriveEmail = \App\Models\Setting::get('gdrive_account_email', 'pekanbaruhomecleaning@gmail.com');
+                    @endphp
                     @if($gdriveConnected)
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full flex items-center gap-1 shadow-sm">
-                        <i class="ri-checkbox-circle-fill"></i> Terhubung ke Google Drive
-                    </span>
+                    <div class="flex flex-col items-end">
+                        <span class="px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full flex items-center gap-1 shadow-sm">
+                            <i class="ri-checkbox-circle-fill"></i> Terhubung
+                        </span>
+                        <span class="text-[10px] text-gray-500 mt-1 font-semibold">Akun: <span class="text-blue-600">{{ $gdriveEmail }}</span></span>
+                    </div>
                     @else
                     <span class="px-2.5 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full flex items-center gap-1 shadow-sm">
                         <i class="ri-close-circle-fill"></i> Belum Terhubung
@@ -152,30 +158,105 @@
                 </div>
 
                 <div class="space-y-4">
+                    <!-- Target Account Select (Hanya tampil jika belum terhubung atau ingin diubah) -->
+                    <div>
+                        <label for="gdrive_account_email" class="block text-xs font-bold text-gray-600 uppercase mb-1">Hubungkan ke Akun Google</label>
+                        <select name="settings[gdrive_account_email]" id="gdrive_account_email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required {{ $gdriveConnected ? 'disabled' : '' }}>
+                            <option value="pekanbaruhomecleaning@gmail.com" {{ $gdriveEmail === 'pekanbaruhomecleaning@gmail.com' ? 'selected' : '' }}>pekanbaruhomecleaning@gmail.com (Utama)</option>
+                            <option value="phc.finance@gmail.com" {{ $gdriveEmail === 'phc.finance@gmail.com' ? 'selected' : '' }}>phc.finance@gmail.com (Keuangan)</option>
+                            <option value="admin.pekanbaruclean@gmail.com" {{ $gdriveEmail === 'admin.pekanbaruclean@gmail.com' ? 'selected' : '' }}>admin.pekanbaruclean@gmail.com (Cadangan)</option>
+                        </select>
+                        <p class="text-[10px] text-gray-500 mt-1">Pilih akun Google Drive penyimpanan cloud yang ingin dikoneksikan.</p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Google Client ID</label>
-                            <input type="text" name="settings[gdrive_client_id]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" value="{{ \App\Models\Setting::get('gdrive_client_id') }}" placeholder="Contoh: 12345678-xxxx.apps.googleusercontent.com">
+                            <input type="text" name="settings[gdrive_client_id]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white disabled:bg-gray-100" value="{{ \App\Models\Setting::get('gdrive_client_id') }}" placeholder="Contoh: 12345678-xxxx.apps.googleusercontent.com" {{ $gdriveConnected ? 'disabled' : '' }}>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Google Client Secret</label>
-                            <input type="password" name="settings[gdrive_client_secret]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" value="{{ \App\Models\Setting::get('gdrive_client_secret') }}" placeholder="••••••••••••••••••••••••">
+                            <input type="password" name="settings[gdrive_client_secret]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white disabled:bg-gray-100" value="{{ \App\Models\Setting::get('gdrive_client_secret') }}" placeholder="••••••••••••••••••••••••" {{ $gdriveConnected ? 'disabled' : '' }}>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Target Sync Folder ID (Opsional)</label>
-                        <input type="text" name="settings[gdrive_folder_id]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" value="{{ \App\Models\Setting::get('gdrive_folder_id') }}" placeholder="Contoh: 1a2b3c4d5e6f7g8h9i0j-xxxxxxxx (Biarkan kosong untuk Root Google Drive)">
+                        <input type="text" name="settings[gdrive_folder_id]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white disabled:bg-gray-100" value="{{ \App\Models\Setting::get('gdrive_folder_id') }}" placeholder="Contoh: 1a2b3c4d5e6f7g8h9i0j-xxxxxxxx (Biarkan kosong untuk Root Google Drive)" {{ $gdriveConnected ? 'disabled' : '' }}>
                     </div>
 
-                    <div class="pt-2">
+                    <div class="pt-2" x-data="{
+                        testing: false,
+                        testMessage: '',
+                        isSuccess: false,
+                        driveUrl: '',
+                        triggerTestUpload(event) {
+                            let file = event.target.files[0];
+                            if (!file) return;
+
+                            let formData = new FormData();
+                            formData.append('test_image', file);
+                            formData.append('_token', '{{ csrf_token() }}');
+
+                            this.testing = true;
+                            this.testMessage = '';
+                            this.driveUrl = '';
+
+                            fetch('{{ route('admin.settings.gdrive-test') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json'
+                                },
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(res => {
+                                this.isSuccess = res.success;
+                                this.testMessage = res.message;
+                                if (res.success && res.data && res.data.drive_url) {
+                                    this.driveUrl = res.data.drive_url;
+                                }
+                            })
+                            .catch(err => {
+                                this.isSuccess = false;
+                                this.testMessage = 'Gagal menghubungi server.';
+                            })
+                            .finally(() => {
+                                this.testing = false;
+                            });
+                        }
+                    }">
                         @if($gdriveConnected)
-                        <div class="flex items-center gap-3">
-                            <!-- Hidden input to maintain connection status -->
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <!-- Hidden input to maintain connection status & email -->
                             <input type="hidden" name="settings[gdrive_connected]" value="true">
+                            <input type="hidden" name="settings[gdrive_account_email]" value="{{ $gdriveEmail }}">
+                            
+                            <!-- Test Upload Button (Hidden input trigger) -->
+                            <label class="btn border border-emerald-600 hover:bg-emerald-50 text-emerald-700 font-semibold py-2 px-4 rounded-lg text-xs cursor-pointer flex items-center gap-1.5 transition-colors">
+                                <i class="ri-upload-cloud-2-line"></i> Tes Upload Gambar
+                                <input type="file" class="hidden" accept="image/*" @change="triggerTestUpload($event)">
+                            </label>
+
                             <button type="button" onclick="disconnectGoogleDrive()" class="btn border border-red-500 hover:bg-red-50 text-red-600 font-semibold py-2 px-4 rounded-lg text-xs transition-colors">
                                 <i class="ri-logout-box-line mr-1"></i> Putuskan Koneksi
                             </button>
+                        </div>
+
+                        <!-- Test feedback message -->
+                        <div class="mt-3 text-[11px] space-y-1.5" x-show="testing || testMessage !== ''" x-cloak>
+                            <span class="text-gray-400 flex items-center gap-1" x-show="testing">
+                                <i class="ri-loader-4-line animate-spin text-sm"></i> Sedang mengunggah tes gambar...
+                            </span>
+                            <div x-show="!testing">
+                                <span class="font-bold flex items-center gap-1" :class="isSuccess ? 'text-green-650' : 'text-red-500'" x-text="testMessage"></span>
+                                <template x-if="driveUrl !== ''">
+                                    <div class="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg max-w-md">
+                                        <p class="text-blue-800 font-bold mb-1"><i class="ri-google-drive-fill"></i> Tautan File Google Drive Virtual:</p>
+                                        <a :href="driveUrl" target="_blank" class="text-blue-600 hover:text-blue-800 underline break-all font-mono font-semibold" x-text="driveUrl"></a>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                         @else
                         <div class="flex items-center gap-3">

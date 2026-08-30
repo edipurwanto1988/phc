@@ -92,6 +92,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::resource('/menu', AdminMenuController::class)->names('admin.menu');
         Route::get('/settings', [AdminSettingController::class, 'index'])->name('admin.settings.index');
         Route::post('/settings', [AdminSettingController::class, 'update'])->name('admin.settings.update');
+        Route::get('/settings/gdrive/auth', [AdminSettingController::class, 'redirectToGoogleDrive'])->name('admin.settings.gdrive-auth');
+        Route::get('/settings/gdrive/callback', [AdminSettingController::class, 'handleGoogleDriveCallback'])->name('admin.settings.gdrive-callback');
+        Route::post('/settings/gdrive/test-upload', [AdminSettingController::class, 'testGDriveUpload'])->name('admin.settings.gdrive-test');
+        Route::post('/settings/gdrive/disconnect', [AdminSettingController::class, 'disconnectGDrive'])->name('admin.settings.gdrive-disconnect');
         Route::get('/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
         Route::get('/reports/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
         

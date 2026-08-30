@@ -319,36 +319,50 @@ class OrderController extends Controller
         $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true';
 
         if ($request->hasFile('foto_sebelum')) {
-            if ($assignment->foto_sebelum && file_exists(public_path($assignment->foto_sebelum))) {
+            if ($assignment->foto_sebelum && !str_starts_with($assignment->foto_sebelum, 'http') && file_exists(public_path($assignment->foto_sebelum))) {
                 @unlink(public_path($assignment->foto_sebelum));
             }
             $file = $request->file('foto_sebelum');
             $filename = 'before_' . $assignment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/orders'), $filename);
-            $data['foto_sebelum'] = 'uploads/orders/' . $filename;
-
-            // Mock Google Drive Upload trigger
+            
             if ($gdriveConnected) {
-                // System logs simulated upload to Google Drive target folder
-                $folderId = \App\Models\Setting::get('gdrive_folder_id', 'root');
-                \Log::info("Mock Google Drive Sync: Uploaded foto_sebelum to folder {$folderId} as {$filename}");
+                try {
+                    $driveService = new \App\Services\GoogleDriveService();
+                    $result = $driveService->uploadFile($file->getRealPath(), $filename, $assignment->order->order_number);
+                    $data['foto_sebelum'] = $result['web_content_link'];
+                } catch (\Exception $e) {
+                    \Log::error("Failed to upload before-photo to GDrive: " . $e->getMessage());
+                    // Fallback to local
+                    $file->move(public_path('uploads/orders'), $filename);
+                    $data['foto_sebelum'] = 'uploads/orders/' . $filename;
+                }
+            } else {
+                $file->move(public_path('uploads/orders'), $filename);
+                $data['foto_sebelum'] = 'uploads/orders/' . $filename;
             }
         }
 
         if ($request->hasFile('foto_sesudah')) {
-            if ($assignment->foto_sesudah && file_exists(public_path($assignment->foto_sesudah))) {
+            if ($assignment->foto_sesudah && !str_starts_with($assignment->foto_sesudah, 'http') && file_exists(public_path($assignment->foto_sesudah))) {
                 @unlink(public_path($assignment->foto_sesudah));
             }
             $file = $request->file('foto_sesudah');
             $filename = 'after_' . $assignment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/orders'), $filename);
-            $data['foto_sesudah'] = 'uploads/orders/' . $filename;
 
-            // Mock Google Drive Upload trigger
             if ($gdriveConnected) {
-                // System logs simulated upload to Google Drive target folder
-                $folderId = \App\Models\Setting::get('gdrive_folder_id', 'root');
-                \Log::info("Mock Google Drive Sync: Uploaded foto_sesudah to folder {$folderId} as {$filename}");
+                try {
+                    $driveService = new \App\Services\GoogleDriveService();
+                    $result = $driveService->uploadFile($file->getRealPath(), $filename, $assignment->order->order_number);
+                    $data['foto_sesudah'] = $result['web_content_link'];
+                } catch (\Exception $e) {
+                    \Log::error("Failed to upload after-photo to GDrive: " . $e->getMessage());
+                    // Fallback to local
+                    $file->move(public_path('uploads/orders'), $filename);
+                    $data['foto_sesudah'] = 'uploads/orders/' . $filename;
+                }
+            } else {
+                $file->move(public_path('uploads/orders'), $filename);
+                $data['foto_sesudah'] = 'uploads/orders/' . $filename;
             }
         }
 
