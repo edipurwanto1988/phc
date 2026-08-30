@@ -293,19 +293,24 @@ function connectGoogleDrive() {
     }
 
     if (confirm('Hubungkan PHC dengan Google Drive menggunakan kredensial ini?')) {
-        document.getElementById('gdrive_conn_hidden').value = 'true';
-        clientInput.form.submit();
+        // Redirect to real Google Drive Auth URL
+        window.location.href = "{{ route('admin.settings.gdrive-auth') }}";
     }
 }
 
 function disconnectGoogleDrive() {
     if (confirm('Apakah Anda yakin ingin memutuskan integrasi Google Drive?')) {
-        const form = document.querySelector('form');
-        const connHidden = document.createElement('input');
-        connHidden.type = 'hidden';
-        connHidden.name = 'settings[gdrive_connected]';
-        connHidden.value = 'false';
-        form.appendChild(connHidden);
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ route('admin.settings.gdrive-disconnect') }}";
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
         form.submit();
     }
 }
