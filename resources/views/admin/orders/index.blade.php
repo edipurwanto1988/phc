@@ -63,9 +63,11 @@
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">No. Order</th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Customer</th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Jadwal Pengerjaan</th>
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-right">Grand Total</th>
+                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-right">{{ auth()->user()->role->name === 'Cleaner' ? 'Gaji Diterima' : 'Grand Total' }}</th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-center">Status</th>
+                    @if(auth()->user()->role->name !== 'Cleaner')
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-center">Pembayaran</th>
+                    @endif
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Cleaner Ditugaskan</th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-center w-20">Aksi</th>
                 </tr>
@@ -84,7 +86,17 @@
                         {{ $order->tanggal_jadwal->translatedFormat('d M Y, H:i') }} WIB
                     </td>
                     <td class="py-4 px-6 text-sm font-bold text-gray-850 text-right">
-                        Rp {{ number_format($order->grand_total, 0, ',', '.') }}
+                        @if(auth()->user()->role->name === 'Cleaner')
+                            @php
+                                $myAssign = $order->assignments->where('user_id', auth()->id())->first();
+                            @endphp
+                            Rp {{ number_format($myAssign->gaji ?? 0, 0, ',', '.') }}
+                            <div class="text-[9px] {{ ($myAssign->status_gaji ?? '') === 'sudah_dibayar' ? 'text-green-600' : 'text-red-500' }} font-bold">
+                                {{ ($myAssign->status_gaji ?? '') === 'sudah_dibayar' ? 'Sudah' : 'Belum' }} Dibayar
+                            </div>
+                        @else
+                            Rp {{ number_format($order->grand_total, 0, ',', '.') }}
+                        @endif
                     </td>
                     <td class="py-4 px-6 text-center">
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full 
@@ -96,6 +108,7 @@
                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                         </span>
                     </td>
+                    @if(auth()->user()->role->name !== 'Cleaner')
                     <td class="py-4 px-6 text-center">
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full 
                             @if($order->status_bayar === 'paid') bg-green-100 text-green-700
@@ -104,6 +117,7 @@
                             {{ ucfirst($order->status_bayar) }}
                         </span>
                     </td>
+                    @endif
                     <td class="py-4 px-6 text-sm text-gray-650">
                         @php 
                             // Sorted assignments (by sort_order then id)

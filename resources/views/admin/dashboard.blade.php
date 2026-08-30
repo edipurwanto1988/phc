@@ -54,7 +54,7 @@
                 <i class="ri-money-dollar-circle-line text-2xl"></i>
             </div>
             <div>
-                <p class="text-sm text-gray-500 font-medium">Total Pendapatan</p>
+                <p class="text-sm text-gray-500 font-medium">{{ auth()->user()->role->name === 'Cleaner' ? 'Gaji Diterima' : 'Total Pendapatan' }}</p>
                 <p class="text-2xl font-bold text-gray-800">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
             </div>
         </div>
@@ -66,7 +66,7 @@
     <!-- Revenue Trend Chart (2/3 width on large screens) -->
     <div class="lg:col-span-2 card p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <i class="ri-line-chart-line text-blue-600"></i> Tren Pendapatan & Pengeluaran Bulanan
+            <i class="ri-line-chart-line text-blue-600"></i> {{ auth()->user()->role->name === 'Cleaner' ? 'Tren Pendapatan Gaji Bulanan' : 'Tren Pendapatan & Pengeluaran Bulanan' }}
         </h3>
         <div style="height: 350px;">
             <canvas id="revenueChart"></canvas>
@@ -81,7 +81,7 @@
             </h3>
             <div class="space-y-4">
                 <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span class="text-sm text-gray-600 font-medium">Total Order Masuk</span>
+                    <span class="text-sm text-gray-600 font-medium">Total Pekerjaan</span>
                     <span class="text-base font-bold text-gray-800">{{ $stats['total_orders'] }}</span>
                 </div>
                 <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
@@ -94,11 +94,13 @@
                 </div>
             </div>
         </div>
+        @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('create_orders'))
         <div class="mt-6 pt-4 border-t border-gray-100">
             <a href="{{ route('admin.orders.create') }}" class="w-full btn btn-primary flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition-all shadow-sm">
                 <i class="ri-add-line"></i> Input Order Baru
             </a>
         </div>
+        @endif
     </div>
 </div>
 
@@ -119,9 +121,11 @@
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">No. Order</th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Customer</th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Jadwal Pengerjaan</th>
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-right">Grand Total</th>
+                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-right">{{ auth()->user()->role->name === 'Cleaner' ? 'Gaji Diterima' : 'Grand Total' }}</th>
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-center">Status</th>
+                    @if(auth()->user()->role->name !== 'Cleaner')
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-center">Bayar</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -138,7 +142,17 @@
                         {{ $order->tanggal_jadwal->translatedFormat('d M Y, H:i') }} WIB
                     </td>
                     <td class="py-3.5 px-6 text-sm font-semibold text-gray-800 text-right">
-                        Rp {{ number_format($order->grand_total, 0, ',', '.') }}
+                        @if(auth()->user()->role->name === 'Cleaner')
+                            @php
+                                $myAssign = $order->assignments->where('user_id', auth()->id())->first();
+                            @endphp
+                            Rp {{ number_format($myAssign->gaji ?? 0, 0, ',', '.') }}
+                            <div class="text-[9px] {{ ($myAssign->status_gaji ?? '') === 'sudah_dibayar' ? 'text-green-600' : 'text-red-500' }} font-bold">
+                                {{ ($myAssign->status_gaji ?? '') === 'sudah_dibayar' ? 'Sudah Dibayar' : 'Belum Dibayar' }}
+                            </div>
+                        @else
+                            Rp {{ number_format($order->grand_total, 0, ',', '.') }}
+                        @endif
                     </td>
                     <td class="py-3.5 px-6 text-center">
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full 
@@ -150,6 +164,7 @@
                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                         </span>
                     </td>
+                    @if(auth()->user()->role->name !== 'Cleaner')
                     <td class="py-3.5 px-6 text-center">
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full 
                             @if($order->status_bayar === 'paid') bg-green-100 text-green-700
@@ -158,6 +173,7 @@
                             {{ ucfirst($order->status_bayar) }}
                         </span>
                     </td>
+                    @endif
                 </tr>
                 @empty
                 <tr>
@@ -181,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: @json($months),
             datasets: [
                 {
-                    label: 'Pendapatan (Rp)',
+                    label: '{{ $isCleaner ? 'Gaji Diterima (Rp)' : 'Pendapatan (Rp)' }}',
                     data: @json($revenueData),
                     borderColor: '#2563eb', // Blue-600
                     backgroundColor: 'rgba(37, 99, 235, 0.05)',
@@ -190,7 +206,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     tension: 0.3,
                     pointBackgroundColor: '#2563eb',
                     pointHoverRadius: 7,
-                },
+                }
+                @if(!$isCleaner)
+                ,
                 {
                     label: 'Pengeluaran (Rp)',
                     data: @json($expenseData),
@@ -202,6 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     pointBackgroundColor: '#dc2626',
                     pointHoverRadius: 7,
                 }
+                @endif
             ]
         },
         options: {

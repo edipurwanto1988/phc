@@ -96,26 +96,77 @@ class ReportController extends Controller
         $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
 
         $inflow = Order::with('customer')
-            ->whereBetween('tanggal_jadwal', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->where('status_bayar', 'paid')
-            ->orderBy('tanggal_jadwal', 'asc')
+            ->whereBetween('tanggal_jadwal', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->get();
 
         $outflow = Expense::with('user')
             ->whereBetween('tanggal', [$startDate, $endDate])
-            ->orderBy('tanggal', 'asc')
             ->get();
 
         $totalInflow = $inflow->sum('grand_total');
         $totalOutflow = $outflow->sum('jumlah');
         $balance = $totalInflow - $totalOutflow;
 
+        // Calculate lifetime balance prior to startDate to determine beginning balance (saldo awal)
+        $previousInflow = Order::where('status_bayar', 'paid')
+            ->where('tanggal_jadwal', '<', $startDate . ' 00:00:00')
+            ->sum('grand_total');
+
+        $previousOutflow = Expense::where('tanggal', '<', $startDate)
+            ->sum('jumlah');
+
+        $beginningBalance = $previousInflow - $previousOutflow;
+
+        // Combine into one collection, sort chronologically, and calculate cumulative balance
+        $ledger = collect();
+
+        foreach ($inflow as $in) {
+            $ledger->push([
+                'tanggal' => $in->tanggal_jadwal,
+                'tipe' => 'uang_masuk',
+                'keterangan' => "Order #{$in->order_number} - {$in->customer->nama}",
+                'ref' => route('admin.orders.show', $in),
+                'penerima_pelaksana' => $in->customer->nama,
+                'masuk' => (float)$in->grand_total,
+                'keluar' => 0.0
+            ]);
+        }
+
+        foreach ($outflow as $out) {
+            $ledger->push([
+                'tanggal' => \Carbon\Carbon::parse($out->tanggal),
+                'tipe' => 'uang_keluar',
+                'keterangan' => "{$out->kategori_biaya} - " . ($out->keterangan ?: 'Tanpa catatan'),
+                'ref' => route('admin.expenses.show', $out),
+                'penerima_pelaksana' => $out->user->name ?? '-',
+                'masuk' => 0.0,
+                'keluar' => (float)$out->jumlah
+            ]);
+        }
+
+        $ledger = $ledger->sortBy('tanggal')->values();
+
+        // Add cumulative cash balance logic to each row
+        $runningBalance = $beginningBalance;
+        $ledger = $ledger->map(function($item) use (&$runningBalance) {
+            $runningBalance += ($item['masuk'] - $item['keluar']);
+            $item['saldo'] = $runningBalance;
+            return $item;
+        });
+
+        // Lifetime balance (untuk statistik header box tetap konsisten)
+        $cashIn = Order::where('status_bayar', 'paid')->sum('grand_total');
+        $cashOut = Expense::sum('jumlah');
+        $cashBalance = $cashIn - $cashOut;
+
         return view('admin.reports_detail', compact(
-            'inflow',
-            'outflow',
+            'ledger',
+            'beginningBalance',
             'totalInflow',
             'totalOutflow',
             'balance',
+            'cashBalance',
             'startDate',
             'endDate'
         ));

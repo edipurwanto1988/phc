@@ -100,6 +100,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/orders/{order}/assign', [AdminOrderController::class, 'assignCleaner'])->name('admin.orders.assign');
         Route::post('/orders/assignments/{assignment}/gaji', [AdminOrderController::class, 'updateGaji'])->name('admin.orders.update-gaji');
         Route::post('/orders/assignments/{assignment}/photos', [AdminOrderController::class, 'uploadPhotos'])->name('admin.orders.upload-photos');
+        Route::delete('/orders/assignments/{assignment}/photos/{type}', [AdminOrderController::class, 'deletePhoto'])->name('admin.orders.delete-photo');
         Route::delete('/orders/assignments/{assignment}', [AdminOrderController::class, 'deleteAssignment'])->name('admin.orders.delete-assignment');
         Route::post('/orders/{order}/assignments/reorder', [AdminOrderController::class, 'reorderAssignments'])->name('admin.orders.assignments-reorder');
         Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.status');

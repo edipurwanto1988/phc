@@ -316,9 +316,9 @@ class OrderController extends Controller
         ]);
 
         $data = [];
+        $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true';
 
         if ($request->hasFile('foto_sebelum')) {
-            // Delete old photo if exists
             if ($assignment->foto_sebelum && file_exists(public_path($assignment->foto_sebelum))) {
                 @unlink(public_path($assignment->foto_sebelum));
             }
@@ -326,10 +326,16 @@ class OrderController extends Controller
             $filename = 'before_' . $assignment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('uploads/orders'), $filename);
             $data['foto_sebelum'] = 'uploads/orders/' . $filename;
+
+            // Mock Google Drive Upload trigger
+            if ($gdriveConnected) {
+                // System logs simulated upload to Google Drive target folder
+                $folderId = \App\Models\Setting::get('gdrive_folder_id', 'root');
+                \Log::info("Mock Google Drive Sync: Uploaded foto_sebelum to folder {$folderId} as {$filename}");
+            }
         }
 
         if ($request->hasFile('foto_sesudah')) {
-            // Delete old photo if exists
             if ($assignment->foto_sesudah && file_exists(public_path($assignment->foto_sesudah))) {
                 @unlink(public_path($assignment->foto_sesudah));
             }
@@ -337,6 +343,13 @@ class OrderController extends Controller
             $filename = 'after_' . $assignment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
             $file->move(public_path('uploads/orders'), $filename);
             $data['foto_sesudah'] = 'uploads/orders/' . $filename;
+
+            // Mock Google Drive Upload trigger
+            if ($gdriveConnected) {
+                // System logs simulated upload to Google Drive target folder
+                $folderId = \App\Models\Setting::get('gdrive_folder_id', 'root');
+                \Log::info("Mock Google Drive Sync: Uploaded foto_sesudah to folder {$folderId} as {$filename}");
+            }
         }
 
         if (!empty($data)) {
@@ -352,6 +365,22 @@ class OrderController extends Controller
         }
 
         return redirect()->route('admin.orders.show', $assignment->order_id)->with('success', 'Foto pekerjaan berhasil diunggah.');
+    }
+
+    public function deletePhoto(OrderAssignment $assignment, string $type)
+    {
+        if (!in_array($type, ['foto_sebelum', 'foto_sesudah'])) {
+            return abort(400);
+        }
+
+        $photoPath = $assignment->{$type};
+        if ($photoPath && file_exists(public_path($photoPath))) {
+            @unlink(public_path($photoPath));
+        }
+
+        $assignment->update([$type => null]);
+
+        return redirect()->route('admin.orders.show', $assignment->order_id)->with('success', 'Foto berhasil dihapus.');
     }
 
     public function reorderAssignments(Request $request, Order $order)

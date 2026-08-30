@@ -324,9 +324,10 @@
                     </div>
                     @endif
 
-                    <!-- Foto Sebelum & Sesudah Section (AJAX Auto Upload - Bisa diakses oleh Cleaner yang bersangkutan atau Admin) -->
+                    <!-- Foto Sebelum & Sesudah Section (Popup View & Delete Option) -->
                     @if(auth()->user()->id === $assignment->user_id || auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
                     <div class="border-t border-gray-250 pt-3 space-y-2" x-data="{
+                        activeImage: null,
                         uploadPhoto(field, event) {
                             let file = event.target.files[0];
                             if (!file) return;
@@ -335,7 +336,6 @@
                             formData.append(field, file);
                             formData.append('_token', '{{ csrf_token() }}');
 
-                            // Show progress/loader on parent container or input
                             $data.saving = true;
                             $data.saved = false;
                             $data.error = false;
@@ -371,28 +371,75 @@
                             <div class="space-y-1">
                                 <span class="block text-[8px] font-bold text-gray-400 uppercase">Sebelum</span>
                                 @if($assignment->foto_sebelum)
-                                    <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black">
+                                    <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
                                         <img src="{{ asset($assignment->foto_sebelum) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
-                                        <a href="{{ asset($assignment->foto_sebelum) }}" target="_blank" class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white text-[10px] font-semibold">
-                                            <i class="ri-eye-line mr-0.5"></i> Lihat
-                                        </a>
+                                        <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <!-- View Button (Popup) -->
+                                            <button type="button" @click="activeImage = '{{ asset($assignment->foto_sebelum) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold" title="Lihat Foto">
+                                                <i class="ri-eye-line text-sm"></i>
+                                            </button>
+                                            <!-- Delete Button -->
+                                            <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment, 'foto_sebelum']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto sebelum pengerjaan ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="p-1.5 bg-red-650 hover:bg-red-700 text-white rounded-md text-xs font-semibold" title="Hapus Foto">
+                                                    <i class="ri-delete-bin-line text-sm"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
+                                @else
+                                    <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" @change="uploadPhoto('foto_sebelum', $event)">
                                 @endif
-                                <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" @change="uploadPhoto('foto_sebelum', $event)">
                             </div>
 
                             <!-- Foto Sesudah -->
                             <div class="space-y-1">
                                 <span class="block text-[8px] font-bold text-gray-400 uppercase">Sesudah</span>
                                 @if($assignment->foto_sesudah)
-                                    <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black">
+                                    <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
                                         <img src="{{ asset($assignment->foto_sesudah) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
-                                        <a href="{{ asset($assignment->foto_sesudah) }}" target="_blank" class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white text-[10px] font-semibold">
-                                            <i class="ri-eye-line mr-0.5"></i> Lihat
-                                        </a>
+                                        <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <!-- View Button (Popup) -->
+                                            <button type="button" @click="activeImage = '{{ asset($assignment->foto_sesudah) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold" title="Lihat Foto">
+                                                <i class="ri-eye-line text-sm"></i>
+                                            </button>
+                                            <!-- Delete Button -->
+                                            <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment, 'foto_sesudah']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto setelah pengerjaan ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="p-1.5 bg-red-650 hover:bg-red-700 text-white rounded-md text-xs font-semibold" title="Hapus Foto">
+                                                    <i class="ri-delete-bin-line text-sm"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
+                                @else
+                                    <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" @change="uploadPhoto('foto_sesudah', $event)">
                                 @endif
-                                <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" @change="uploadPhoto('foto_sesudah', $event)">
+                            </div>
+                        </div>
+
+                        <!-- Image Viewer Modal (Popup) -->
+                        <div 
+                            class="fixed inset-0 z-50 overflow-hidden flex items-center justify-center bg-black/80" 
+                            x-show="activeImage !== null"
+                            x-cloak
+                            @click="activeImage = null"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0"
+                        >
+                            <!-- Close button -->
+                            <button type="button" class="absolute top-4 right-4 text-white hover:text-gray-300 focus:outline-none p-2 rounded-lg bg-black/40">
+                                <i class="ri-close-line text-2xl"></i>
+                            </button>
+                            <!-- Image container -->
+                            <div class="max-w-4xl max-h-[85vh] p-4 flex justify-center items-center" @click.stop>
+                                <img :src="activeImage" class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl border border-white/10">
                             </div>
                         </div>
                     </div>
