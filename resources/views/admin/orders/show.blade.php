@@ -367,74 +367,66 @@
                         <h4 class="text-[9px] font-bold text-gray-500 uppercase tracking-wide">Dokumentasi Kerja</h4>
                         
                         <div class="grid grid-cols-2 gap-2">
-                            <!-- Foto Sebelum -->
-                            <div class="space-y-1">
-                                <span class="block text-[8px] font-bold text-gray-400 uppercase">Sebelum</span>
-                                @if($assignment->foto_sebelum)
-                                    <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
-                                        <!-- Check if it is a Google Drive link -->
-                                        @if(str_contains($assignment->foto_sebelum, 'drive.google.com') || str_contains($assignment->foto_sebelum, 'drive.usercontent.google.com'))
-                                            <!-- Friendly Google Drive Placeholder/Mock Graphic -->
-                                            <div class="w-full h-full bg-blue-50 flex flex-col items-center justify-center text-center p-1">
-                                                <i class="ri-google-drive-fill text-2xl text-blue-600"></i>
-                                                <span class="text-[8px] font-bold text-blue-800">Drive Cloud File</span>
-                                                <span class="text-[7px] text-gray-400 truncate w-full px-1" title="{{ $assignment->foto_sebelum }}">{{ substr(explode('id=', $assignment->foto_sebelum)[1] ?? '', 0, 12) }}...</span>
-                                            </div>
-                                        @else
-                                            <img src="{{ str_starts_with($assignment->foto_sebelum, 'http') ? $assignment->foto_sebelum : asset($assignment->foto_sebelum) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
-                                        @endif
-                                        <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <!-- View Button (Popup via Local Image Proxy) -->
-                                            <button type="button" @click="activeImage = '{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sebelum']) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
-                                                <i class="ri-eye-line text-sm"></i>
-                                            </button>
-                                            <!-- Delete Button -->
-                                            <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment->id, 'foto_sebelum']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto sebelum pengerjaan ini?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="p-1.5 bg-red-650 hover:bg-red-700 text-white rounded-md text-xs font-semibold" title="Hapus Foto">
-                                                    <i class="ri-delete-bin-line text-sm"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                @else
+                             <!-- Foto Sebelum -->
+                             <div class="space-y-1">
+                                 <span class="block text-[8px] font-bold text-gray-400 uppercase">Sebelum</span>
+                                 @if($assignment->foto_sebelum)
+                                     <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
+                                         <!-- Check if it is a Google Drive link -->
+                                         @if(str_contains($assignment->foto_sebelum, 'drive.google.com') || str_contains($assignment->foto_sebelum, 'drive.usercontent.google.com'))
+                                             <!-- Use Image Proxy Route for thumbnail to bypass CORS/Opaque blocking -->
+                                             <img src="{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sebelum']) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                                         @else
+                                             <img src="{{ str_starts_with($assignment->foto_sebelum, 'http') ? $assignment->foto_sebelum : asset($assignment->foto_sebelum) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                                         @endif
+                                         <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                             <!-- View Button (Popup via Local Image Proxy) -->
+                                             <button type="button" @click="activeImage = '{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sebelum']) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
+                                                 <i class="ri-eye-line text-sm"></i>
+                                             </button>
+                                             <!-- Delete Button -->
+                                             <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment->id, 'foto_sebelum']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto sebelum pengerjaan ini?')">
+                                                 @csrf
+                                                 @method('DELETE')
+                                                 <button type="submit" class="p-1.5 bg-red-650 hover:bg-red-700 text-white rounded-md text-xs font-semibold" title="Hapus Foto">
+                                                     <i class="ri-delete-bin-line text-sm"></i>
+                                                 </button>
+                                             </form>
+                                         </div>
+                                     </div>
+                                 @else
                                     <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*" @change="uploadPhoto('foto_sebelum', $event)">
                                 @endif
                             </div>
 
-                            <!-- Foto Sesudah -->
-                            <div class="space-y-1">
-                                <span class="block text-[8px] font-bold text-gray-400 uppercase">Sesudah</span>
-                                @if($assignment->foto_sesudah)
-                                    <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
-                                        <!-- Check if it is a Google Drive link -->
-                                        @if(str_contains($assignment->foto_sesudah, 'drive.google.com') || str_contains($assignment->foto_sesudah, 'drive.usercontent.google.com'))
-                                            <!-- Friendly Google Drive Placeholder/Mock Graphic -->
-                                            <div class="w-full h-full bg-blue-50 flex flex-col items-center justify-center text-center p-1">
-                                                <i class="ri-google-drive-fill text-2xl text-blue-600"></i>
-                                                <span class="text-[8px] font-bold text-blue-800">Drive Cloud File</span>
-                                                <span class="text-[7px] text-gray-400 truncate w-full px-1" title="{{ $assignment->foto_sesudah }}">{{ substr(explode('id=', $assignment->foto_sesudah)[1] ?? '', 0, 12) }}...</span>
-                                            </div>
-                                        @else
-                                            <img src="{{ str_starts_with($assignment->foto_sesudah, 'http') ? $assignment->foto_sesudah : asset($assignment->foto_sesudah) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
-                                        @endif
-                                        <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <!-- View Button (Popup via Local Image Proxy) -->
-                                            <button type="button" @click="activeImage = '{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sesudah']) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
-                                                <i class="ri-eye-line text-sm"></i>
-                                            </button>
-                                            <!-- Delete Button -->
-                                            <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment->id, 'foto_sesudah']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto setelah pengerjaan ini?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="p-1.5 bg-red-650 hover:bg-red-700 text-white rounded-md text-xs font-semibold" title="Hapus Foto">
-                                                    <i class="ri-delete-bin-line text-sm"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                @else
+                             <!-- Foto Sesudah -->
+                             <div class="space-y-1">
+                                 <span class="block text-[8px] font-bold text-gray-400 uppercase">Sesudah</span>
+                                 @if($assignment->foto_sesudah)
+                                     <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
+                                         <!-- Check if it is a Google Drive link -->
+                                         @if(str_contains($assignment->foto_sesudah, 'drive.google.com') || str_contains($assignment->foto_sesudah, 'drive.usercontent.google.com'))
+                                             <!-- Use Image Proxy Route for thumbnail to bypass CORS/Opaque blocking -->
+                                             <img src="{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sesudah']) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                                         @else
+                                             <img src="{{ str_starts_with($assignment->foto_sesudah, 'http') ? $assignment->foto_sesudah : asset($assignment->foto_sesudah) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                                         @endif
+                                         <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                             <!-- View Button (Popup via Local Image Proxy) -->
+                                             <button type="button" @click="activeImage = '{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sesudah']) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
+                                                 <i class="ri-eye-line text-sm"></i>
+                                             </button>
+                                             <!-- Delete Button -->
+                                             <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment->id, 'foto_sesudah']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto setelah pengerjaan ini?')">
+                                                 @csrf
+                                                 @method('DELETE')
+                                                 <button type="submit" class="p-1.5 bg-red-650 hover:bg-red-700 text-white rounded-md text-xs font-semibold" title="Hapus Foto">
+                                                     <i class="ri-delete-bin-line text-sm"></i>
+                                                 </button>
+                                             </form>
+                                         </div>
+                                     </div>
+                                 @else
                                     <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*" @change="uploadPhoto('foto_sesudah', $event)">
                                 @endif
                             </div>
