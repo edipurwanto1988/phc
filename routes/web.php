@@ -1,4 +1,7 @@
 <?php
+/**
+ * Updated: 20 August 2026
+ */
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
