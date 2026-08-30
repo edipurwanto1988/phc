@@ -458,8 +458,8 @@
                                 <i class="ri-close-line text-2xl"></i>
                             </button>
                             <!-- Image container -->
-                            <div class="max-w-2xl max-h-[75vh] p-4 flex justify-center items-center" @click.stop>
-                                <img :src="activeImage" class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl border border-white/10">
+                            <div class="max-w-md w-full p-4 flex justify-center items-center" @click.stop>
+                                <img :src="activeImage" class="w-full h-auto max-h-[50vh] object-contain rounded-lg shadow-2xl border border-white/10">
                             </div>
                         </div>
                     </div>
