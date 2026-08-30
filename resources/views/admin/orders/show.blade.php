@@ -454,12 +454,12 @@
                             x-transition:leave-end="opacity-0"
                         >
                             <!-- Close button -->
-                            <button type="button" class="absolute top-4 right-4 text-white hover:text-gray-300 focus:outline-none p-2 rounded-lg bg-black/40">
+                            <button type="button" @click="activeImage = null" class="absolute top-4 right-4 text-white hover:text-gray-300 focus:outline-none p-2.5 rounded-lg bg-black/40 flex items-center justify-center transition-colors hover:bg-black/60" title="Tutup">
                                 <i class="ri-close-line text-2xl"></i>
                             </button>
                             <!-- Image container -->
-                            <div class="max-w-4xl max-h-[85vh] p-4 flex justify-center items-center" @click.stop>
-                                <img :src="activeImage" class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl border border-white/10">
+                            <div class="max-w-2xl max-h-[75vh] p-4 flex justify-center items-center" @click.stop>
+                                <img :src="activeImage" class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl border border-white/10">
                             </div>
                         </div>
                     </div>
