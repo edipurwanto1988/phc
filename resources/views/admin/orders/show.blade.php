@@ -384,10 +384,10 @@
                                             <img src="{{ str_starts_with($assignment->foto_sebelum, 'http') ? $assignment->foto_sebelum : asset($assignment->foto_sebelum) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
                                         @endif
                                         <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <!-- View Button (Popup / Link) -->
-                                            <a href="{{ $assignment->foto_sebelum }}" target="_blank" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Buka Google Drive">
-                                                <i class="ri-external-link-line text-sm"></i>
-                                            </a>
+                                            <!-- View Button (Popup) -->
+                                            <button type="button" @click="activeImage = '{{ $assignment->foto_sebelum }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
+                                                <i class="ri-eye-line text-sm"></i>
+                                            </button>
                                             <!-- Delete Button -->
                                             <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment->id, 'foto_sebelum']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto sebelum pengerjaan ini?')">
                                                 @csrf
@@ -420,10 +420,10 @@
                                             <img src="{{ str_starts_with($assignment->foto_sesudah, 'http') ? $assignment->foto_sesudah : asset($assignment->foto_sesudah) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
                                         @endif
                                         <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <!-- View Button (Popup / Link) -->
-                                            <a href="{{ $assignment->foto_sesudah }}" target="_blank" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Buka Google Drive">
-                                                <i class="ri-external-link-line text-sm"></i>
-                                            </a>
+                                            <!-- View Button (Popup) -->
+                                            <button type="button" @click="activeImage = '{{ $assignment->foto_sesudah }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
+                                                <i class="ri-eye-line text-sm"></i>
+                                            </button>
                                             <!-- Delete Button -->
                                             <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment->id, 'foto_sesudah']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto setelah pengerjaan ini?')">
                                                 @csrf
