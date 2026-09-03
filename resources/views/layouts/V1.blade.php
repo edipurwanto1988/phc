@@ -37,6 +37,7 @@ $twitterImageUrl = $defaultImageUrl ? asset($defaultImageUrl) : '';
 @endphp
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="p:domain_verify" content="b7916750cf2e49978a722617b66e9357"/>
 <title>@yield('title', $seoTitle)</title>
 <meta name="description" content="@yield('meta_description', $seoDescription)">
 <meta name="keywords" content="{{ $seoKeywords }}">

@@ -18,6 +18,9 @@
     <meta name="msvalidate.01" content="{{ $bingVerification }}" />
     @endif
 
+    <!-- Pinterest Domain Verification -->
+    <meta name="p:domain_verify" content="b7916750cf2e49978a722617b66e9357"/>
+
     <!-- Open Graph -->
     <meta property="og:title" content="@yield('title', 'PHC — Jasa Cleaning Profesional #1 di Pekanbaru')">
     <meta property="og:description" content="@yield('meta_description', 'Layanan cleaning rumah profesional dan terjangkau di Pekanbaru. Hubungi kami sekarang!')">
