@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Nota {{ $order->order_number }}</title>
+    <title>Nota <?php echo e($order->order_number); ?></title>
     <style>
         @page {
             margin: 15px;
@@ -289,7 +289,7 @@
         <table class="header-table">
             <tr>
                 <td>
-                    <img src="{{ public_path('header.png') }}" class="logo" alt="PHC Logo">
+                    <img src="<?php echo e(public_path('header.png')); ?>" class="logo" alt="PHC Logo">
                     <h1 class="company-title">PEKANBARU HOME CLEANING</h1>
                     <p class="company-subtitle">Bersih Sepenuh Hati</p>
                 </td>
@@ -298,11 +298,11 @@
                     <table class="invoice-meta-table" align="right">
                         <tr>
                             <td class="invoice-meta-label">No. Invoice</td>
-                            <td class="invoice-meta-value">: {{ str_replace('PHC-', 'TRX-', $order->order_number) }}</td>
+                            <td class="invoice-meta-value">: <?php echo e(str_replace('PHC-', 'TRX-', $order->order_number)); ?></td>
                         </tr>
                         <tr>
                             <td class="invoice-meta-label">Tanggal</td>
-                            <td class="invoice-meta-value">: {{ $order->tanggal_order ? \Carbon\Carbon::parse($order->tanggal_order)->translatedFormat('d M Y') : \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d M Y') }}</td>
+                            <td class="invoice-meta-value">: <?php echo e($order->tanggal_order ? \Carbon\Carbon::parse($order->tanggal_order)->translatedFormat('d M Y') : \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d M Y')); ?></td>
                         </tr>
                     </table>
                 </td>
@@ -316,27 +316,29 @@
             <td class="info-col">
                 <div class="section-title">Informasi Pelanggan</div>
                 <div class="info-value">
-                    <strong>{{ $order->customer->nama }}</strong><br>
-                    WhatsApp: {{ $order->customer->no_wa }}<br>
-                    Alamat: {{ $order->alamat_pengerjaan }}
+                    <strong><?php echo e($order->customer->nama); ?></strong><br>
+                    WhatsApp: <?php echo e($order->customer->no_wa); ?><br>
+                    Alamat: <?php echo e($order->alamat_pengerjaan); ?>
+
                 </div>
             </td>
             <td class="info-col">
                 <div class="section-title">Detail Layanan</div>
                 <div class="info-value">
-                    @php
+                    <?php
                         $firstItem = $order->items->first();
                         $categoryName = $firstItem && $firstItem->service && $firstItem->service->category ? $firstItem->service->category->nama : 'Daily';
-                    @endphp
-                    Layanan: {{ $categoryName }}<br>
-                    Tanggal: {{ \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d M Y') }}<br>
-                    Jam: {{ \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('H.i') }} WIB - Selesai<br>
+                    ?>
+                    Layanan: <?php echo e($categoryName); ?><br>
+                    Tanggal: <?php echo e(\Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d M Y')); ?><br>
+                    Jam: <?php echo e(\Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('H.i')); ?> WIB - Selesai<br>
                     Qty / Durasi: 
-                    @php
+                    <?php
                         $totalQty = $order->items->sum('qty');
                         $satuan = $firstItem ? $firstItem->satuan : 'Jam';
-                    @endphp
-                    {{ $totalQty }} {{ $satuan }}
+                    ?>
+                    <?php echo e($totalQty); ?> <?php echo e($satuan); ?>
+
                 </div>
             </td>
         </tr>
@@ -353,14 +355,14 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($order->items as $index => $item)
+            <?php $__currentLoopData = $order->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <tr>
-                <td>{{ !empty($item->service->nama_invoice) ? $item->service->nama_invoice : $item->service->nama }}</td>
-                <td class="text-right">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
-                <td class="text-center">{{ $item->qty }}</td>
-                <td class="text-right">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                <td><?php echo e(!empty($item->service->nama_invoice) ? $item->service->nama_invoice : $item->service->nama); ?></td>
+                <td class="text-right">Rp <?php echo e(number_format($item->harga_satuan, 0, ',', '.')); ?></td>
+                <td class="text-center"><?php echo e($item->qty); ?></td>
+                <td class="text-right">Rp <?php echo e(number_format($item->subtotal, 0, ',', '.')); ?></td>
             </tr>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </tbody>
     </table>
 
@@ -379,29 +381,29 @@
                 </div>
             </td>
             <td class="summary-col" style="padding-left: 15px; position: relative;">
-                @if($order->status_bayar === 'paid')
+                <?php if($order->status_bayar === 'paid'): ?>
                 <!-- Paid Stamp Badge placed close to SUBTOTAL -->
                 <div class="stamp-container">
                     <div class="stamp-paid">LUNAS</div>
                 </div>
-                @elseif($order->status_bayar === 'unpaid')
+                <?php elseif($order->status_bayar === 'unpaid'): ?>
                 <!-- Unpaid Stamp Badge -->
                 <div class="stamp-container">
                     <div class="stamp-unpaid">BELUM BAYAR</div>
                 </div>
-                @endif
+                <?php endif; ?>
                 <table class="summary-table">
                     <tr>
                         <td class="summary-label">SUBTOTAL</td>
-                        <td class="summary-value">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
+                        <td class="summary-value">Rp <?php echo e(number_format($order->total_harga, 0, ',', '.')); ?></td>
                     </tr>
                     <tr>
                         <td class="summary-label">DISKON</td>
-                        <td class="summary-value">Rp {{ number_format($order->diskon, 0, ',', '.') }}</td>
+                        <td class="summary-value">Rp <?php echo e(number_format($order->diskon, 0, ',', '.')); ?></td>
                     </tr>
                     <tr class="grand-total-row">
                         <td class="grand-total-label">TOTAL</td>
-                        <td class="grand-total-value">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</td>
+                        <td class="grand-total-value">Rp <?php echo e(number_format($order->grand_total, 0, ',', '.')); ?></td>
                     </tr>
                 </table>
             </td>
@@ -428,4 +430,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH /Users/macbook/CascadeProjects/PHC/laravel/resources/views/admin/orders/invoice.blade.php ENDPATH**/ ?>
