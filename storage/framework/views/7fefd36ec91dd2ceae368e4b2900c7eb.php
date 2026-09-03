@@ -262,24 +262,6 @@
             background-color: transparent;
             text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.9);
         }
-        .stamp-unpaid {
-            width: 100%;
-            height: 100%;
-            border: 3.5px dashed rgba(220, 38, 38, 0.5); /* Red-600 with transparency */
-            border-radius: 8px;
-            color: rgba(220, 38, 38, 0.5);
-            font-family: 'Georgia', serif;
-            font-weight: 900;
-            font-style: italic;
-            font-size: 16px;
-            text-align: center;
-            line-height: 48px;
-            text-transform: uppercase;
-            transform: rotate(-12deg);
-            letter-spacing: 2px;
-            background-color: transparent;
-            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.9);
-        }
     </style>
 </head>
 <body>
@@ -386,11 +368,6 @@
                 <div class="stamp-container">
                     <div class="stamp-paid">LUNAS</div>
                 </div>
-                <?php elseif($order->status_bayar === 'unpaid'): ?>
-                <!-- Unpaid Stamp Badge -->
-                <div class="stamp-container">
-                    <div class="stamp-unpaid">BELUM BAYAR</div>
-                </div>
                 <?php endif; ?>
                 <table class="summary-table">
                     <tr>
@@ -405,6 +382,13 @@
                         <td class="grand-total-label">TOTAL</td>
                         <td class="grand-total-value">Rp <?php echo e(number_format($order->grand_total, 0, ',', '.')); ?></td>
                     </tr>
+                    <?php if($order->status_bayar === 'unpaid'): ?>
+                    <tr>
+                        <td colspan="2" style="text-align: right; padding-top: 8px;">
+                            <span style="font-size: 11px; font-weight: bold; color: #dc2626; border: 1px solid #dc2626; padding: 3px 6px; border-radius: 4px; display: inline-block;">STATUS: BELUM BAYAR (UNPAID)</span>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
                 </table>
             </td>
         </tr>
