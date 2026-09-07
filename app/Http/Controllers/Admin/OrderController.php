@@ -536,6 +536,19 @@ class OrderController extends Controller
         return redirect()->route('admin.orders.show', $order)->with('success', 'Koordinat lokasi berhasil disimpan.');
     }
 
+    public function updateCatatan(Request $request, Order $order)
+    {
+        $request->validate([
+            'catatan' => 'nullable|string|max:2000',
+        ]);
+
+        $order->update([
+            'catatan' => $request->catatan,
+        ]);
+
+        return redirect()->route('admin.orders.show', $order)->with('success', 'Catatan order berhasil diperbarui.');
+    }
+
     public function downloadInvoice(Order $order)
     {
         $order->load(['customer', 'items.service']);

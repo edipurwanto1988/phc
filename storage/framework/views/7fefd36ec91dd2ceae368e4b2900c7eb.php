@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Nota {{ $order->order_number }}</title>
+    <title>Nota <?php echo e($order->order_number); ?></title>
     <style>
         @page {
             margin: 15px;
@@ -271,7 +271,7 @@
         <table class="header-table">
             <tr>
                 <td>
-                    <img src="{{ public_path('header.png') }}" class="logo" alt="PHC Logo">
+                    <img src="<?php echo e(public_path('header.png')); ?>" class="logo" alt="PHC Logo">
                     <h1 class="company-title">PEKANBARU HOME CLEANING</h1>
                     <p class="company-subtitle">Bersih Sepenuh Hati</p>
                 </td>
@@ -280,11 +280,11 @@
                     <table class="invoice-meta-table" align="right">
                         <tr>
                             <td class="invoice-meta-label">No. Invoice</td>
-                            <td class="invoice-meta-value">: {{ str_replace('PHC-', 'TRX-', $order->order_number) }}</td>
+                            <td class="invoice-meta-value">: <?php echo e(str_replace('PHC-', 'TRX-', $order->order_number)); ?></td>
                         </tr>
                         <tr>
                             <td class="invoice-meta-label">Tanggal</td>
-                            <td class="invoice-meta-value">: {{ $order->tanggal_order ? \Carbon\Carbon::parse($order->tanggal_order)->translatedFormat('d M Y') : \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d M Y') }}</td>
+                            <td class="invoice-meta-value">: <?php echo e($order->tanggal_order ? \Carbon\Carbon::parse($order->tanggal_order)->translatedFormat('d M Y') : \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d M Y')); ?></td>
                         </tr>
                     </table>
                 </td>
@@ -298,27 +298,29 @@
             <td class="info-col">
                 <div class="section-title">Informasi Pelanggan</div>
                 <div class="info-value">
-                    <strong>{{ $order->customer->nama }}</strong><br>
-                    WhatsApp: {{ $order->customer->no_wa }}<br>
-                    Alamat: {{ $order->alamat_pengerjaan }}
+                    <strong><?php echo e($order->customer->nama); ?></strong><br>
+                    WhatsApp: <?php echo e($order->customer->no_wa); ?><br>
+                    Alamat: <?php echo e($order->alamat_pengerjaan); ?>
+
                 </div>
             </td>
             <td class="info-col">
                 <div class="section-title">Detail Layanan</div>
                 <div class="info-value">
-                    @php
+                    <?php
                         $firstItem = $order->items->first();
                         $categoryName = $firstItem && $firstItem->service && $firstItem->service->category ? $firstItem->service->category->nama : 'Daily';
-                    @endphp
-                    Layanan: {{ $categoryName }}<br>
-                    Tanggal: {{ \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d M Y') }}<br>
-                    Jam: {{ \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('H.i') }} WIB - Selesai<br>
+                    ?>
+                    Layanan: <?php echo e($categoryName); ?><br>
+                    Tanggal: <?php echo e(\Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d M Y')); ?><br>
+                    Jam: <?php echo e(\Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('H.i')); ?> WIB - Selesai<br>
                     Qty / Durasi: 
-                    @php
+                    <?php
                         $totalQty = $order->items->sum('qty');
                         $satuan = $firstItem ? $firstItem->satuan : 'Jam';
-                    @endphp
-                    {{ $totalQty }} {{ $satuan }}
+                    ?>
+                    <?php echo e($totalQty); ?> <?php echo e($satuan); ?>
+
                 </div>
             </td>
         </tr>
@@ -335,14 +337,14 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($order->items as $index => $item)
+            <?php $__currentLoopData = $order->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <tr>
-                <td>{{ !empty($item->service->nama_invoice) ? $item->service->nama_invoice : $item->service->nama }}</td>
-                <td class="text-right">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
-                <td class="text-center">{{ $item->qty }}</td>
-                <td class="text-right">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                <td><?php echo e(!empty($item->service->nama_invoice) ? $item->service->nama_invoice : $item->service->nama); ?></td>
+                <td class="text-right">Rp <?php echo e(number_format($item->harga_satuan, 0, ',', '.')); ?></td>
+                <td class="text-center"><?php echo e($item->qty); ?></td>
+                <td class="text-right">Rp <?php echo e(number_format($item->subtotal, 0, ',', '.')); ?></td>
             </tr>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </tbody>
     </table>
 
@@ -361,32 +363,32 @@
                 </div>
             </td>
             <td class="summary-col" style="padding-left: 15px; position: relative;">
-                @if($order->status_bayar === 'paid')
+                <?php if($order->status_bayar === 'paid'): ?>
                 <!-- Paid Stamp Badge placed close to SUBTOTAL -->
                 <div class="stamp-container">
                     <div class="stamp-paid">LUNAS</div>
                 </div>
-                @endif
+                <?php endif; ?>
                 <table class="summary-table">
                     <tr>
                         <td class="summary-label">SUBTOTAL</td>
-                        <td class="summary-value">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
+                        <td class="summary-value">Rp <?php echo e(number_format($order->total_harga, 0, ',', '.')); ?></td>
                     </tr>
                     <tr>
                         <td class="summary-label">DISKON</td>
-                        <td class="summary-value">Rp {{ number_format($order->diskon, 0, ',', '.') }}</td>
+                        <td class="summary-value">Rp <?php echo e(number_format($order->diskon, 0, ',', '.')); ?></td>
                     </tr>
                     <tr class="grand-total-row">
                         <td class="grand-total-label">TOTAL</td>
-                        <td class="grand-total-value">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</td>
+                        <td class="grand-total-value">Rp <?php echo e(number_format($order->grand_total, 0, ',', '.')); ?></td>
                     </tr>
-                    @if($order->status_bayar === 'unpaid')
+                    <?php if($order->status_bayar === 'unpaid'): ?>
                     <tr>
                         <td colspan="2" style="text-align: right; padding-top: 8px;">
                             <span style="font-size: 11px; font-weight: bold; color: #dc2626; border: 1px solid #dc2626; padding: 3px 6px; border-radius: 4px; display: inline-block;">STATUS: BELUM BAYAR (UNPAID)</span>
                         </td>
                     </tr>
-                    @endif
+                    <?php endif; ?>
                 </table>
             </td>
         </tr>
@@ -396,12 +398,12 @@
     <table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
         <tr>
             <td style="width: 60%; font-size: 8.5px; color: #4b5563; vertical-align: top; line-height: 1.3;">
-                @if($order->catatan)
+                <?php if($order->catatan): ?>
                 <strong>Catatan Order:</strong><br>
-                <span style="font-style: italic; color: #374151;">{{ $order->catatan }}</span>
-                @else
+                <span style="font-style: italic; color: #374151;"><?php echo e($order->catatan); ?></span>
+                <?php else: ?>
                 <strong>Catatan:</strong> Pembayaran dapat dilakukan setelah layanan selesai.
-                @endif
+                <?php endif; ?>
             </td>
             <td style="width: 40%; font-size: 8.5px; color: #4b5563; text-align: right; vertical-align: top; line-height: 1.3;">
                 Terima kasih atas kepercayaan Anda.
@@ -417,4 +419,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH /Users/macbook/CascadeProjects/PHC/laravel/resources/views/admin/orders/invoice.blade.php ENDPATH**/ ?>

@@ -1,11 +1,10 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Detail Pesanan'); ?>
+<?php $__env->startSection('header'); ?>
+<i class="ri-calendar-todo-line"></i> Pesanan: <?php echo e($order->order_number); ?>
 
-@section('title', 'Detail Pesanan')
-@section('header')
-<i class="ri-calendar-todo-line"></i> Pesanan: {{ $order->order_number }}
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
     <!-- Left: Order Details & Services List (2/3 width) -->
@@ -19,65 +18,67 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm mb-6">
                 <div>
                     <span class="block text-xs font-semibold text-gray-400 uppercase">Pelanggan</span>
-                    <a href="{{ route('admin.customers.show', $order->customer) }}" class="text-sm font-semibold text-blue-600 hover:underline block mt-0.5">
-                        {{ $order->customer->nama }}
+                    <a href="<?php echo e(route('admin.customers.show', $order->customer)); ?>" class="text-sm font-semibold text-blue-600 hover:underline block mt-0.5">
+                        <?php echo e($order->customer->nama); ?>
+
                     </a>
-                    <span class="text-xs text-gray-500 block">WA: {{ $order->customer->no_wa }}</span>
+                    <span class="text-xs text-gray-500 block">WA: <?php echo e($order->customer->no_wa); ?></span>
                 </div>
                 <div>
                     <span class="block text-xs font-semibold text-gray-400 uppercase">Jadwal Pengerjaan</span>
                     <span class="text-sm font-semibold text-gray-800 block mt-0.5">
-                        {{ $order->tanggal_jadwal->translatedFormat('d F Y, H:i') }} WIB
+                        <?php echo e($order->tanggal_jadwal->translatedFormat('d F Y, H:i')); ?> WIB
                     </span>
-                    <span class="text-xs text-gray-500 block">Dibuat oleh: {{ $order->creator->name ?? 'Sistem' }}</span>
-                    @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
+                    <span class="text-xs text-gray-500 block">Dibuat oleh: <?php echo e($order->creator->name ?? 'Sistem'); ?></span>
+                    <?php if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
                     <div class="mt-2">
-                        <a href="{{ route('admin.orders.download-invoice', $order) }}" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-xs inline-flex items-center gap-1.5 shadow-sm transition-all">
+                        <a href="<?php echo e(route('admin.orders.download-invoice', $order)); ?>" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-lg text-xs inline-flex items-center gap-1.5 shadow-sm transition-all">
                             <i class="ri-download-2-line text-sm"></i> Download Invoice (PDF)
                         </a>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
             <div class="space-y-4">
                 <div>
                     <span class="block text-xs font-semibold text-gray-400 uppercase">Alamat Pengerjaan</span>
-                    <p class="text-sm font-medium text-gray-700 mt-1 leading-relaxed">{{ $order->alamat_pengerjaan }}</p>
-                    @if($order->latitude && $order->longitude)
-                    <a href="https://www.google.com/maps/search/?api=1&query={{ $order->latitude }},{{ $order->longitude }}" target="_blank" class="text-xs text-blue-600 hover:underline inline-flex items-center gap-1 mt-1 font-semibold">
+                    <p class="text-sm font-medium text-gray-700 mt-1 leading-relaxed"><?php echo e($order->alamat_pengerjaan); ?></p>
+                    <?php if($order->latitude && $order->longitude): ?>
+                    <a href="https://www.google.com/maps/search/?api=1&query=<?php echo e($order->latitude); ?>,<?php echo e($order->longitude); ?>" target="_blank" class="text-xs text-blue-600 hover:underline inline-flex items-center gap-1 mt-1 font-semibold">
                         <i class="ri-map-pin-line text-red-500"></i> Lihat di Google Maps
                     </a>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 <div x-data="{ editing: false }">
                     <div class="flex items-center justify-between mb-1">
                         <span class="block text-xs font-semibold text-gray-400 uppercase">Catatan Order</span>
-                        @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
+                        <?php if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
                         <button type="button" @click="editing = !editing"
                             class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold rounded-md border transition-all"
                             :class="editing ? 'border-gray-300 text-gray-600 bg-gray-100 hover:bg-gray-200' : 'border-blue-300 text-blue-600 bg-blue-50 hover:bg-blue-100'">
                             <i :class="editing ? 'ri-close-line' : 'ri-edit-line'" class="text-xs"></i>
                             <span x-text="editing ? 'Batal' : 'Edit'"></span>
                         </button>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
-                    {{-- View mode --}}
+                    
                     <div x-show="!editing" x-transition>
                         <p class="text-xs text-gray-600 bg-gray-50 border border-gray-100 p-2.5 rounded-lg italic leading-relaxed whitespace-pre-line">
-                            {{ $order->catatan ?? 'Tidak ada catatan tambahan.' }}
+                            <?php echo e($order->catatan ?? 'Tidak ada catatan tambahan.'); ?>
+
                         </p>
                     </div>
 
-                    {{-- Edit mode --}}
-                    @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
+                    
+                    <?php if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
                     <div x-show="editing" x-transition>
-                        <form method="POST" action="{{ route('admin.orders.catatan', $order) }}" class="space-y-2">
-                            @csrf
+                        <form method="POST" action="<?php echo e(route('admin.orders.catatan', $order)); ?>" class="space-y-2">
+                            <?php echo csrf_field(); ?>
                             <textarea name="catatan" rows="4"
                                 class="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm leading-relaxed resize-y"
-                                placeholder="Tulis catatan tambahan untuk order ini...">{{ old('catatan', $order->catatan) }}</textarea>
+                                placeholder="Tulis catatan tambahan untuk order ini..."><?php echo e(old('catatan', $order->catatan)); ?></textarea>
                             <div class="flex gap-2 justify-end">
                                 <button type="button" @click="editing = false"
                                     class="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
@@ -90,7 +91,7 @@
                             </div>
                         </form>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -101,11 +102,11 @@
                 <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
                     <i class="ri-file-list-3-line text-blue-600"></i> Layanan yang Dipesan
                 </h3>
-                @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
-                <a href="{{ route('admin.orders.edit', $order) }}" class="btn border border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 font-semibold transition-all">
+                <?php if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
+                <a href="<?php echo e(route('admin.orders.edit', $order)); ?>" class="btn border border-blue-600 text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 font-semibold transition-all">
                     <i class="ri-edit-line"></i> Edit Layanan
                 </a>
-                @endif
+                <?php endif; ?>
             </div>
             
             <div class="overflow-x-auto">
@@ -119,25 +120,29 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($order->items as $item)
+                        <?php $__currentLoopData = $order->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr class="border-b border-gray-100">
                             <td class="py-3 px-4 text-sm font-semibold text-gray-800">
-                                {{ $item->service->nama }}
-                                @if($item->catatan)
-                                <div class="text-[11px] text-gray-400 italic font-normal">catatan: {{ $item->catatan }}</div>
-                                @endif
+                                <?php echo e($item->service->nama); ?>
+
+                                <?php if($item->catatan): ?>
+                                <div class="text-[11px] text-gray-400 italic font-normal">catatan: <?php echo e($item->catatan); ?></div>
+                                <?php endif; ?>
                             </td>
                             <td class="py-3 px-4 text-sm text-gray-600 text-center font-medium">
-                                {{ $item->qty }} {{ $item->satuan }}
+                                <?php echo e($item->qty); ?> <?php echo e($item->satuan); ?>
+
                             </td>
                             <td class="py-3 px-4 text-sm text-gray-600 text-right font-medium">
-                                Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}
+                                Rp <?php echo e(number_format($item->harga_satuan, 0, ',', '.')); ?>
+
                             </td>
                             <td class="py-3 px-4 text-sm font-bold text-gray-800 text-right">
-                                Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                                Rp <?php echo e(number_format($item->subtotal, 0, ',', '.')); ?>
+
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
@@ -147,15 +152,15 @@
                 <div class="w-full md:w-64 space-y-2 text-sm text-gray-600 text-right">
                     <div class="flex justify-between">
                         <span>Total Jasa:</span>
-                        <span class="font-bold text-gray-800">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</span>
+                        <span class="font-bold text-gray-800">Rp <?php echo e(number_format($order->total_harga, 0, ',', '.')); ?></span>
                     </div>
                     <div class="flex justify-between text-red-500">
                         <span>Potongan Harga:</span>
-                        <span>- Rp {{ number_format($order->diskon, 0, ',', '.') }}</span>
+                        <span>- Rp <?php echo e(number_format($order->diskon, 0, ',', '.')); ?></span>
                     </div>
                     <div class="flex justify-between text-base font-bold text-gray-900 border-t border-gray-200 pt-2">
                         <span>Grand Total:</span>
-                        <span class="text-blue-600">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</span>
+                        <span class="text-blue-600">Rp <?php echo e(number_format($order->grand_total, 0, ',', '.')); ?></span>
                     </div>
                 </div>
             </div>
@@ -165,24 +170,24 @@
     <!-- Right: Operational Controls & Cleaner Assignments (1/3 width) -->
     <div class="space-y-6">
         <!-- Status & Payment controls (Hanya untuk Admin/Super Admin yang punya manage_orders/edit_orders) -->
-        @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
+        <?php if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
         <div class="card p-6 bg-white border border-gray-200 rounded-xl">
             <h3 class="text-base font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
                 <i class="ri-settings-line text-blue-600"></i> Kontrol Status
             </h3>
             
-            <form method="POST" action="{{ route('admin.orders.status', $order) }}" class="space-y-4">
-                @csrf
+            <form method="POST" action="<?php echo e(route('admin.orders.status', $order)); ?>" class="space-y-4">
+                <?php echo csrf_field(); ?>
                 
                 <!-- Status Pengerjaan -->
                 <div>
                     <label for="status" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status Order</label>
                     <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" onchange="this.form.submit()">
-                        <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="confirmed" {{ $order->status === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                        <option value="in_progress" {{ $order->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="completed" {{ $order->status === 'completed' ? 'selected' : '' }}>Completed</option>
-                        <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        <option value="pending" <?php echo e($order->status === 'pending' ? 'selected' : ''); ?>>Pending</option>
+                        <option value="confirmed" <?php echo e($order->status === 'confirmed' ? 'selected' : ''); ?>>Confirmed</option>
+                        <option value="in_progress" <?php echo e($order->status === 'in_progress' ? 'selected' : ''); ?>>In Progress</option>
+                        <option value="completed" <?php echo e($order->status === 'completed' ? 'selected' : ''); ?>>Completed</option>
+                        <option value="cancelled" <?php echo e($order->status === 'cancelled' ? 'selected' : ''); ?>>Cancelled</option>
                     </select>
                 </div>
 
@@ -190,19 +195,19 @@
                 <div>
                     <label for="status_bayar" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status Pembayaran</label>
                     <select name="status_bayar" id="status_bayar" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" onchange="this.form.submit()">
-                        <option value="unpaid" {{ $order->status_bayar === 'unpaid' ? 'selected' : '' }}>Unpaid</option>
-                        <option value="partial" {{ $order->status_bayar === 'partial' ? 'selected' : '' }}>Partial</option>
-                        <option value="paid" {{ $order->status_bayar === 'paid' ? 'selected' : '' }}>Paid</option>
+                        <option value="unpaid" <?php echo e($order->status_bayar === 'unpaid' ? 'selected' : ''); ?>>Unpaid</option>
+                        <option value="partial" <?php echo e($order->status_bayar === 'partial' ? 'selected' : ''); ?>>Partial</option>
+                        <option value="paid" <?php echo e($order->status_bayar === 'paid' ? 'selected' : ''); ?>>Paid</option>
                     </select>
                 </div>
 
                 <div>
                     <span class="block text-xs font-semibold text-gray-400 uppercase">Metode Pembayaran</span>
-                    <span class="text-sm font-semibold text-gray-700 block mt-0.5">{{ ucfirst($order->metode_bayar ?? 'Belum ditentukan') }}</span>
+                    <span class="text-sm font-semibold text-gray-700 block mt-0.5"><?php echo e(ucfirst($order->metode_bayar ?? 'Belum ditentukan')); ?></span>
                 </div>
             </form>
         </div>
-        @endif
+        <?php endif; ?>
 
         <!-- Koordinat Lokasi Card (Bisa diakses Cleaner & Admin/Super Admin) -->
         <div class="card p-6 bg-white border border-gray-200 rounded-xl">
@@ -210,15 +215,15 @@
                 <i class="ri-map-pin-line text-blue-600"></i> Koordinat Lokasi
             </h3>
             
-            <form method="POST" action="{{ route('admin.orders.coordinates', $order) }}" class="space-y-4">
-                @csrf
+            <form method="POST" action="<?php echo e(route('admin.orders.coordinates', $order)); ?>" class="space-y-4">
+                <?php echo csrf_field(); ?>
                 <div>
                     <label for="latitude" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Latitude</label>
-                    <input type="text" name="latitude" id="latitude" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" value="{{ $order->latitude }}">
+                    <input type="text" name="latitude" id="latitude" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" value="<?php echo e($order->latitude); ?>">
                 </div>
                 <div>
                     <label for="longitude" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Longitude</label>
-                    <input type="text" name="longitude" id="longitude" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" value="{{ $order->longitude }}">
+                    <input type="text" name="longitude" id="longitude" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" value="<?php echo e($order->longitude); ?>">
                 </div>
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="getCurrentCoordinates()" class="btn flex-1 border border-gray-300 bg-white hover:bg-gray-50 text-blue-600 font-semibold px-3 py-2 rounded-lg text-xs flex justify-center items-center gap-1.5 transition-colors" title="Deteksi GPS">
@@ -238,15 +243,15 @@
                 <i class="ri-user-star-line text-blue-600"></i> Cleaner & Informasi Gaji
             </h3>
             
-            @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
+            <?php if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
             <p class="text-xs text-gray-500 mb-4 italic"><i class="ri-drag-drop-line"></i> Seret (drag & drop) untuk mengurutkan. Cleaner teratas otomatis menjadi **PIC**.</p>
-            @endif
+            <?php endif; ?>
             
             <div id="cleaners-sortable" class="space-y-4 mb-6">
-                @forelse($order->assignments as $index => $assignment)
-                <div class="p-4 border border-gray-250 rounded-xl bg-gray-50 space-y-3 relative {{ (auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')) ? 'cursor-grab active:cursor-grabbing' : '' }}" data-id="{{ $assignment->id }}" x-data="{
-                    gaji: '{{ (int)$assignment->gaji }}',
-                    statusGaji: '{{ $assignment->status_gaji }}',
+                <?php $__empty_1 = true; $__currentLoopData = $order->assignments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $assignment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <div class="p-4 border border-gray-250 rounded-xl bg-gray-50 space-y-3 relative <?php echo e((auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')) ? 'cursor-grab active:cursor-grabbing' : ''); ?>" data-id="<?php echo e($assignment->id); ?>" x-data="{
+                    gaji: '<?php echo e((int)$assignment->gaji); ?>',
+                    statusGaji: '<?php echo e($assignment->status_gaji); ?>',
                     saving: false,
                     saved: false,
                     error: false,
@@ -255,11 +260,11 @@
                         this.saved = false;
                         this.error = false;
                         try {
-                            let response = await fetch('{{ route('admin.orders.update-gaji', $assignment) }}', {
+                            let response = await fetch('<?php echo e(route('admin.orders.update-gaji', $assignment)); ?>', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                                     'Accept': 'application/json'
                                 },
                                 body: JSON.stringify({
@@ -285,49 +290,51 @@
                     <!-- Action Buttons Header (Hanya untuk Admin/Super Admin) -->
                     <div class="flex items-center justify-between pb-2 border-b border-gray-150">
                         <div>
-                            @if($index === 0)
+                            <?php if($index === 0): ?>
                             <span class="px-2 py-0.5 text-[9px] font-bold uppercase bg-blue-600 text-white rounded-lg tracking-wider">PIC / Leader</span>
-                            @endif
+                            <?php endif; ?>
                         </div>
-                        @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
+                        <?php if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
                         <div class="flex items-center gap-1.5 bg-gray-100 px-2 py-0.5 rounded-lg">
-                            <form method="POST" action="{{ route('admin.orders.delete-assignment', $assignment) }}" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus cleaner ini dari tugas?')">
-                                @csrf
-                                @method('DELETE')
+                            <form method="POST" action="<?php echo e(route('admin.orders.delete-assignment', $assignment)); ?>" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus cleaner ini dari tugas?')">
+                                <?php echo csrf_field(); ?>
+                                <?php echo method_field('DELETE'); ?>
                                 <button type="submit" class="text-red-500 hover:text-red-700 transition-colors p-1 flex items-center justify-center rounded" title="Hapus Cleaner">
                                     <i class="ri-delete-bin-line text-sm"></i>
                                 </button>
                             </form>
                             <span class="text-gray-400 cursor-move p-1 flex items-center justify-center" title="Geser untuk Urutkan"><i class="ri-drag-move-2-line text-base"></i></span>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
                     <div class="flex items-center justify-between">
                         <div>
                             <div class="text-sm font-bold text-gray-800 flex items-center gap-2">
-                                <span>{{ $assignment->cleaner->name }}</span>
-                                @if($assignment->cleaner && $assignment->cleaner->jenis)
-                                <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full {{ $assignment->cleaner->jenis === 'Tetap' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
-                                    {{ $assignment->cleaner->jenis }}
+                                <span><?php echo e($assignment->cleaner->name); ?></span>
+                                <?php if($assignment->cleaner && $assignment->cleaner->jenis): ?>
+                                <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full <?php echo e($assignment->cleaner->jenis === 'Tetap' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'); ?>">
+                                    <?php echo e($assignment->cleaner->jenis); ?>
+
                                 </span>
-                                @endif
+                                <?php endif; ?>
                             </div>
                             <div class="text-[10px] text-gray-400 mt-1">Status Tugas: 
                                 <span class="px-2 py-0.5 text-xs font-semibold rounded-full 
-                                    @if($assignment->status === 'assigned') bg-blue-100 text-blue-700
-                                    @elseif($assignment->status === 'on_the_way') bg-yellow-100 text-yellow-700
-                                    @elseif($assignment->status === 'working') bg-purple-100 text-purple-700
-                                    @else bg-green-100 text-green-700 @endif">
-                                    {{ $assignment->status }}
+                                    <?php if($assignment->status === 'assigned'): ?> bg-blue-100 text-blue-700
+                                    <?php elseif($assignment->status === 'on_the_way'): ?> bg-yellow-100 text-yellow-700
+                                    <?php elseif($assignment->status === 'working'): ?> bg-purple-100 text-purple-700
+                                    <?php else: ?> bg-green-100 text-green-700 <?php endif; ?>">
+                                    <?php echo e($assignment->status); ?>
+
                                 </span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Gaji Form (Hanya untuk Admin/Super Admin) -->
-                    @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
-                    <div class="border-t border-gray-200 pt-3 space-y-2" x-data="{isPaidExpense: {{ $assignment->expense_id ? 'true' : 'false' }} }">
+                    <?php if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
+                    <div class="border-t border-gray-200 pt-3 space-y-2" x-data="{isPaidExpense: <?php echo e($assignment->expense_id ? 'true' : 'false'); ?> }">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">Gaji Cleaner (Rp)</label>
@@ -365,10 +372,10 @@
                             </button>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
                     <!-- Foto Sebelum & Sesudah Section (Popup View & Delete Option) -->
-                    @if(auth()->user()->id === $assignment->user_id || auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
+                    <?php if(auth()->user()->id === $assignment->user_id || auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
                     <div class="border-t border-gray-250 pt-3 space-y-2" x-data="{
                         activeImage: null,
                         uploadPhoto(field, event) {
@@ -377,13 +384,13 @@
 
                             let formData = new FormData();
                             formData.append(field, file);
-                            formData.append('_token', '{{ csrf_token() }}');
+                            formData.append('_token', '<?php echo e(csrf_token()); ?>');
 
                             $data.saving = true;
                             $data.saved = false;
                             $data.error = false;
 
-                            fetch('{{ route('admin.orders.upload-photos', $assignment) }}', {
+                            fetch('<?php echo e(route('admin.orders.upload-photos', $assignment)); ?>', {
                                 method: 'POST',
                                 headers: {
                                     'Accept': 'application/json'
@@ -413,65 +420,65 @@
                              <!-- Foto Sebelum -->
                              <div class="space-y-1">
                                  <span class="block text-[8px] font-bold text-gray-400 uppercase">Sebelum</span>
-                                 @if($assignment->foto_sebelum)
+                                 <?php if($assignment->foto_sebelum): ?>
                                      <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
                                          <!-- Check if it is a Google Drive link -->
-                                         @if(str_contains($assignment->foto_sebelum, 'drive.google.com') || str_contains($assignment->foto_sebelum, 'drive.usercontent.google.com'))
+                                         <?php if(str_contains($assignment->foto_sebelum, 'drive.google.com') || str_contains($assignment->foto_sebelum, 'drive.usercontent.google.com')): ?>
                                              <!-- Use Image Proxy Route for thumbnail to bypass CORS/Opaque blocking -->
-                                             <img src="{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sebelum']) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
-                                         @else
-                                             <img src="{{ str_starts_with($assignment->foto_sebelum, 'http') ? $assignment->foto_sebelum : asset($assignment->foto_sebelum) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
-                                         @endif
+                                             <img src="<?php echo e(route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sebelum'])); ?>" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                                         <?php else: ?>
+                                             <img src="<?php echo e(str_starts_with($assignment->foto_sebelum, 'http') ? $assignment->foto_sebelum : asset($assignment->foto_sebelum)); ?>" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                                         <?php endif; ?>
                                          <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
                                              <!-- View Button (Popup via Local Image Proxy) -->
-                                             <button type="button" @click="activeImage = '{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sebelum']) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
+                                             <button type="button" @click="activeImage = '<?php echo e(route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sebelum'])); ?>'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
                                                  <i class="ri-eye-line text-sm"></i>
                                              </button>
                                              <!-- Delete Button -->
-                                             <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment->id, 'foto_sebelum']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto sebelum pengerjaan ini?')">
-                                                 @csrf
-                                                 @method('DELETE')
+                                             <form method="POST" action="<?php echo e(route('admin.orders.delete-photo', [$assignment->id, 'foto_sebelum'])); ?>" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto sebelum pengerjaan ini?')">
+                                                 <?php echo csrf_field(); ?>
+                                                 <?php echo method_field('DELETE'); ?>
                                                  <button type="submit" class="p-1.5 bg-red-650 hover:bg-red-700 text-white rounded-md text-xs font-semibold" title="Hapus Foto">
                                                      <i class="ri-delete-bin-line text-sm"></i>
                                                  </button>
                                              </form>
                                          </div>
                                      </div>
-                                 @else
+                                 <?php else: ?>
                                     <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*" @change="uploadPhoto('foto_sebelum', $event)">
-                                @endif
+                                <?php endif; ?>
                             </div>
 
                              <!-- Foto Sesudah -->
                              <div class="space-y-1">
                                  <span class="block text-[8px] font-bold text-gray-400 uppercase">Sesudah</span>
-                                 @if($assignment->foto_sesudah)
+                                 <?php if($assignment->foto_sesudah): ?>
                                      <div class="relative group w-full h-20 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
                                          <!-- Check if it is a Google Drive link -->
-                                         @if(str_contains($assignment->foto_sesudah, 'drive.google.com') || str_contains($assignment->foto_sesudah, 'drive.usercontent.google.com'))
+                                         <?php if(str_contains($assignment->foto_sesudah, 'drive.google.com') || str_contains($assignment->foto_sesudah, 'drive.usercontent.google.com')): ?>
                                              <!-- Use Image Proxy Route for thumbnail to bypass CORS/Opaque blocking -->
-                                             <img src="{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sesudah']) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
-                                         @else
-                                             <img src="{{ str_starts_with($assignment->foto_sesudah, 'http') ? $assignment->foto_sesudah : asset($assignment->foto_sesudah) }}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
-                                         @endif
+                                             <img src="<?php echo e(route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sesudah'])); ?>" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                                         <?php else: ?>
+                                             <img src="<?php echo e(str_starts_with($assignment->foto_sesudah, 'http') ? $assignment->foto_sesudah : asset($assignment->foto_sesudah)); ?>" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                                         <?php endif; ?>
                                          <div class="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
                                              <!-- View Button (Popup via Local Image Proxy) -->
-                                             <button type="button" @click="activeImage = '{{ route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sesudah']) }}'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
+                                             <button type="button" @click="activeImage = '<?php echo e(route('admin.orders.view-drive-photo', [$assignment->id, 'foto_sesudah'])); ?>'" class="p-1.5 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
                                                  <i class="ri-eye-line text-sm"></i>
                                              </button>
                                              <!-- Delete Button -->
-                                             <form method="POST" action="{{ route('admin.orders.delete-photo', [$assignment->id, 'foto_sesudah']) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto setelah pengerjaan ini?')">
-                                                 @csrf
-                                                 @method('DELETE')
+                                             <form method="POST" action="<?php echo e(route('admin.orders.delete-photo', [$assignment->id, 'foto_sesudah'])); ?>" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto setelah pengerjaan ini?')">
+                                                 <?php echo csrf_field(); ?>
+                                                 <?php echo method_field('DELETE'); ?>
                                                  <button type="submit" class="p-1.5 bg-red-650 hover:bg-red-700 text-white rounded-md text-xs font-semibold" title="Hapus Foto">
                                                      <i class="ri-delete-bin-line text-sm"></i>
                                                  </button>
                                              </form>
                                          </div>
                                      </div>
-                                 @else
+                                 <?php else: ?>
                                     <input type="file" class="w-full text-[9px] text-gray-400 file:mr-1 file:py-0.5 file:px-1.5 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*" @change="uploadPhoto('foto_sesudah', $event)">
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -498,42 +505,42 @@
                             </div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="text-xs text-red-500 font-semibold p-3 border border-red-50 bg-red-50 rounded-lg text-center">
                     <i class="ri-alert-line mr-1"></i> Belum ada cleaner yang ditugaskan ke order ini.
                 </div>
-                @endforelse
+                <?php endif; ?>
             </div>
 
             <!-- Assignment form (Hanya untuk Admin/Super Admin) -->
-            @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
-            <form method="POST" action="{{ route('admin.orders.assign', $order) }}" class="pt-4 border-t border-gray-100">
-                @csrf
+            <?php if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')): ?>
+            <form method="POST" action="<?php echo e(route('admin.orders.assign', $order)); ?>" class="pt-4 border-t border-gray-100">
+                <?php echo csrf_field(); ?>
                 <label for="cleaner_id" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Tugaskan Cleaner Baru</label>
                 <div class="flex gap-2">
                     <select name="cleaner_id" id="cleaner_id" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required>
                         <option value="">-- Pilih Cleaner --</option>
-                        @foreach($cleaners as $cleaner)
-                            @if(!$order->assignments->contains('user_id', $cleaner->id))
-                            <option value="{{ $cleaner->id }}">{{ $cleaner->name }}{{ $cleaner->jenis ? ' (' . $cleaner->jenis . ')' : '' }}</option>
-                            @endif
-                        @endforeach
+                        <?php $__currentLoopData = $cleaners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cleaner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php if(!$order->assignments->contains('user_id', $cleaner->id)): ?>
+                            <option value="<?php echo e($cleaner->id); ?>"><?php echo e($cleaner->name); ?><?php echo e($cleaner->jenis ? ' (' . $cleaner->jenis . ')' : ''); ?></option>
+                            <?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                     <button type="submit" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition-all shadow-sm">
                         Assign
                     </button>
                 </div>
             </form>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
+<?php $__env->startSection('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const el = document.getElementById('cleaners-sortable');
@@ -548,11 +555,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 try {
-                    let response = await fetch('{{ route('admin.orders.assignments-reorder', $order) }}', {
+                    let response = await fetch('<?php echo e(route('admin.orders.assignments-reorder', $order)); ?>', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                             'Accept': 'application/json'
                         },
                         body: JSON.stringify({ ids: ids })
@@ -612,4 +619,6 @@ function getCurrentCoordinates() {
     );
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/macbook/CascadeProjects/PHC/laravel/resources/views/admin/orders/show.blade.php ENDPATH**/ ?>
