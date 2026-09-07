@@ -13,13 +13,18 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'username', 'email', 'password', 'role_id', 'foto', 'status', 'google_id'];
+    protected $fillable = ['name', 'username', 'email', 'password', 'role_id', 'jenis', 'phone', 'foto', 'status', 'google_id'];
     protected $hidden = ['password', 'remember_token'];
     protected $casts = ['email_verified_at' => 'datetime', 'password' => 'hashed'];
 
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function isCleaner(): bool
+    {
+        return $this->role && strtolower($this->role->name) === 'cleaner';
     }
 
     public function hasPermission(string $permission): bool

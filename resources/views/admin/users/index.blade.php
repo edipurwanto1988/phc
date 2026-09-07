@@ -34,6 +34,11 @@
                         <span class="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
                             {{ $user->role->name ?? '-' }}
                         </span>
+                        @if($user->jenis)
+                        <span class="ml-1 px-2 py-0.5 text-[11px] font-medium rounded-full {{ $user->jenis === 'Tetap' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+                            {{ $user->jenis }}
+                        </span>
+                        @endif
                     </td>
                     <td class="py-3 px-4">
                         <span class="px-2 py-1 text-xs rounded-full {{ $user->status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }}">

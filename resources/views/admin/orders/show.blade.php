@@ -269,7 +269,14 @@
 
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-sm font-bold text-gray-800">{{ $assignment->cleaner->name }}</div>
+                            <div class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                                <span>{{ $assignment->cleaner->name }}</span>
+                                @if($assignment->cleaner && $assignment->cleaner->jenis)
+                                <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full {{ $assignment->cleaner->jenis === 'Tetap' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+                                    {{ $assignment->cleaner->jenis }}
+                                </span>
+                                @endif
+                            </div>
                             <div class="text-[10px] text-gray-400 mt-1">Status Tugas: 
                                 <span class="px-2 py-0.5 text-xs font-semibold rounded-full 
                                     @if($assignment->status === 'assigned') bg-blue-100 text-blue-700
@@ -474,7 +481,7 @@
                         <option value="">-- Pilih Cleaner --</option>
                         @foreach($cleaners as $cleaner)
                             @if(!$order->assignments->contains('user_id', $cleaner->id))
-                            <option value="{{ $cleaner->id }}">{{ $cleaner->name }}</option>
+                            <option value="{{ $cleaner->id }}">{{ $cleaner->name }}{{ $cleaner->jenis ? ' (' . $cleaner->jenis . ')' : '' }}</option>
                             @endif
                         @endforeach
                     </select>

@@ -242,7 +242,7 @@
                     <select name="cleaner_id" id="cleaner_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                         <option value="">-- Pilih Cleaner --</option>
                         @foreach($cleaners as $cleaner)
-                        <option value="{{ $cleaner->id }}">{{ $cleaner->name }}</option>
+                        <option value="{{ $cleaner->id }}">{{ $cleaner->name }}{{ $cleaner->jenis ? ' (' . $cleaner->jenis . ')' : '' }}</option>
                         @endforeach
                     </select>
                 </div>

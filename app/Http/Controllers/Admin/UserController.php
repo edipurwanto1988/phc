@@ -32,7 +32,11 @@ class UserController extends Controller
             'password' => 'required|string|min:6',
             'role_id' => 'required|exists:roles,id',
             'status' => 'required|in:active,inactive',
+            'jenis' => 'nullable|in:Tetap,Mitra',
         ]);
+
+        $role = Role::find($request->role_id);
+        $isCleaner = $role && strtolower($role->name) === 'cleaner';
 
         User::create([
             'name' => $request->name,
@@ -41,6 +45,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'role_id' => $request->role_id,
             'status' => $request->status,
+            'jenis' => $isCleaner ? $request->jenis : null,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully');
@@ -49,6 +54,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::all();
+        $user->load('role');
         return view('admin.users.edit', compact('user', 'roles'));
     }
 
@@ -61,7 +67,11 @@ class UserController extends Controller
             'password' => 'nullable|string|min:6',
             'role_id' => 'required|exists:roles,id',
             'status' => 'required|in:active,inactive',
+            'jenis' => 'nullable|in:Tetap,Mitra',
         ]);
+
+        $role = Role::find($request->role_id);
+        $isCleaner = $role && strtolower($role->name) === 'cleaner';
 
         $data = [
             'name' => $request->name,
@@ -69,6 +79,7 @@ class UserController extends Controller
             'email' => $request->email,
             'role_id' => $request->role_id,
             'status' => $request->status,
+            'jenis' => $isCleaner ? $request->jenis : null,
         ];
 
         if ($request->password) {
