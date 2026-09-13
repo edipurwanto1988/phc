@@ -151,7 +151,7 @@
                                 <i class="ri-download-2-line text-lg"></i>
                             </a>
                             @endif
-                            @if((auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('delete_orders')) && $order->status_bayar !== 'paid')
+                            @if((auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('delete_orders')) && $order->status_bayar === 'unpaid')
                             <form method="POST" action="{{ route('admin.orders.destroy', $order) }}" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data order ini?')">
                                 @csrf
                                 @method('DELETE')
