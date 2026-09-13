@@ -22,6 +22,8 @@ class Order extends Model
         'grand_total',
         'metode_bayar',
         'status_bayar',
+        'down_payment',
+        'down_payment_due_date',
         'catatan',
         'created_by',
     ];
@@ -29,6 +31,7 @@ class Order extends Model
     protected $casts = [
         'tanggal_order' => 'date',
         'tanggal_jadwal' => 'datetime',
+        'down_payment_due_date' => 'date',
         'total_harga' => 'decimal:2',
         'diskon' => 'decimal:2',
         'grand_total' => 'decimal:2',

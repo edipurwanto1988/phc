@@ -380,6 +380,23 @@
                         <td class="grand-total-label">TOTAL</td>
                         <td class="grand-total-value">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</td>
                     </tr>
+                    @if($order->status_bayar === 'partial')
+                    <tr>
+                        <td class="summary-label" style="padding-top: 5px;">DOWN PAYMENT (DP)</td>
+                        <td class="summary-value" style="padding-top: 5px; color: #15803d;">- Rp {{ number_format($order->down_payment, 0, ',', '.') }}</td>
+                    </tr>
+                    <tr>
+                        <td class="summary-label" style="font-weight: bold; color: #dc2626;">SISA BAYAR</td>
+                        <td class="summary-value" style="font-weight: bold; color: #dc2626;">Rp {{ number_format($order->grand_total - $order->down_payment, 0, ',', '.') }}</td>
+                    </tr>
+                    @if($order->down_payment_due_date)
+                    <tr>
+                        <td colspan="2" style="text-align: right; font-size: 8px; color: #6b7280; padding-top: 2px;">
+                            *Tenggat Waktu Sisa: {{ \Carbon\Carbon::parse($order->down_payment_due_date)->translatedFormat('d M Y') }}
+                        </td>
+                    </tr>
+                    @endif
+                    @endif
                     @if($order->status_bayar === 'unpaid')
                     <tr>
                         <td colspan="2" style="text-align: right; padding-top: 8px;">

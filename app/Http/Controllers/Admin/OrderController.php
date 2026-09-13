@@ -86,6 +86,8 @@ class OrderController extends Controller
             'diskon' => 'nullable|numeric|min:0',
             'metode_bayar' => 'required|string',
             'status_bayar' => 'required|in:unpaid,partial,paid',
+            'down_payment' => 'nullable|numeric|min:0',
+            'down_payment_due_date' => 'nullable|date',
             'cleaner_id' => 'nullable|exists:users,id',
             'catatan' => 'nullable|string',
         ]);
@@ -136,6 +138,8 @@ class OrderController extends Controller
                 'grand_total' => $grandTotal,
                 'metode_bayar' => $request->metode_bayar,
                 'status_bayar' => $request->status_bayar,
+                'down_payment' => $request->status_bayar === 'partial' ? $request->down_payment : null,
+                'down_payment_due_date' => $request->status_bayar === 'partial' ? $request->down_payment_due_date : null,
                 'catatan' => $request->catatan,
                 'created_by' => Auth::id(),
             ]);
@@ -493,6 +497,8 @@ class OrderController extends Controller
         $request->validate([
             'status' => 'nullable|in:pending,confirmed,in_progress,completed,cancelled',
             'status_bayar' => 'nullable|in:unpaid,partial,paid',
+            'down_payment' => 'nullable|numeric|min:0',
+            'down_payment_due_date' => 'nullable|date',
         ]);
 
         if ($request->filled('status')) {
@@ -514,6 +520,14 @@ class OrderController extends Controller
 
         if ($request->filled('status_bayar')) {
             $order->status_bayar = $request->status_bayar;
+            
+            if ($request->status_bayar === 'partial') {
+                $order->down_payment = $request->down_payment;
+                $order->down_payment_due_date = $request->down_payment_due_date;
+            } else {
+                $order->down_payment = null;
+                $order->down_payment_due_date = null;
+            }
         }
 
         $order->save();

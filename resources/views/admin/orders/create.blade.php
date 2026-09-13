@@ -215,11 +215,22 @@
                 <!-- Status Bayar -->
                 <div>
                     <label for="status_bayar" class="block text-sm font-semibold text-gray-700 mb-1">Status Pembayaran</label>
-                    <select name="status_bayar" id="status_bayar" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
+                    <select name="status_bayar" id="status_bayar" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required onchange="toggleDpFieldsCreate()">
                         <option value="unpaid">Belum Lunas (Unpaid)</option>
-                        <option value="partial">Bayar Sebagian (Partial)</option>
+                        <option value="partial">Bayar Sebagian (DP)</option>
                         <option value="paid">Lunas (Paid)</option>
                     </select>
+                </div>
+
+                <div id="dp_fields_create" class="hidden grid-cols-1 md:grid-cols-2 gap-6 col-span-1 md:col-span-2 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                    <div>
+                        <label for="down_payment" class="block text-sm font-semibold text-gray-700 mb-1">Jumlah Down Payment (Rp)</label>
+                        <input type="number" name="down_payment" id="down_payment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" min="0" step="1">
+                    </div>
+                    <div>
+                        <label for="down_payment_due_date" class="block text-sm font-semibold text-gray-700 mb-1">Kapan Bayarnya (Tenggat Sisa)</label>
+                        <input type="date" name="down_payment_due_date" id="down_payment_due_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                    </div>
                 </div>
 
                 <!-- Status Pengerjaan -->
@@ -337,6 +348,18 @@ function orderForm() {
         formatRupiah(value) {
             return Number(value).toLocaleString('id-ID');
         }
+    }
+}
+
+function toggleDpFieldsCreate() {
+    const status = document.getElementById('status_bayar').value;
+    const dpFields = document.getElementById('dp_fields_create');
+    if (status === 'partial') {
+        dpFields.classList.remove('hidden');
+        dpFields.classList.add('grid');
+    } else {
+        dpFields.classList.add('hidden');
+        dpFields.classList.remove('grid');
     }
 }
 </script>

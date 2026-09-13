@@ -177,7 +177,7 @@
                 <!-- Status Pengerjaan -->
                 <div>
                     <label for="status" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status Order</label>
-                    <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" onchange="this.form.submit()">
+                    <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
                         <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pending</option>
                         <option value="confirmed" {{ $order->status === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
                         <option value="in_progress" {{ $order->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
@@ -189,18 +189,47 @@
                 <!-- Status Pembayaran -->
                 <div>
                     <label for="status_bayar" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status Pembayaran</label>
-                    <select name="status_bayar" id="status_bayar" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" onchange="this.form.submit()">
+                    <select name="status_bayar" id="status_bayar" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" onchange="toggleDpFields()">
                         <option value="unpaid" {{ $order->status_bayar === 'unpaid' ? 'selected' : '' }}>Unpaid</option>
-                        <option value="partial" {{ $order->status_bayar === 'partial' ? 'selected' : '' }}>Partial</option>
+                        <option value="partial" {{ $order->status_bayar === 'partial' ? 'selected' : '' }}>Partial (Down Payment)</option>
                         <option value="paid" {{ $order->status_bayar === 'paid' ? 'selected' : '' }}>Paid</option>
                     </select>
+                </div>
+
+                <div id="dp_fields" class="space-y-4 {{ $order->status_bayar === 'partial' ? '' : 'hidden' }}">
+                    <div>
+                        <label for="down_payment" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Jumlah Down Payment (Rp)</label>
+                        <input type="number" name="down_payment" id="down_payment" value="{{ $order->down_payment }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" min="0" step="1">
+                    </div>
+                    <div>
+                        <label for="down_payment_due_date" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Kapan Bayarnya (Tenggat Waktu Sisa)</label>
+                        <input type="date" name="down_payment_due_date" id="down_payment_due_date" value="{{ $order->down_payment_due_date ? \Carbon\Carbon::parse($order->down_payment_due_date)->format('Y-m-d') : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                    </div>
                 </div>
 
                 <div>
                     <span class="block text-xs font-semibold text-gray-400 uppercase">Metode Pembayaran</span>
                     <span class="text-sm font-semibold text-gray-700 block mt-0.5">{{ ucfirst($order->metode_bayar ?? 'Belum ditentukan') }}</span>
                 </div>
+                
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
+                        Simpan Perubahan Status
+                    </button>
+                </div>
             </form>
+
+            <script>
+                function toggleDpFields() {
+                    const statusBayar = document.getElementById('status_bayar').value;
+                    const dpFields = document.getElementById('dp_fields');
+                    if (statusBayar === 'partial') {
+                        dpFields.classList.remove('hidden');
+                    } else {
+                        dpFields.classList.add('hidden');
+                    }
+                }
+            </script>
         </div>
         @endif
 
