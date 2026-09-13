@@ -205,12 +205,12 @@
             <hr class="my-6 border-gray-200">
 
             <div x-data="{ showPaymentModal: false }">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-bold text-gray-800">Riwayat Pembayaran</h3>
-                    <button type="button" @click="showPaymentModal = true" class="text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
-                        <i class="ri-add-line"></i> Tambah
-                    </button>
-                </div>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-bold text-gray-800">Riwayat Pembayaran</h3>
+                <button type="button" @click="$dispatch('open-payment-modal')" class="text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                    <i class="ri-add-line"></i> Tambah
+                </button>
+            </div>
 
                 @if($order->payments->count() > 0)
                     <div class="space-y-3">
@@ -243,7 +243,6 @@
                 @endif
 
         <!-- Alpine Dialog Modal for Payment -->
-        <div x-data="{ showPaymentModal: false }" @open-payment-modal.window="showPaymentModal = true">
             <!-- Modal Container -->
             <div x-show="showPaymentModal" x-cloak style="display: none;" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <!-- Background backdrop -->
