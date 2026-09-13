@@ -380,40 +380,33 @@
                         <td class="grand-total-label">TOTAL</td>
                         <td class="grand-total-value">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</td>
                     </tr>
-                    @if($order->status_bayar === 'partial')
+                    @php
+                        $totalPaid = $order->payments->sum('amount');
+                        $isPaid = $order->status_bayar === 'paid';
+                    @endphp
+                    @foreach($order->payments as $index => $payment)
                     <tr>
-                        <td class="summary-label" style="padding-top: 5px;">DOWN PAYMENT (DP)</td>
-                        <td class="summary-value" style="padding-top: 5px; color: #15803d;">- Rp {{ number_format($order->down_payment, 0, ',', '.') }}</td>
+                        <td class="summary-label" style="padding-top: 5px;">{{ strtoupper($payment->type) }} {{ $payment->notes ? "({$payment->notes})" : "" }}</td>
+                        <td class="summary-value" style="padding-top: 5px; color: #15803d;">- Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
                     </tr>
-                    @if($order->down_payment_date)
-                    <tr>
-                        <td colspan="2" style="text-align: right; font-size: 8px; color: #6b7280; padding-top: 2px;">
-                            (Tgl DP: {{ \Carbon\Carbon::parse($order->down_payment_date)->translatedFormat('d M Y') }})
-                        </td>
-                    </tr>
-                    @endif
-                    <tr>
-                        <td class="summary-label" style="font-weight: bold; color: #dc2626; padding-top: 5px;">SISA BAYAR</td>
-                        <td class="summary-value" style="font-weight: bold; color: #dc2626; padding-top: 5px;">Rp {{ number_format($order->grand_total - $order->down_payment, 0, ',', '.') }}</td>
-                    </tr>
-                    @if($order->final_payment)
-                    <tr>
-                        <td class="summary-label" style="padding-top: 5px; color: #15803d;">PELUNASAN SISA</td>
-                        <td class="summary-value" style="padding-top: 5px; color: #15803d;">- Rp {{ number_format($order->final_payment, 0, ',', '.') }}</td>
-                    </tr>
-                    @if($order->final_payment_date)
                     <tr>
                         <td colspan="2" style="text-align: right; font-size: 8px; color: #6b7280; padding-top: 2px;">
-                            (Tgl Pelunasan: {{ \Carbon\Carbon::parse($order->final_payment_date)->translatedFormat('d M Y') }})
+                            (Tgl: {{ \Carbon\Carbon::parse($payment->payment_date)->translatedFormat('d M Y') }})
                         </td>
                     </tr>
-                    @endif
+                    @endforeach
+                    @if($totalPaid > 0 && !$isPaid)
                     <tr class="grand-total-row">
-                        <td class="summary-label" style="font-weight: bold; padding-top: 5px;">KEKURANGAN</td>
-                        <td class="summary-value" style="font-weight: bold; padding-top: 5px;">Rp {{ number_format(max(0, $order->grand_total - $order->down_payment - $order->final_payment), 0, ',', '.') }}</td>
+                        <td class="summary-label" style="font-weight: bold; color: #dc2626; padding-top: 5px;">SISA BAYAR (KEKURANGAN)</td>
+                        <td class="summary-value" style="font-weight: bold; color: #dc2626; padding-top: 5px;">Rp {{ number_format(max(0, $order->grand_total - $totalPaid), 0, ',', '.') }}</td>
+                    </tr>
+                    @elseif($isPaid)
+                    <tr class="grand-total-row">
+                        <td class="summary-label" style="font-weight: bold; color: #15803d; padding-top: 5px;">STATUS LUNAS</td>
+                        <td class="summary-value" style="font-weight: bold; color: #15803d; padding-top: 5px;">Rp 0</td>
                     </tr>
                     @endif
-                    @endif
+                    
                     @if($order->status_bayar === 'unpaid')
                     <tr>
                         <td colspan="2" style="text-align: right; padding-top: 8px;">

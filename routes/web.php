@@ -112,6 +112,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::delete('/orders/assignments/{assignment}', [AdminOrderController::class, 'deleteAssignment'])->name('admin.orders.delete-assignment');
         Route::post('/orders/{order}/assignments/reorder', [AdminOrderController::class, 'reorderAssignments'])->name('admin.orders.assignments-reorder');
         Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.status');
+        Route::post('/orders/{order}/payments', [AdminOrderController::class, 'storePayment'])->name('admin.orders.payments.store');
+        Route::delete('/orders/payments/{payment}', [AdminOrderController::class, 'destroyPayment'])->name('admin.orders.payments.destroy');
         Route::post('/orders/{order}/coordinates', [AdminOrderController::class, 'updateCoordinates'])->name('admin.orders.coordinates');
         Route::post('/orders/{order}/catatan', [AdminOrderController::class, 'updateCatatan'])->name('admin.orders.catatan');
     });

@@ -153,6 +153,25 @@ class OrderController extends Controller
                 $order->items()->create($itemData);
             }
 
+            // Create Initial Payment if any
+            if ($request->status_bayar === 'partial' && $request->filled('down_payment')) {
+                $order->payments()->create([
+                    'amount' => $request->down_payment,
+                    'payment_date' => $request->down_payment_date ?? now()->toDateString(),
+                    'type' => 'partial',
+                    'notes' => 'Down Payment',
+                    'created_by' => Auth::id(),
+                ]);
+            } elseif ($request->status_bayar === 'paid') {
+                $order->payments()->create([
+                    'amount' => $grandTotal,
+                    'payment_date' => now()->toDateString(),
+                    'type' => 'pelunasan',
+                    'notes' => 'Lunas saat order dibuat',
+                    'created_by' => Auth::id(),
+                ]);
+            }
+
             // Assign Cleaner if selected
             if ($request->filled('cleaner_id')) {
                 OrderAssignment::create([
@@ -501,10 +520,6 @@ class OrderController extends Controller
         $request->validate([
             'status' => 'nullable|in:pending,confirmed,in_progress,completed,cancelled',
             'status_bayar' => 'nullable|in:unpaid,partial,paid',
-            'down_payment' => 'nullable|numeric|min:0',
-            'down_payment_date' => 'nullable|date',
-            'final_payment' => 'nullable|numeric|min:0',
-            'final_payment_date' => 'nullable|date',
         ]);
 
         if ($request->filled('status')) {
@@ -526,32 +541,57 @@ class OrderController extends Controller
 
         if ($request->filled('status_bayar')) {
             $order->status_bayar = $request->status_bayar;
-            
-            if ($request->status_bayar === 'partial') {
-                $order->down_payment = $request->down_payment;
-                $order->down_payment_date = $request->down_payment_date;
-                $order->final_payment = $request->final_payment;
-                $order->final_payment_date = $request->final_payment_date;
-            } elseif ($request->status_bayar === 'paid') {
-                // Keep the DP fields if they already exist so history isn't lost,
-                // but allow them to be overwritten if they submitted them.
-                if ($request->has('down_payment')) {
-                    $order->down_payment = $request->down_payment;
-                    $order->down_payment_date = $request->down_payment_date;
-                    $order->final_payment = $request->final_payment;
-                    $order->final_payment_date = $request->final_payment_date;
-                }
-            } else {
-                $order->down_payment = null;
-                $order->down_payment_date = null;
-                $order->final_payment = null;
-                $order->final_payment_date = null;
-            }
         }
 
         $order->save();
 
         return redirect()->route('admin.orders.show', $order)->with('success', 'Status order / pembayaran berhasil diperbarui.');
+    }
+
+    public function storePayment(Request $request, Order $order)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_date' => 'required|date',
+            'type' => 'required|string|in:partial,pelunasan',
+            'notes' => 'nullable|string',
+        ]);
+
+        $order->payments()->create([
+            'amount' => $request->amount,
+            'payment_date' => $request->payment_date,
+            'type' => $request->type,
+            'notes' => $request->notes,
+            'created_by' => Auth::id(),
+        ]);
+        
+        // Auto update status_bayar if type is pelunasan
+        if ($request->type === 'pelunasan') {
+            $order->update(['status_bayar' => 'paid']);
+        } elseif ($order->status_bayar === 'unpaid') {
+            $order->update(['status_bayar' => 'partial']);
+        }
+
+        return redirect()->route('admin.orders.show', $order)->with('success', 'Data pembayaran berhasil ditambahkan.');
+    }
+
+    public function destroyPayment(\App\Models\OrderPayment $payment)
+    {
+        $order = $payment->order;
+        $payment->delete();
+
+        // If no payments left, maybe set back to unpaid
+        if ($order->payments()->count() === 0) {
+            $order->update(['status_bayar' => 'unpaid']);
+        } else {
+            // Check if there are no pelunasan left
+            $hasPelunasan = $order->payments()->where('type', 'pelunasan')->exists();
+            if (!$hasPelunasan && $order->status_bayar === 'paid') {
+                $order->update(['status_bayar' => 'partial']);
+            }
+        }
+
+        return back()->with('success', 'Data pembayaran berhasil dihapus.');
     }
 
     public function updateCoordinates(Request $request, Order $order)
@@ -584,7 +624,7 @@ class OrderController extends Controller
 
     public function downloadInvoice(Order $order)
     {
-        $order->load(['customer', 'items.service']);
+        $order->load(['customer', 'items.service', 'payments']);
         
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.invoice', compact('order'));
         

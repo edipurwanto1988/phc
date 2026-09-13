@@ -22,10 +22,6 @@ class Order extends Model
         'grand_total',
         'metode_bayar',
         'status_bayar',
-        'down_payment',
-        'down_payment_date',
-        'final_payment',
-        'final_payment_date',
         'catatan',
         'created_by',
     ];
@@ -33,8 +29,6 @@ class Order extends Model
     protected $casts = [
         'tanggal_order' => 'date',
         'tanggal_jadwal' => 'datetime',
-        'down_payment_date' => 'date',
-        'final_payment_date' => 'date',
         'total_harga' => 'decimal:2',
         'diskon' => 'decimal:2',
         'grand_total' => 'decimal:2',
@@ -58,5 +52,10 @@ class Order extends Model
     public function assignments(): HasMany
     {
         return $this->hasMany(OrderAssignment::class)->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(OrderPayment::class)->orderBy('payment_date', 'asc')->orderBy('id', 'asc');
     }
 }
