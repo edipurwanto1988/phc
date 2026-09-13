@@ -242,55 +242,82 @@
                     </div>
                 @endif
 
-                <!-- Payment Modal (AlpineJS) -->
-                <div x-show="showPaymentModal" x-cloak class="fixed inset-0 flex items-center justify-center" style="z-index: 9999;">
-                    <!-- Backdrop -->
-                    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showPaymentModal = false" x-transition.opacity></div>
-                    
-                    <!-- Modal Content -->
-                    <div class="relative bg-white rounded-xl shadow-2xl w-[90%] max-w-md mx-auto overflow-hidden" x-transition>
-                        <!-- Header -->
-                        <div class="flex justify-between items-center px-5 py-4 border-b border-gray-100 bg-gray-50/80">
-                            <h3 class="text-base font-bold text-gray-800">Tambah Pembayaran</h3>
-                            <button type="button" @click="showPaymentModal = false" class="text-gray-400 hover:text-gray-700 bg-white hover:bg-gray-200 shadow-sm rounded-full w-8 h-8 flex items-center justify-center transition-colors">
-                                <i class="ri-close-line text-xl"></i>
-                            </button>
-                        </div>
-                        
-                        <!-- Form -->
-                        <form action="{{ route('admin.orders.payments.store', $order) }}" method="POST" class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
-                            @csrf
-                            <div>
-                                <label for="amount" class="block text-sm font-semibold text-gray-700 mb-1">Jumlah (Rp) <span class="text-red-500">*</span></label>
-                                <input type="number" name="amount" id="amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required min="1">
-                            </div>
+        <!-- Alpine Dialog Modal for Payment -->
+        <div x-data="{ showPaymentModal: false }" @open-payment-modal.window="showPaymentModal = true">
+            <!-- Modal Container -->
+            <div x-show="showPaymentModal" x-cloak style="display: none;" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <!-- Background backdrop -->
+                <div x-show="showPaymentModal" 
+                     x-transition:enter="ease-out duration-300" 
+                     x-transition:enter-start="opacity-0" 
+                     x-transition:enter-end="opacity-100" 
+                     x-transition:leave="ease-in duration-200" 
+                     x-transition:leave-start="opacity-100" 
+                     x-transition:leave-end="opacity-0" 
+                     class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm"></div>
+
+                <!-- Modal Panel -->
+                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                        <div x-show="showPaymentModal" 
+                             @click.away="showPaymentModal = false"
+                             x-transition:enter="ease-out duration-300" 
+                             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                             x-transition:leave="ease-in duration-200" 
+                             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                             class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                             
-                            <div>
-                                <label for="payment_date" class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Bayar <span class="text-red-500">*</span></label>
-                                <input type="date" name="payment_date" id="payment_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required value="{{ date('Y-m-d') }}">
+                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                <div class="sm:flex sm:items-start">
+                                    <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                                        <i class="ri-bank-card-line text-xl text-blue-600"></i>
+                                    </div>
+                                    <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                                        <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Tambah Pembayaran</h3>
+                                        
+                                        <form id="form-tambah-pembayaran" action="{{ route('admin.orders.payments.store', $order) }}" method="POST" class="mt-4 space-y-4">
+                                            @csrf
+                                            <div>
+                                                <label for="amount" class="block text-sm font-semibold text-gray-700 mb-1">Jumlah (Rp) <span class="text-red-500">*</span></label>
+                                                <input type="number" name="amount" id="amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required min="1">
+                                            </div>
+                                            
+                                            <div>
+                                                <label for="payment_date" class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Bayar <span class="text-red-500">*</span></label>
+                                                <input type="date" name="payment_date" id="payment_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required value="{{ date('Y-m-d') }}">
+                                            </div>
+                                            
+                                            <div>
+                                                <label for="type" class="block text-sm font-semibold text-gray-700 mb-1">Jenis Pembayaran <span class="text-red-500">*</span></label>
+                                                <select name="type" id="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required>
+                                                    <option value="partial">Partial / Cicilan</option>
+                                                    <option value="pelunasan">Pelunasan (Lunas)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label for="notes" class="block text-sm font-semibold text-gray-700 mb-1">Catatan</label>
+                                                <input type="text" name="notes" id="notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: DP pertama via Transfer BCA">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div>
-                                <label for="type" class="block text-sm font-semibold text-gray-700 mb-1">Jenis Pembayaran <span class="text-red-500">*</span></label>
-                                <select name="type" id="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required>
-                                    <option value="partial">Partial / Cicilan</option>
-                                    <option value="pelunasan">Pelunasan (Lunas)</option>
-                                </select>
-                            </div>
-                            
-                            <div>
-                                <label for="notes" class="block text-sm font-semibold text-gray-700 mb-1">Catatan</label>
-                                <input type="text" name="notes" id="notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: DP pertama via Transfer BCA">
-                            </div>
-                            
-                            <div class="pt-4 border-t border-gray-100">
-                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-all flex justify-center items-center gap-2 shadow-sm shadow-blue-600/20">
-                                    <i class="ri-save-line text-lg"></i> Simpan Pembayaran
+                            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                                <button type="button" onclick="document.getElementById('form-tambah-pembayaran').submit();" class="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">
+                                    Simpan Pembayaran
+                                </button>
+                                <button type="button" @click="showPaymentModal = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
+                                    Batal
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
             </div>
 
         </div>
