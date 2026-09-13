@@ -228,8 +228,8 @@
                         <input type="number" name="down_payment" id="down_payment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" min="0" step="1">
                     </div>
                     <div>
-                        <label for="down_payment_due_date" class="block text-sm font-semibold text-gray-700 mb-1">Kapan Bayarnya (Tenggat Sisa)</label>
-                        <input type="date" name="down_payment_due_date" id="down_payment_due_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                        <label for="down_payment_date" class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Bayar DP</label>
+                        <input type="date" name="down_payment_date" id="down_payment_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
                     </div>
                 </div>
 

@@ -197,13 +197,28 @@
                 </div>
 
                 <div id="dp_fields" class="space-y-4 {{ $order->status_bayar === 'partial' ? '' : 'hidden' }}">
-                    <div>
-                        <label for="down_payment" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Jumlah Down Payment (Rp)</label>
-                        <input type="number" name="down_payment" id="down_payment" value="{{ $order->down_payment }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" min="0" step="1">
+                    <div class="p-3 bg-blue-50 border border-blue-100 rounded-lg space-y-3">
+                        <h4 class="text-xs font-bold text-blue-800 uppercase border-b border-blue-200 pb-1">Pembayaran 1 (Down Payment)</h4>
+                        <div>
+                            <label for="down_payment" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Jumlah Down Payment (Rp)</label>
+                            <input type="number" name="down_payment" id="down_payment" value="{{ $order->down_payment }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" min="0" step="1">
+                        </div>
+                        <div>
+                            <label for="down_payment_date" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Tanggal Bayar DP</label>
+                            <input type="date" name="down_payment_date" id="down_payment_date" value="{{ $order->down_payment_date ? \Carbon\Carbon::parse($order->down_payment_date)->format('Y-m-d') : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                        </div>
                     </div>
-                    <div>
-                        <label for="down_payment_due_date" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Kapan Bayarnya (Tenggat Waktu Sisa)</label>
-                        <input type="date" name="down_payment_due_date" id="down_payment_due_date" value="{{ $order->down_payment_due_date ? \Carbon\Carbon::parse($order->down_payment_due_date)->format('Y-m-d') : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+
+                    <div class="p-3 bg-green-50 border border-green-100 rounded-lg space-y-3">
+                        <h4 class="text-xs font-bold text-green-800 uppercase border-b border-green-200 pb-1">Pembayaran 2 (Pelunasan Sisa)</h4>
+                        <div>
+                            <label for="final_payment" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Jumlah Bayar Sisa (Rp)</label>
+                            <input type="number" name="final_payment" id="final_payment" value="{{ $order->final_payment }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm bg-white" min="0" step="1">
+                        </div>
+                        <div>
+                            <label for="final_payment_date" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Tanggal Bayar Sisa</label>
+                            <input type="date" name="final_payment_date" id="final_payment_date" value="{{ $order->final_payment_date ? \Carbon\Carbon::parse($order->final_payment_date)->format('Y-m-d') : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm bg-white">
+                        </div>
                     </div>
                 </div>
 
