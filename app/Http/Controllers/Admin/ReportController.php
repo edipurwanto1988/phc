@@ -95,23 +95,22 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
 
-        $inflow = Order::with('customer')
-            ->where('status_bayar', 'paid')
-            ->whereBetween('tanggal_jadwal', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+        // Uang masuk diambil dari tabel order_payments (mencakup DP, cicilan/partial, dan pelunasan)
+        $inflow = \App\Models\OrderPayment::with(['order.customer'])
+            ->whereBetween('payment_date', [$startDate, $endDate])
             ->get();
 
         $outflow = Expense::with('user')
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->get();
 
-        $totalInflow = $inflow->sum('grand_total');
+        $totalInflow = $inflow->sum('amount');
         $totalOutflow = $outflow->sum('jumlah');
         $balance = $totalInflow - $totalOutflow;
 
         // Calculate lifetime balance prior to startDate to determine beginning balance (saldo awal)
-        $previousInflow = Order::where('status_bayar', 'paid')
-            ->where('tanggal_jadwal', '<', $startDate . ' 00:00:00')
-            ->sum('grand_total');
+        $previousInflow = \App\Models\OrderPayment::where('payment_date', '<', $startDate)
+            ->sum('amount');
 
         $previousOutflow = Expense::where('tanggal', '<', $startDate)
             ->sum('jumlah');
@@ -122,13 +121,18 @@ class ReportController extends Controller
         $ledger = collect();
 
         foreach ($inflow as $in) {
+            $typeLabel = match($in->type) {
+                'down_payment' => 'Down Payment (DP)',
+                'pelunasan' => 'Pelunasan',
+                default => 'Cicilan / Partial',
+            };
             $ledger->push([
-                'tanggal' => $in->tanggal_jadwal,
+                'tanggal' => \Carbon\Carbon::parse($in->payment_date),
                 'tipe' => 'uang_masuk',
-                'keterangan' => "Order #{$in->order_number} - {$in->customer->nama}",
-                'ref' => route('admin.orders.show', $in),
-                'penerima_pelaksana' => $in->customer->nama,
-                'masuk' => (float)$in->grand_total,
+                'keterangan' => "Order #{$in->order->order_number} - {$in->order->customer->nama} ({$typeLabel})",
+                'ref' => route('admin.orders.show', $in->order),
+                'penerima_pelaksana' => $in->order->customer->nama,
+                'masuk' => (float)$in->amount,
                 'keluar' => 0.0
             ]);
         }
@@ -156,7 +160,7 @@ class ReportController extends Controller
         });
 
         // Lifetime balance (untuk statistik header box tetap konsisten)
-        $cashIn = Order::where('status_bayar', 'paid')->sum('grand_total');
+        $cashIn = \App\Models\OrderPayment::sum('amount');
         $cashOut = Expense::sum('jumlah');
         $cashBalance = $cashIn - $cashOut;
 
