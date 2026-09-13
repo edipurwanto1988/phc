@@ -268,7 +268,7 @@
                         @csrf
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Jumlah (Rp)</label>
-                            <input type="number" name="amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required min="1" placeholder="Contoh: 50000" value="{{ max(0, $order->grand_total - $order->payments->sum('amount')) }}">
+                            <input type="number" name="amount" id="payment_amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required min="1" placeholder="Contoh: 50000" value="{{ max(0, $order->grand_total - $order->payments->sum('amount')) }}">
                         </div>
                         
                         <div class="grid grid-cols-2 gap-3">
@@ -278,7 +278,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status Pembayaran Ini</label>
-                                <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required>
+                                <select name="type" id="payment_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required onchange="autoFillPelunasan(this)">
                                     @if($order->payments->count() === 0)
                                         <option value="down_payment">Down Payment (DP)</option>
                                         <option value="pelunasan">Pelunasan (Order Lunas)</option>
@@ -684,6 +684,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function autoFillPelunasan(select) {
+    const amountInput = document.getElementById('payment_amount');
+    if (!amountInput) return;
+
+    if (select.value === 'pelunasan') {
+        // Grand total minus all recorded payments
+        const grandTotal = {{ $order->grand_total }};
+        const totalPaid = {{ $order->payments->sum('amount') }};
+        const sisa = Math.max(0, grandTotal - totalPaid);
+        amountInput.value = sisa;
+    }
+}
 
 function getCurrentCoordinates() {
     const btn = document.querySelector('[onclick="getCurrentCoordinates()"]');
