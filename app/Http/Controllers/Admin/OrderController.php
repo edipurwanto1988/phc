@@ -561,6 +561,13 @@ class OrderController extends Controller
         $totalPaid = $order->payments()->sum('amount');
         $sisa = $order->grand_total - $totalPaid;
 
+        // Down Payment harus lebih kecil dari grand total (tidak boleh sama / lunas)
+        if ($request->type === 'down_payment' && (float) $request->amount >= $order->grand_total) {
+            return redirect()
+                ->route('admin.orders.show', $order)
+                ->with('error', 'Down Payment (DP) harus lebih kecil dari grand total (Rp ' . number_format($order->grand_total, 0, ',', '.') . '). Gunakan "Pelunasan" jika ingin melunasi sekaligus.');
+        }
+
         // Tolak jika jumlah pembayaran melebihi sisa tagihan
         if ((float) $request->amount > $sisa) {
             return redirect()
