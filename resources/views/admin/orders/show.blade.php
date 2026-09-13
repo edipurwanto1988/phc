@@ -571,40 +571,50 @@
     </div>
 
 </div>
-<!-- Payment Modal -->
-<div id="paymentModal" class="fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePaymentModal()"></div>
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl w-full max-w-md border border-gray-100 z-10">
-        <div class="flex justify-between items-center p-4 border-b border-gray-100">
+<!-- Payment Modal (Di luar flexbox utama biar tidak kena overflow clipping) -->
+<div id="paymentModal" class="fixed inset-0 flex items-center justify-center hidden" style="z-index: 9999;">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closePaymentModal()"></div>
+    
+    <!-- Modal Content -->
+    <div class="relative bg-white rounded-xl shadow-2xl w-[90%] max-w-md mx-auto overflow-hidden animate-fade-in-up">
+        <!-- Header -->
+        <div class="flex justify-between items-center px-5 py-4 border-b border-gray-100 bg-gray-50/80">
             <h3 class="text-base font-bold text-gray-800">Tambah Pembayaran</h3>
-            <button type="button" onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+            <button type="button" onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-700 bg-white hover:bg-gray-200 shadow-sm rounded-full w-8 h-8 flex items-center justify-center transition-colors">
                 <i class="ri-close-line text-xl"></i>
             </button>
         </div>
-        <form action="{{ route('admin.orders.payments.store', $order) }}" method="POST" class="p-4 space-y-4">
+        
+        <!-- Form -->
+        <form action="{{ route('admin.orders.payments.store', $order) }}" method="POST" class="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
             @csrf
             <div>
-                <label for="amount" class="block text-sm font-semibold text-gray-700 mb-1">Jumlah (Rp)</label>
+                <label for="amount" class="block text-sm font-semibold text-gray-700 mb-1">Jumlah (Rp) <span class="text-red-500">*</span></label>
                 <input type="number" name="amount" id="amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required min="1">
             </div>
+            
             <div>
-                <label for="payment_date" class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Bayar</label>
+                <label for="payment_date" class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Bayar <span class="text-red-500">*</span></label>
                 <input type="date" name="payment_date" id="payment_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required value="{{ date('Y-m-d') }}">
             </div>
+            
             <div>
-                <label for="type" class="block text-sm font-semibold text-gray-700 mb-1">Jenis Pembayaran</label>
-                <select name="type" id="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required>
+                <label for="type" class="block text-sm font-semibold text-gray-700 mb-1">Jenis Pembayaran <span class="text-red-500">*</span></label>
+                <select name="type" id="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required>
                     <option value="partial">Partial / Cicilan</option>
                     <option value="pelunasan">Pelunasan (Lunas)</option>
                 </select>
             </div>
+            
             <div>
-                <label for="notes" class="block text-sm font-semibold text-gray-700 mb-1">Catatan (opsional)</label>
-                <input type="text" name="notes" id="notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: DP pertama via BCA">
+                <label for="notes" class="block text-sm font-semibold text-gray-700 mb-1">Catatan</label>
+                <input type="text" name="notes" id="notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: DP pertama via Transfer BCA">
             </div>
-            <div class="pt-2">
-                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex justify-center items-center gap-2">
-                    <i class="ri-save-line"></i> Simpan Pembayaran
+            
+            <div class="pt-4 border-t border-gray-100">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-semibold transition-all flex justify-center items-center gap-2 shadow-sm shadow-blue-600/20">
+                    <i class="ri-save-line text-lg"></i> Simpan Pembayaran
                 </button>
             </div>
         </form>
