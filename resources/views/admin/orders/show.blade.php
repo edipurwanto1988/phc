@@ -204,10 +204,10 @@
 
             <hr class="my-6 border-gray-200">
 
-            <div x-data="{ showPaymentModal: false }">
+            <div>
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-sm font-bold text-gray-800">Riwayat Pembayaran</h3>
-                    <button type="button" @click="showPaymentModal = true" class="text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                    <button type="button" onclick="document.getElementById('myPaymentModal').classList.remove('hidden');" class="text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
                         <i class="ri-add-line"></i> Tambah
                     </button>
                 </div>
