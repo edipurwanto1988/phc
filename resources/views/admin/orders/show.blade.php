@@ -206,7 +206,7 @@
 
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-sm font-bold text-gray-800">Riwayat Pembayaran</h3>
-                <button type="button" onclick="openPaymentModal()" class="text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                <button type="button" onclick="openPaymentModal(event)" class="text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
                     <i class="ri-add-line"></i> Tambah
                 </button>
             </div>
@@ -572,12 +572,12 @@
 
 </div>
 <!-- Payment Modal -->
-<div id="paymentModal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/50" onclick="closePaymentModal()"></div>
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl w-full max-w-md">
+<div id="paymentModal" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePaymentModal()"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl w-full max-w-md border border-gray-100 z-10">
         <div class="flex justify-between items-center p-4 border-b border-gray-100">
             <h3 class="text-base font-bold text-gray-800">Tambah Pembayaran</h3>
-            <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600">
+            <button type="button" onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
                 <i class="ri-close-line text-xl"></i>
             </button>
         </div>
@@ -600,11 +600,11 @@
             </div>
             <div>
                 <label for="notes" class="block text-sm font-semibold text-gray-700 mb-1">Catatan (opsional)</label>
-                <input type="text" name="notes" id="notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <input type="text" name="notes" id="notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: DP pertama via BCA">
             </div>
             <div class="pt-2">
-                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
-                    Simpan Pembayaran
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex justify-center items-center gap-2">
+                    <i class="ri-save-line"></i> Simpan Pembayaran
                 </button>
             </div>
         </form>
@@ -615,7 +615,8 @@
 
 @section('scripts')
 <script>
-function openPaymentModal() {
+function openPaymentModal(event) {
+    if(event) event.preventDefault();
     document.getElementById('paymentModal').classList.remove('hidden');
 }
 
