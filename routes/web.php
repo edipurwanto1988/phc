@@ -104,6 +104,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         
         // Extra Assignment Route for orders
         Route::get('/orders/{order}/download-invoice', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.download-invoice');
+        Route::get('/orders/payments/{payment}/download-invoice', [AdminOrderController::class, 'downloadPaymentInvoice'])->name('admin.orders.payments.download-invoice');
         Route::post('/orders/{order}/assign', [AdminOrderController::class, 'assignCleaner'])->name('admin.orders.assign');
         Route::post('/orders/assignments/{assignment}/gaji', [AdminOrderController::class, 'updateGaji'])->name('admin.orders.update-gaji');
         Route::post('/orders/assignments/{assignment}/photos', [AdminOrderController::class, 'uploadPhotos'])->name('admin.orders.upload-photos');

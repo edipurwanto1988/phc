@@ -236,13 +236,18 @@
                                         @endif
                                     </div>
                                 </div>
-                                <form action="{{ route('admin.orders.payments.destroy', $payment) }}" method="POST" onsubmit="return confirm('Hapus data pembayaran ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 p-2 bg-red-50 hover:bg-red-100 rounded-md transition-colors">
-                                        <i class="ri-delete-bin-line"></i>
-                                    </button>
-                                </form>
+                                <div class="flex items-center gap-1">
+                                    <a href="{{ route('admin.orders.payments.download-invoice', $payment) }}" class="text-blue-500 hover:text-blue-700 p-2 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors" title="Download Nota Pembayaran">
+                                        <i class="ri-download-2-line"></i>
+                                    </a>
+                                    <form action="{{ route('admin.orders.payments.destroy', $payment) }}" method="POST" onsubmit="return confirm('Hapus data pembayaran ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:text-red-700 p-2 bg-red-50 hover:bg-red-100 rounded-md transition-colors">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         @endforeach
                         

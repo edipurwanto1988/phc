@@ -651,4 +651,22 @@ class OrderController extends Controller
         
         return $pdf->download('Nota-' . $order->order_number . '.pdf');
     }
+
+    public function downloadPaymentInvoice(\App\Models\OrderPayment $payment)
+    {
+        $payment->load(['order.customer', 'order.items.service', 'order.payments']);
+        $order = $payment->order;
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.payment-invoice', compact('payment', 'order'));
+        
+        $pdf->setPaper('a5', 'portrait');
+        
+        $typeLabel = match($payment->type) {
+            'down_payment' => 'DP',
+            'pelunasan' => 'Pelunasan',
+            default => 'Cicilan',
+        };
+        
+        return $pdf->download('Nota-' . $order->order_number . '-' . $typeLabel . '-' . $payment->id . '.pdf');
+    }
 }
