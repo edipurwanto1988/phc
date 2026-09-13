@@ -204,119 +204,111 @@
 
             <hr class="my-6 border-gray-200">
 
-            <div>
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-bold text-gray-800">Riwayat Pembayaran</h3>
-                    <button type="button" onclick="document.getElementById('myPaymentModal').classList.remove('hidden');" class="text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
-                        <i class="ri-add-line"></i> Tambah
-                    </button>
-                </div>
+            <!-- Manajemen Pembayaran (Cicilan & Pelunasan) -->
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <h3 class="text-sm font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">Manajemen Pembayaran (Cicilan & Pelunasan)</h3>
 
                 @if($order->payments->count() > 0)
-                    <div class="space-y-3">
+                    <div class="space-y-2 mb-4">
                         @foreach($order->payments as $payment)
-                            <div class="p-3 border border-gray-200 rounded-lg bg-gray-50 relative">
-                                <form action="{{ route('admin.orders.payments.destroy', $payment) }}" method="POST" class="absolute top-3 right-3" onsubmit="return confirm('Hapus data pembayaran ini?')">
+                            <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <div>
+                                    <div class="text-sm font-bold text-gray-800">Rp {{ number_format($payment->amount, 0, ',', '.') }}</div>
+                                    <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($payment->payment_date)->translatedFormat('d M Y') }}</div>
+                                    <div class="mt-1">
+                                        @php
+                                            $typeLabel = match($payment->type) {
+                                                'down_payment' => 'Down Payment',
+                                                'pelunasan' => 'Pelunasan',
+                                                default => 'Cicilan',
+                                            };
+                                            $typeClass = match($payment->type) {
+                                                'down_payment' => 'bg-amber-100 text-amber-700',
+                                                'pelunasan' => 'bg-green-100 text-green-700',
+                                                default => 'bg-blue-100 text-blue-700',
+                                            };
+                                        @endphp
+                                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $typeClass }}">
+                                            {{ $typeLabel }}
+                                        </span>
+                                        @if($payment->notes)
+                                            <span class="text-xs text-gray-600 ml-1">- {{ $payment->notes }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <form action="{{ route('admin.orders.payments.destroy', $payment) }}" method="POST" onsubmit="return confirm('Hapus data pembayaran ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700">
+                                    <button type="submit" class="text-red-500 hover:text-red-700 p-2 bg-red-50 hover:bg-red-100 rounded-md transition-colors">
                                         <i class="ri-delete-bin-line"></i>
                                     </button>
                                 </form>
-                                <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($payment->payment_date)->translatedFormat('d M Y') }}</div>
-                                <div class="text-sm font-bold text-gray-800">Rp {{ number_format($payment->amount, 0, ',', '.') }}</div>
-                                <div class="mt-1 flex items-center gap-2">
-                                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $payment->type === 'pelunasan' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' }}">
-                                        {{ ucfirst($payment->type) }}
-                                    </span>
-                                    @if($payment->notes)
-                                        <span class="text-xs text-gray-600 truncate">{{ $payment->notes }}</span>
-                                    @endif
-                                </div>
                             </div>
                         @endforeach
+                        
+                        <!-- Rangkuman Bayar -->
+                        <div class="mt-2 p-3 bg-blue-50 text-blue-800 text-xs font-semibold border border-blue-100 rounded-lg flex justify-between">
+                            <span>Total Terbayar: Rp {{ number_format($order->payments->sum('amount'), 0, ',', '.') }}</span>
+                            <span>Sisa: Rp {{ number_format(max(0, $order->grand_total - $order->payments->sum('amount')), 0, ',', '.') }}</span>
+                        </div>
                     </div>
                 @else
-                    <div class="text-center py-4 text-gray-500 text-sm">
-                        Belum ada riwayat pembayaran.
+                    <div class="text-center py-3 bg-white border border-gray-200 rounded-lg text-gray-500 text-xs mb-4">
+                        Belum ada pembayaran yang dicatat.
                     </div>
                 @endif
 
-        <!-- Alpine Dialog Modal for Payment -->
-            <!-- Modal Container -->
-            <div x-show="showPaymentModal" x-cloak style="display: none;" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                <!-- Background backdrop -->
-                <div x-show="showPaymentModal" 
-                     x-transition:enter="ease-out duration-300" 
-                     x-transition:enter-start="opacity-0" 
-                     x-transition:enter-end="opacity-100" 
-                     x-transition:leave="ease-in duration-200" 
-                     x-transition:leave-start="opacity-100" 
-                     x-transition:leave-end="opacity-0" 
-                     class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm"></div>
-
-                <!-- Modal Panel -->
-                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                        <div x-show="showPaymentModal" 
-                             @click.away="showPaymentModal = false"
-                             x-transition:enter="ease-out duration-300" 
-                             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
-                             x-transition:leave="ease-in duration-200" 
-                             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
-                             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                             class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                            
-                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                <div class="sm:flex sm:items-start">
-                                    <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                                        <i class="ri-bank-card-line text-xl text-blue-600"></i>
-                                    </div>
-                                    <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
-                                        <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Tambah Pembayaran</h3>
-                                        
-                                        <form id="form-tambah-pembayaran" action="{{ route('admin.orders.payments.store', $order) }}" method="POST" class="mt-4 space-y-4">
-                                            @csrf
-                                            <div>
-                                                <label for="amount" class="block text-sm font-semibold text-gray-700 mb-1">Jumlah (Rp) <span class="text-red-500">*</span></label>
-                                                <input type="number" name="amount" id="amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required min="1">
-                                            </div>
-                                            
-                                            <div>
-                                                <label for="payment_date" class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Bayar <span class="text-red-500">*</span></label>
-                                                <input type="date" name="payment_date" id="payment_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required value="{{ date('Y-m-d') }}">
-                                            </div>
-                                            
-                                            <div>
-                                                <label for="type" class="block text-sm font-semibold text-gray-700 mb-1">Jenis Pembayaran <span class="text-red-500">*</span></label>
-                                                <select name="type" id="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required>
-                                                    <option value="partial">Partial / Cicilan</option>
-                                                    <option value="pelunasan">Pelunasan (Lunas)</option>
-                                                </select>
-                                            </div>
-                                            
-                                            <div>
-                                                <label for="notes" class="block text-sm font-semibold text-gray-700 mb-1">Catatan</label>
-                                                <input type="text" name="notes" id="notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: DP pertama via Transfer BCA">
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
+                <!-- Form Tambah Pembayaran (Inline, langsung tampil) -->
+                @if($order->status_bayar !== 'paid')
+                <div class="bg-white p-4 border border-blue-200 rounded-lg shadow-sm">
+                    <h4 class="text-xs font-bold text-blue-800 mb-3 flex items-center gap-1">
+                        <i class="ri-add-circle-line"></i> Catat Pembayaran Baru
+                    </h4>
+                    <form action="{{ route('admin.orders.payments.store', $order) }}" method="POST" class="space-y-3">
+                        @csrf
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Jumlah (Rp)</label>
+                            <input type="number" name="amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required min="1" placeholder="Contoh: 50000" value="{{ max(0, $order->grand_total - $order->payments->sum('amount')) }}">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Tanggal</label>
+                                <input type="date" name="payment_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required value="{{ date('Y-m-d') }}">
                             </div>
-                            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                                <button type="button" onclick="document.getElementById('form-tambah-pembayaran').submit();" class="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">
-                                    Simpan Pembayaran
-                                </button>
-                                <button type="button" @click="showPaymentModal = false" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
-                                    Batal
-                                </button>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status Pembayaran Ini</label>
+                                <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required>
+                                    @if($order->payments->count() === 0)
+                                        <option value="down_payment">Down Payment (DP)</option>
+                                        <option value="pelunasan">Pelunasan (Order Lunas)</option>
+                                    @else
+                                        <option value="partial">Cicilan / Partial</option>
+                                        <option value="pelunasan">Pelunasan (Order Lunas)</option>
+                                    @endif
+                                </select>
                             </div>
                         </div>
-                    </div>
+                        
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Catatan</label>
+                            <input type="text" name="notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Opsional (contoh: DP kedua via Transfer)">
+                        </div>
+                        
+                        <div class="pt-2">
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold transition-all flex justify-center items-center gap-1 shadow-sm">
+                                <i class="ri-save-line"></i> Simpan Pembayaran
+                            </button>
+                        </div>
+                    </form>
                 </div>
+                @else
+                <div class="bg-green-50 text-green-700 border border-green-200 p-3 rounded-lg text-center text-sm font-bold flex flex-col items-center gap-1">
+                    <i class="ri-checkbox-circle-fill text-2xl"></i>
+                    ORDER TELAH LUNAS
+                </div>
+                @endif
             </div>
-            <!-- End Alpine Modal -->
 
         </div>
         @endif

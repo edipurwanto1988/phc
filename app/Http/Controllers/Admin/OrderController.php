@@ -553,7 +553,7 @@ class OrderController extends Controller
         $request->validate([
             'amount' => 'required|numeric|min:1',
             'payment_date' => 'required|date',
-            'type' => 'required|string|in:partial,pelunasan',
+            'type' => 'required|string|in:partial,down_payment,pelunasan',
             'notes' => 'nullable|string',
         ]);
 
@@ -570,9 +570,7 @@ class OrderController extends Controller
             $order->update(['status_bayar' => 'paid']);
         } elseif ($order->status_bayar === 'unpaid') {
             $order->update(['status_bayar' => 'partial']);
-        }
-
-        return redirect()->route('admin.orders.show', $order)->with('success', 'Data pembayaran berhasil ditambahkan.');
+        }        return redirect()->route('admin.orders.show', $order)->with('success', 'Data pembayaran berhasil ditambahkan.');
     }
 
     public function destroyPayment(\App\Models\OrderPayment $payment)

@@ -385,8 +385,15 @@
                         $isPaid = $order->status_bayar === 'paid';
                     @endphp
                     @foreach($order->payments as $index => $payment)
+                    @php
+                        $typeLabel = match($payment->type) {
+                            'down_payment' => 'DOWN PAYMENT (DP)',
+                            'pelunasan' => 'PELUNASAN',
+                            default => 'CICILAN / PARTIAL',
+                        };
+                    @endphp
                     <tr>
-                        <td class="summary-label" style="padding-top: 5px;">{{ strtoupper($payment->type) }} {{ $payment->notes ? "({$payment->notes})" : "" }}</td>
+                        <td class="summary-label" style="padding-top: 5px;">{{ $typeLabel }} {{ $payment->notes ? "({$payment->notes})" : "" }}</td>
                         <td class="summary-value" style="padding-top: 5px; color: #15803d;">- Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
