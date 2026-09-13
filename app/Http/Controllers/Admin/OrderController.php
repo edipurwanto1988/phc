@@ -557,6 +557,17 @@ class OrderController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        // Hitung sisa yang harus dibayar
+        $totalPaid = $order->payments()->sum('amount');
+        $sisa = $order->grand_total - $totalPaid;
+
+        // Tolak jika jumlah pembayaran melebihi sisa tagihan
+        if ((float) $request->amount > $sisa) {
+            return redirect()
+                ->route('admin.orders.show', $order)
+                ->with('error', 'Pembayaran ditolak: jumlah yang dimasukkan (Rp ' . number_format($request->amount, 0, ',', '.') . ') melebihi sisa tagihan (Rp ' . number_format($sisa, 0, ',', '.') . ').');
+        }
+
         $order->payments()->create([
             'amount' => $request->amount,
             'payment_date' => $request->payment_date,
@@ -570,7 +581,9 @@ class OrderController extends Controller
             $order->update(['status_bayar' => 'paid']);
         } elseif ($order->status_bayar === 'unpaid') {
             $order->update(['status_bayar' => 'partial']);
-        }        return redirect()->route('admin.orders.show', $order)->with('success', 'Data pembayaran berhasil ditambahkan.');
+        }
+
+        return redirect()->route('admin.orders.show', $order)->with('success', 'Data pembayaran berhasil ditambahkan.');
     }
 
     public function destroyPayment(\App\Models\OrderPayment $payment)

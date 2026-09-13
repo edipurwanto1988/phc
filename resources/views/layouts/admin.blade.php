@@ -254,6 +254,13 @@
                     </div>
                 @endif
 
+                @if(session('error'))
+                    <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2">
+                        <i class="ri-error-warning-line text-lg"></i>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                @endif
+
                 @if($errors->any())
                     <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
                         <div class="flex items-center gap-2 mb-2 font-medium">
