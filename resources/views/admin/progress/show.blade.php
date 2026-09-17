@@ -153,8 +153,8 @@
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between">
                                         <span class="text-[10px] font-bold text-gray-400 uppercase">Keterangan</span>
-                                        <button type="button" @click="editingCatatan = !editingCatatan" class="text-[11px] font-semibold text-blue-600 hover:underline">
-                                            <span x-show="!editingCatatan">Edit</span><span x-show="editingCatatan" x-cloak>Batal</span>
+                                        <button type="button" @click="editingCatatan = !editingCatatan" class="text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-50 transition-colors" title="Edit keterangan">
+                                            <i x-show="!editingCatatan" class="ri-edit-line"></i><i x-show="editingCatatan" x-cloak class="ri-close-line"></i>
                                         </button>
                                     </div>
                                     <div x-show="!editingCatatan">
@@ -175,8 +175,8 @@
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between">
                                         <span class="text-[10px] font-bold text-gray-400 uppercase">Masalah (jika ada)</span>
-                                        <button type="button" @click="editingMasalah = !editingMasalah" class="text-[11px] font-semibold text-blue-600 hover:underline">
-                                            <span x-show="!editingMasalah">Edit</span><span x-show="editingMasalah" x-cloak>Batal</span>
+                                        <button type="button" @click="editingMasalah = !editingMasalah" class="text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-50 transition-colors" title="Edit masalah">
+                                            <i x-show="!editingMasalah" class="ri-edit-line"></i><i x-show="editingMasalah" x-cloak class="ri-close-line"></i>
                                         </button>
                                     </div>
                                     <div x-show="!editingMasalah">
