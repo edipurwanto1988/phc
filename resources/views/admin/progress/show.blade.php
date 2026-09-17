@@ -11,6 +11,7 @@
     $doneRooms = $order->progressRooms->where('status', 'selesai')->count();
     $prosesRooms = $order->progressRooms->where('status', 'proses')->count();
     $belumRooms = $order->progressRooms->where('status', 'belum')->count();
+    $totalLuas = $order->progressRooms->sum('luas');
     $progressPercent = $totalRooms > 0 ? round(($doneRooms / $totalRooms) * 100) : 0;
     $grouped = $order->progressRooms->groupBy(fn($r) => $r->lantai ?: 'Tanpa Lantai');
 @endphp
@@ -30,22 +31,26 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
-                    <div class="text-3xl font-extrabold text-gray-800">{{ $totalRooms }}</div>
-                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Total Ruangan</div>
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 text-sm">
+                <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-gray-800">{{ $totalRooms }}</span>
+                    <span class="text-gray-500">Ruangan</span>
                 </div>
-                <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                    <div class="text-3xl font-extrabold text-green-600">{{ $doneRooms }}</div>
-                    <div class="text-xs font-semibold text-green-700 uppercase mt-1">Selesai</div>
+                <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-green-600">{{ $doneRooms }}</span>
+                    <span class="text-gray-500">Selesai</span>
                 </div>
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                    <div class="text-3xl font-extrabold text-blue-600">{{ $prosesRooms }}</div>
-                    <div class="text-xs font-semibold text-blue-700 uppercase mt-1">Progress</div>
+                <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-blue-600">{{ $prosesRooms }}</span>
+                    <span class="text-gray-500">Progress</span>
                 </div>
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-                    <div class="text-3xl font-extrabold text-amber-600">{{ $belumRooms }}</div>
-                    <div class="text-xs font-semibold text-amber-700 uppercase mt-1">Belum</div>
+                <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-amber-600">{{ $belumRooms }}</span>
+                    <span class="text-gray-500">Belum</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-violet-600">{{ rtrim(rtrim(number_format($totalLuas, 2, ',', '.'), '0'), ',') }} m²</span>
+                    <span class="text-gray-500">Total Luas</span>
                 </div>
             </div>
 
@@ -63,7 +68,7 @@
         <div class="card p-6 bg-white border border-gray-200 rounded-xl">
             <h3 class="text-base font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
                 <i class="ri-building-2-line text-blue-600"></i> {{ $lantai }}
-                <span class="ml-1 text-xs font-semibold text-gray-400">({{ $rooms->where('status', 'selesai')->count() }}/{{ $rooms->count() }} selesai)</span>
+                <span class="ml-1 text-xs font-semibold text-gray-400">({{ $rooms->where('status', 'selesai')->count() }}/{{ $rooms->count() }} selesai{{ $rooms->sum('luas') ? ' · ' . rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') . ' m²' : '' }})</span>
             </h3>
 
             <div class="space-y-3">
