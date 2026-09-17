@@ -103,11 +103,15 @@
                                             <p class="text-sm text-red-600 leading-relaxed whitespace-pre-line">{{ $room->masalah }}</p>
                                         </div>
                                     @endif
-                                    @if($room->bukti)
-                                        <a href="{{ route('public.progress.bukti.view', [$order->progress_token, $room]) }}" target="_blank" class="mt-2 inline-block">
-                                            <img src="{{ route('public.progress.bukti.view', [$order->progress_token, $room]) }}"
-                                                class="h-20 w-20 object-cover rounded-lg border border-gray-200 hover:opacity-80 transition-opacity" alt="Bukti {{ $room->ruangan }}">
-                                        </a>
+                                    @if($room->buktiPhotos->count() > 0)
+                                        <div class="mt-2 flex flex-wrap gap-2">
+                                            @foreach($room->buktiPhotos as $bukti)
+                                                <a href="{{ route('public.progress.bukti.view', [$order->progress_token, $bukti]) }}" target="_blank">
+                                                    <img src="{{ route('public.progress.bukti.view', [$order->progress_token, $bukti]) }}"
+                                                        class="h-20 w-20 object-cover rounded-lg border border-gray-200 hover:opacity-80 transition-opacity" alt="Bukti {{ $room->ruangan }}">
+                                                </a>
+                                            @endforeach
+                                        </div>
                                     @endif
                                 </div>
                             </div>

@@ -140,70 +140,91 @@ class OrderProgressController extends Controller
         abort_unless($room->order_id === $order->id, 404);
 
         $request->validate([
-            'bukti' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'bukti' => 'required|array|min:1',
+            'bukti.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true';
-        $data = [];
+        $uploaded = [];
 
-        if ($request->hasFile('bukti')) {
-            if ($room->bukti && !str_starts_with($room->bukti, 'http') && file_exists(public_path($room->bukti))) {
-                @unlink(public_path($room->bukti));
-            }
-
-            $file = $request->file('bukti');
-            $filename = 'progress_' . $room->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        foreach ($request->file('bukti') as $file) {
+            $filename = 'progress_' . $room->id . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
             if ($gdriveConnected) {
                 try {
                     $driveService = new \App\Services\GoogleDriveService();
                     $result = $driveService->uploadFile($file->getRealPath(), $filename, $order->order_number);
-                    $data['bukti'] = $result['web_content_link'];
+                    $path = $result['web_content_link'];
                 } catch (\Exception $e) {
                     \Log::error("Failed to upload progress bukti to GDrive: " . $e->getMessage());
-                    $file->move(public_path('uploads/progress'), $filename);
-                    $data['bukti'] = 'uploads/progress/' . $filename;
+                    $dir = public_path('uploads/progress');
+                    if (!is_dir($dir)) {
+                        @mkdir($dir, 0755, true);
+                    }
+                    $file->move($dir, $filename);
+                    $path = 'uploads/progress/' . $filename;
                 }
             } else {
-                $file->move(public_path('uploads/progress'), $filename);
-                $data['bukti'] = 'uploads/progress/' . $filename;
+                $dir = public_path('uploads/progress');
+                if (!is_dir($dir)) {
+                    @mkdir($dir, 0755, true);
+                }
+                $file->move($dir, $filename);
+                $path = 'uploads/progress/' . $filename;
             }
-        }
 
-        if (!empty($data)) {
-            $room->update($data);
+            $room->buktiPhotos()->create(['path' => $path]);
+            $uploaded[] = $path;
         }
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Bukti pekerjaan berhasil diunggah.',
-                'data' => $data,
+                'data' => $uploaded,
             ]);
         }
 
-        return back()->with('success', 'Bukti pekerjaan berhasil diunggah.');
+        return back()->with('success', count($uploaded) . ' bukti pekerjaan berhasil diunggah.');
     }
 
-    public function deleteBukti(Order $order, OrderProgressRoom $room)
+    public function deleteBukti(Order $order, OrderProgressRoom $room, \App\Models\OrderProgressBukti $bukti)
     {
         abort_unless($room->order_id === $order->id, 404);
+        abort_unless($bukti->order_progress_room_id === $room->id, 404);
 
-        $path = $room->bukti;
+        $path = $bukti->path;
+
+        // Hapus file lokal (jika disimpan lokal)
         if ($path && !str_starts_with($path, 'http') && file_exists(public_path($path))) {
             @unlink(public_path($path));
         }
 
-        $room->update(['bukti' => null]);
+        // Hapus file dari Google Drive (jika tersimpan di Drive)
+        if ($path && (str_contains($path, 'drive.google.com') || str_contains($path, 'drive.usercontent.google.com'))) {
+            // Ekstrak file ID dari URL Drive
+            if (preg_match('/[?&]id=([a-zA-Z0-9_-]+)/', $path, $m)) {
+                $fileId = $m[1];
+                try {
+                    $driveService = new \App\Services\GoogleDriveService();
+                    $driveService->deleteFile($fileId);
+                } catch (\Exception $e) {
+                    \Log::error("Failed to delete progress bukti from GDrive: " . $e->getMessage());
+                }
+            }
+        }
+
+        $bukti->delete();
 
         return back()->with('success', 'Bukti pekerjaan berhasil dihapus.');
     }
 
-    public function viewBukti(Order $order, OrderProgressRoom $room)
+    public function viewBukti(Order $order, OrderProgressRoom $room, \App\Models\OrderProgressBukti $bukti)
     {
         abort_unless($room->order_id === $order->id, 404);
+        abort_unless($bukti->order_progress_room_id === $room->id, 404);
 
-        $photoUrl = $room->bukti;
+        $photoUrl = $bukti->path;
         if (!$photoUrl) {
             return abort(404);
         }

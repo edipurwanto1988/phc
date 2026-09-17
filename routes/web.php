@@ -48,7 +48,7 @@ Route::get('/halaman/{slug}', [PublicHalamanController::class, 'show'])->name('p
 
 // Progress pekerjaan (link publik untuk client)
 Route::get('/progress/{token}', [PublicOrderProgressController::class, 'show'])->name('public.progress.show');
-Route::get('/progress/{token}/bukti/{room}', [PublicOrderProgressController::class, 'viewBukti'])->name('public.progress.bukti.view');
+Route::get('/progress/{token}/bukti/{bukti}', [PublicOrderProgressController::class, 'viewBukti'])->name('public.progress.bukti.view');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
@@ -131,8 +131,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::put('/progress/{order}/rooms/{room}', [AdminOrderProgressController::class, 'updateRoom'])->name('admin.progress.rooms.update');
         Route::delete('/progress/{order}/rooms/{room}', [AdminOrderProgressController::class, 'destroyRoom'])->name('admin.progress.rooms.destroy');
         Route::post('/progress/{order}/rooms/{room}/bukti', [AdminOrderProgressController::class, 'uploadBukti'])->name('admin.progress.rooms.bukti.upload');
-        Route::delete('/progress/{order}/rooms/{room}/bukti', [AdminOrderProgressController::class, 'deleteBukti'])->name('admin.progress.rooms.bukti.destroy');
-        Route::get('/progress/{order}/rooms/{room}/bukti/view', [AdminOrderProgressController::class, 'viewBukti'])->name('admin.progress.rooms.bukti.view');
+        Route::delete('/progress/{order}/rooms/{room}/bukti/{bukti}', [AdminOrderProgressController::class, 'deleteBukti'])->name('admin.progress.rooms.bukti.destroy');
+        Route::get('/progress/{order}/rooms/{room}/bukti/{bukti}/view', [AdminOrderProgressController::class, 'viewBukti'])->name('admin.progress.rooms.bukti.view');
         Route::post('/progress/{order}/link', [AdminOrderProgressController::class, 'generateLink'])->name('admin.progress.link');
     });
 });

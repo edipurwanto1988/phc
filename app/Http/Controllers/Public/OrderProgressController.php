@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderProgressBukti;
 use App\Models\OrderProgressRoom;
 
 class OrderProgressController extends Controller
@@ -11,7 +12,7 @@ class OrderProgressController extends Controller
     public function show($token)
     {
         $order = Order::where('progress_token', $token)
-            ->with(['customer', 'progressRooms'])
+            ->with(['customer', 'progressRooms.buktiPhotos'])
             ->firstOrFail();
 
         // Kelompokkan ruangan berdasarkan lantai
@@ -22,12 +23,13 @@ class OrderProgressController extends Controller
         return view('pages.progress', compact('order', 'grouped'));
     }
 
-    public function viewBukti($token, OrderProgressRoom $room)
+    public function viewBukti($token, OrderProgressBukti $bukti)
     {
+        $room = $bukti->room;
         $order = Order::where('progress_token', $token)->firstOrFail();
-        abort_unless($room->order_id === $order->id, 404);
+        abort_unless($room && $room->order_id === $order->id, 404);
 
-        $photoUrl = $room->bukti;
+        $photoUrl = $bukti->path;
         if (!$photoUrl) {
             return abort(404);
         }

@@ -94,10 +94,12 @@
                             this.saving = false;
                         },
                         uploadBukti(e) {
-                            const file = e.target.files[0];
-                            if (!file) return;
+                            const files = e.target.files;
+                            if (!files.length) return;
                             const fd = new FormData();
-                            fd.append('bukti', file);
+                            for (let i = 0; i < files.length; i++) {
+                                fd.append('bukti[]', files[i]);
+                            }
                             fd.append('_token', '{{ csrf_token() }}');
                             fetch('{{ route('admin.progress.rooms.bukti.upload', [$order, $room]) }}', {
                                 method: 'POST',
@@ -114,7 +116,7 @@
                         </div>
 
                         <div class="flex-1 min-w-0 space-y-3">
-                            {{-- Nama ruangan + status badge + aksi --}}
+                            {{-- Nama ruangan + status + aksi --}}
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
                                     <span class="font-semibold text-gray-800" :class="status === 'selesai' ? 'line-through text-gray-500' : ''">{{ $room->ruangan }}</span>
@@ -122,10 +124,22 @@
                                     <span class="shrink-0 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-gray-100 text-gray-500">{{ rtrim(rtrim(number_format($room->luas, 2, ',', '.'), '0'), ',') }} m²</span>
                                     @endif
                                 </div>
-                                <div class="shrink-0 flex items-center gap-1">
+                                <div class="shrink-0 flex items-center gap-2">
                                     <span class="text-[11px] text-green-600 font-bold flex items-center gap-1" x-show="saved"><i class="ri-checkbox-circle-line"></i> Tersimpan</span>
                                     <span class="text-[11px] text-gray-400 flex items-center gap-1" x-show="saving"><i class="ri-loader-4-line animate-spin"></i></span>
-                                    <form method="POST" action="{{ route('admin.progress.rooms.destroy', [$order, $room]) }}" onsubmit="return confirm('Hapus ruangan ini dari progress?')" class="shrink-0">
+
+                                    {{-- Pilihan status (dropdown minimalis) --}}
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase shrink-0">Status</label>
+                                    <select x-model="status" @change="save()"
+                                        class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        :class="status === 'selesai' ? 'border-green-300 text-green-700' : (status === 'proses' ? 'border-blue-300 text-blue-700' : 'border-amber-300 text-amber-700')">
+                                        <option value="belum">Belum Selesai</option>
+                                        <option value="proses">Proses Pengerjaan</option>
+                                        <option value="selesai">Selesai</option>
+                                    </select>
+
+                                    {{-- Hapus (hanya tampil jika belum diproses) --}}
+                                    <form method="POST" action="{{ route('admin.progress.rooms.destroy', [$order, $room]) }}" onsubmit="return confirm('Hapus ruangan ini dari progress?')" class="shrink-0" x-show="status === 'belum'">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-1.5 rounded-lg text-red-500 bg-red-50 hover:bg-red-100 transition-colors" title="Hapus Ruangan">
@@ -133,18 +147,6 @@
                                         </button>
                                     </form>
                                 </div>
-                            </div>
-
-                            {{-- Pilihan status (dropdown minimalis) --}}
-                            <div class="flex items-center gap-2">
-                                <label class="text-[10px] font-bold text-gray-400 uppercase shrink-0">Status</label>
-                                <select x-model="status" @change="save()"
-                                    class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    :class="status === 'selesai' ? 'border-green-300 text-green-700' : (status === 'proses' ? 'border-blue-300 text-blue-700' : 'border-amber-300 text-amber-700')">
-                                    <option value="belum">Belum Selesai</option>
-                                    <option value="proses">Proses Pengerjaan</option>
-                                    <option value="selesai">Selesai</option>
-                                </select>
                             </div>
 
                             {{-- Keterangan (editable inline) --}}
@@ -191,36 +193,41 @@
                                 </div>
                             </div>
 
-                            {{-- Bukti foto --}}
+                            {{-- Bukti foto (multiple) --}}
                             <div class="flex items-start gap-2">
                                 <i class="ri-camera-line text-gray-400 mt-0.5"></i>
                                 <div class="flex-1">
                                     <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Bukti Pekerjaan</span>
-                                    @if($room->bukti)
-                                        <div class="flex items-center gap-2">
-                                            <img src="{{ route('admin.progress.rooms.bukti.view', [$order, $room]) }}"
-                                                class="h-16 w-16 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
-                                                @click="window.open('{{ route('admin.progress.rooms.bukti.view', [$order, $room]) }}', '_blank')">
-                                            <div class="space-y-1">
-                                                <label class="cursor-pointer text-[11px] font-semibold text-blue-600 hover:underline flex items-center gap-1">
-                                                    <i class="ri-refresh-line"></i> Ganti
-                                                    <input type="file" accept="image/*" class="hidden" @change="uploadBukti($event)">
-                                                </label>
-                                                <form method="POST" action="{{ route('admin.progress.rooms.bukti.destroy', [$order, $room]) }}" onsubmit="return confirm('Hapus foto bukti ini?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-[11px] font-semibold text-red-500 hover:underline flex items-center gap-1">
-                                                        <i class="ri-delete-bin-line"></i> Hapus
+
+                                    @if($room->buktiPhotos->count() > 0)
+                                        <div class="flex flex-wrap gap-2 mb-2">
+                                            @foreach($room->buktiPhotos as $bukti)
+                                            <div class="relative group w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-black shadow-sm">
+                                                <img src="{{ route('admin.progress.rooms.bukti.view', [$order, $room, $bukti]) }}"
+                                                    class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                                                <div class="absolute inset-0 flex items-center justify-center gap-1 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button type="button"
+                                                        @click="window.open('{{ route('admin.progress.rooms.bukti.view', [$order, $room, $bukti]) }}', '_blank')"
+                                                        class="p-1 bg-white/20 hover:bg-white/40 text-white rounded-md text-xs font-semibold flex items-center justify-center" title="Lihat Foto">
+                                                        <i class="ri-eye-line text-sm"></i>
                                                     </button>
-                                                </form>
+                                                    <form method="POST" action="{{ route('admin.progress.rooms.bukti.destroy', [$order, $room, $bukti]) }}" class="inline" onsubmit="return confirm('Hapus foto bukti ini?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="p-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-xs font-semibold" title="Hapus Foto">
+                                                            <i class="ri-delete-bin-line text-sm"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </div>
+                                            @endforeach
                                         </div>
-                                    @else
-                                        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg cursor-pointer">
-                                            <i class="ri-upload-2-line"></i> Upload Bukti
-                                            <input type="file" accept="image/*" class="hidden" @change="uploadBukti($event)">
-                                        </label>
                                     @endif
+
+                                    <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg cursor-pointer">
+                                        <i class="ri-upload-2-line"></i> {{ $room->buktiPhotos->count() > 0 ? 'Tambah Bukti' : 'Upload Bukti' }}
+                                        <input type="file" accept="image/*" multiple class="hidden" @change="uploadBukti($event)">
+                                    </label>
                                 </div>
                             </div>
                         </div>

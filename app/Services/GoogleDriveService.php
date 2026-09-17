@@ -143,6 +143,22 @@ class GoogleDriveService
         }
     }
 
+    /**
+     * Hapus file dari Google Drive berdasarkan file ID.
+     */
+    public function deleteFile(string $fileId)
+    {
+        try {
+            $client = $this->getAuthenticatedClient();
+            $driveService = new Drive($client);
+            $driveService->files->delete($fileId);
+            return true;
+        } catch (\Exception $e) {
+            \Log::error("Google Drive Delete Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
     protected function getOrCreateFolder(Drive $driveService, string $folderName, string $parentId = null)
     {
         $query = "name = '{$folderName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
