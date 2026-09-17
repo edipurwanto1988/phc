@@ -49,7 +49,7 @@
                         <a href="{{ route('admin.users.edit', $user) }}" class="text-blue-600 hover:text-blue-800 mr-3">
                             <i class="ri-edit-line"></i>
                         </a>
-                        @if($user->id !== auth()->user()->id)
+                        @if($user->id !== auth()->user()->id && $user->created_orders_count === 0 && $user->assignments_count === 0)
                         <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline">
                             @csrf
                             @method('DELETE')

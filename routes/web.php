@@ -12,6 +12,7 @@ use App\Http\Controllers\Public\BlogController as PublicBlogController;
 use App\Http\Controllers\Public\ContactController as PublicContactController;
 use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\Public\HalamanController as PublicHalamanController;
+use App\Http\Controllers\Public\OrderProgressController as PublicOrderProgressController;
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\MenuController as AdminMenuController;
 use App\Http\Controllers\Admin\HalamanController as AdminHalamanController;
+use App\Http\Controllers\Admin\OrderProgressController as AdminOrderProgressController;
 
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
@@ -43,6 +45,10 @@ Route::post('/kontak', [PublicContactController::class, 'submit'])->name('public
 Route::get('/blog', [PublicBlogController::class, 'index'])->name('public.blog.index');
 Route::get('/blog/{slug}', [PublicBlogController::class, 'show'])->name('public.blog.show');
 Route::get('/halaman/{slug}', [PublicHalamanController::class, 'show'])->name('public.halaman.show');
+
+// Progress pekerjaan (link publik untuk client)
+Route::get('/progress/{token}', [PublicOrderProgressController::class, 'show'])->name('public.progress.show');
+Route::get('/progress/{token}/bukti/{room}', [PublicOrderProgressController::class, 'viewBukti'])->name('public.progress.bukti.view');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
@@ -117,5 +123,16 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::delete('/orders/payments/{payment}', [AdminOrderController::class, 'destroyPayment'])->name('admin.orders.payments.destroy');
         Route::post('/orders/{order}/coordinates', [AdminOrderController::class, 'updateCoordinates'])->name('admin.orders.coordinates');
         Route::post('/orders/{order}/catatan', [AdminOrderController::class, 'updateCatatan'])->name('admin.orders.catatan');
+
+        // Progress Pekerjaan (lantai & ruangan) — halaman khusus
+        Route::get('/progress/{order}', [AdminOrderProgressController::class, 'show'])->name('admin.progress.show');
+        Route::post('/progress/{order}/rooms', [AdminOrderProgressController::class, 'storeRoom'])->name('admin.progress.rooms.store');
+        Route::post('/progress/{order}/rooms/import', [AdminOrderProgressController::class, 'importRooms'])->name('admin.progress.rooms.import');
+        Route::put('/progress/{order}/rooms/{room}', [AdminOrderProgressController::class, 'updateRoom'])->name('admin.progress.rooms.update');
+        Route::delete('/progress/{order}/rooms/{room}', [AdminOrderProgressController::class, 'destroyRoom'])->name('admin.progress.rooms.destroy');
+        Route::post('/progress/{order}/rooms/{room}/bukti', [AdminOrderProgressController::class, 'uploadBukti'])->name('admin.progress.rooms.bukti.upload');
+        Route::delete('/progress/{order}/rooms/{room}/bukti', [AdminOrderProgressController::class, 'deleteBukti'])->name('admin.progress.rooms.bukti.destroy');
+        Route::get('/progress/{order}/rooms/{room}/bukti/view', [AdminOrderProgressController::class, 'viewBukti'])->name('admin.progress.rooms.bukti.view');
+        Route::post('/progress/{order}/link', [AdminOrderProgressController::class, 'generateLink'])->name('admin.progress.link');
     });
 });

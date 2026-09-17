@@ -13,7 +13,10 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('role')->orderBy('created_at', 'desc')->paginate(15);
+        $users = User::with('role')
+            ->withCount(['createdOrders', 'assignments'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
         return view('admin.users.index', compact('users'));
     }
 
@@ -95,6 +98,9 @@ class UserController extends Controller
     {
         if ($user->id === auth()->user()->id) {
             return redirect()->back()->with('error', 'Cannot delete yourself');
+        }
+        if ($user->createdOrders()->exists() || $user->assignments()->exists()) {
+            return redirect()->back()->with('error', 'User masih memiliki order terkait, tidak dapat dihapus');
         }
         $user->delete();
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully');

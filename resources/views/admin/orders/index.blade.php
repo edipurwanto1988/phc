@@ -143,6 +143,9 @@
                     </td>
                     <td class="py-4 px-6 text-center">
                         <div class="flex items-center justify-center gap-3">
+                            <a href="{{ route('admin.progress.show', $order) }}" class="text-emerald-600 hover:text-emerald-800 transition-colors" title="Progress Pekerjaan">
+                                <i class="ri-bar-chart-box-line text-lg"></i>
+                            </a>
                             <a href="{{ route('admin.orders.show', $order) }}" class="text-gray-500 hover:text-gray-750 transition-colors" title="Lihat Detail">
                                 <i class="ri-eye-line text-lg"></i>
                             </a>

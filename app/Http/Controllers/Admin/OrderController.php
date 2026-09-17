@@ -193,7 +193,7 @@ class OrderController extends Controller
     {
         $order->load(['customer', 'items.service', 'assignments' => function($q) {
             $q->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
-        }, 'assignments.cleaner', 'creator']);
+        }, 'assignments.cleaner', 'creator', 'progressRooms']);
         
         $cleaners = User::whereHas('role', function($q) {
             $q->where('name', 'Cleaner');

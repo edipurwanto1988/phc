@@ -346,12 +346,38 @@
             </form>
         </div>
 
+        <!-- Progress Pekerjaan Card (link ke halaman khusus) -->
+        @php
+            $pTotalRooms = $order->progressRooms->count();
+            $pDoneRooms = $order->progressRooms->where('status', 'selesai')->count();
+            $pPercent = $pTotalRooms > 0 ? round(($pDoneRooms / $pTotalRooms) * 100) : 0;
+        @endphp
+        <a href="{{ route('admin.progress.show', $order) }}" class="card p-6 bg-white border border-gray-200 rounded-xl block hover:border-blue-300 hover:shadow-md transition-all group">
+            <h3 class="text-base font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center justify-between gap-2">
+                <span class="flex items-center gap-2">
+                    <i class="ri-bar-chart-box-line text-blue-600"></i> Progress Pekerjaan
+                </span>
+                <i class="ri-arrow-right-line text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all"></i>
+            </h3>
+
+            <div class="flex items-center justify-between text-sm mb-2">
+                <span class="text-gray-600 font-medium">{{ $pDoneRooms }}/{{ $pTotalRooms }} ruangan selesai</span>
+                <span class="font-bold {{ $pPercent === 100 ? 'text-green-600' : 'text-blue-600' }}">{{ $pPercent }}%</span>
+            </div>
+            <div class="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full {{ $pPercent === 100 ? 'bg-green-500' : 'bg-blue-600' }} rounded-full transition-all" style="width: {{ $pPercent }}%"></div>
+            </div>
+
+            <p class="text-[11px] text-blue-600 font-semibold mt-3 flex items-center gap-1">
+                <i class="ri-add-line"></i> Kelola lantai, ruangan & bagikan link
+            </p>
+        </a>
+
         <!-- Cleaner Assignments Card -->
         <div class="card p-6 bg-white border border-gray-200 rounded-xl">
             <h3 class="text-base font-bold text-gray-800 mb-2 pb-2 border-b border-gray-100 flex items-center gap-2">
                 <i class="ri-user-star-line text-blue-600"></i> Cleaner & Informasi Gaji
-            </h3>
-            
+            </h3>            
             @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
             <p class="text-xs text-gray-500 mb-4 italic"><i class="ri-drag-drop-line"></i> Seret (drag & drop) untuk mengurutkan. Cleaner teratas otomatis menjadi **PIC**.</p>
             @endif

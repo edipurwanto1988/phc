@@ -22,6 +22,16 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function createdOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'created_by');
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(OrderAssignment::class, 'user_id');
+    }
+
     public function isCleaner(): bool
     {
         return $this->role && strtolower($this->role->name) === 'cleaner';

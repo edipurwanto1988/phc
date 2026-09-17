@@ -23,6 +23,7 @@ class Order extends Model
         'metode_bayar',
         'status_bayar',
         'catatan',
+        'progress_token',
         'created_by',
     ];
 
@@ -57,5 +58,10 @@ class Order extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(OrderPayment::class)->orderBy('payment_date', 'asc')->orderBy('id', 'asc');
+    }
+
+    public function progressRooms(): HasMany
+    {
+        return $this->hasMany(OrderProgressRoom::class)->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
     }
 }
