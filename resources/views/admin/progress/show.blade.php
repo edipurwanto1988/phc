@@ -31,26 +31,31 @@
                 </a>
             </div>
 
-            <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 text-sm">
-                <div class="flex items-center gap-1.5">
-                    <span class="font-bold text-gray-800">{{ $totalRooms }}</span>
-                    <span class="text-gray-500">Ruangan</span>
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                    <i class="ri-door-line text-gray-500 text-sm"></i>
+                    <span class="text-sm font-bold text-gray-800">{{ $totalRooms }}</span>
+                    <span class="text-xs text-gray-500">Ruangan</span>
                 </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="font-bold text-green-600">{{ $doneRooms }}</span>
-                    <span class="text-gray-500">Selesai</span>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
+                    <i class="ri-checkbox-circle-line text-green-600 text-sm"></i>
+                    <span class="text-sm font-bold text-green-700">{{ $doneRooms }}</span>
+                    <span class="text-xs text-green-600">Selesai</span>
                 </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="font-bold text-blue-600">{{ $prosesRooms }}</span>
-                    <span class="text-gray-500">Progress</span>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full">
+                    <i class="ri-loader-4-line text-blue-600 text-sm"></i>
+                    <span class="text-sm font-bold text-blue-700">{{ $prosesRooms }}</span>
+                    <span class="text-xs text-blue-600">Progress</span>
                 </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="font-bold text-amber-600">{{ $belumRooms }}</span>
-                    <span class="text-gray-500">Belum</span>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full">
+                    <i class="ri-time-line text-amber-600 text-sm"></i>
+                    <span class="text-sm font-bold text-amber-700">{{ $belumRooms }}</span>
+                    <span class="text-xs text-amber-600">Belum</span>
                 </div>
-                <div class="flex items-center gap-1.5">
-                    <span class="font-bold text-violet-600">{{ rtrim(rtrim(number_format($totalLuas, 2, ',', '.'), '0'), ',') }} m²</span>
-                    <span class="text-gray-500">Total Luas</span>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 border border-violet-200 rounded-full">
+                    <i class="ri-ruler-line text-violet-600 text-sm"></i>
+                    <span class="text-sm font-bold text-violet-700">{{ rtrim(rtrim(number_format($totalLuas, 2, ',', '.'), '0'), ',') }} m²</span>
+                    <span class="text-xs text-violet-600">Luas</span>
                 </div>
             </div>
 
