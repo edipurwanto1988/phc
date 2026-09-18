@@ -102,14 +102,19 @@
         <!-- Daftar Lantai & Ruangan -->
         <div class="px-6 md:px-10 py-6 space-y-8">
             @forelse($grouped as $lantai => $rooms)
-                <div>
-                    <h2 class="flex items-center gap-2 text-base font-bold text-gray-800 mb-4">
-                        <i class="ri-building-2-line text-primary"></i> {{ $lantai }}
-                        @if($rooms->sum('luas'))
-                        <span class="text-xs font-semibold text-gray-400">· {{ rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') }} m²</span>
-                        @endif
-                    </h2>
-                    <div class="space-y-3">
+                <div class="border border-border rounded-xl p-4" x-data="{ open: false }">
+                    <div class="flex items-center justify-between gap-2 cursor-pointer select-none" @click="open = !open">
+                        <h2 class="flex items-center gap-2 text-base font-bold text-gray-800">
+                            <i class="ri-building-2-line text-primary"></i> {{ $lantai }}
+                            @if($rooms->sum('luas'))
+                            <span class="text-xs font-semibold text-gray-400">· {{ rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') }} m²</span>
+                            @endif
+                        </h2>
+                        <button type="button" class="shrink-0 p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors" title="Minimize / Expand">
+                            <i class="ri-arrow-up-s-line transition-transform" :class="open ? '' : 'rotate-180'"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-3 mt-4" x-show="open" x-cloak>
                         @foreach($rooms as $room)
                             @php
                                 $done = $room->status === 'selesai';
