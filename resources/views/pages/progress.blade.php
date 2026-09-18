@@ -100,9 +100,9 @@
         </div>
 
         <!-- Daftar Lantai & Ruangan -->
-        <div class="px-6 md:px-10 py-6 space-y-8">
+        <div class="px-6 md:px-10 py-6">
             @forelse($grouped as $lantai => $rooms)
-                <div class="border border-border rounded-xl p-4" x-data="{ open: false }">
+                <div class="border border-border rounded-xl p-4 mb-4" x-data="{ open: false }">
                     <div class="flex items-center justify-between gap-2 cursor-pointer select-none" @click="open = !open">
                         <h2 class="flex items-center gap-2 text-base font-bold text-gray-800">
                             <i class="ri-building-2-line text-primary"></i> {{ $lantai }}
