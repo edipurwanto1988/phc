@@ -13,7 +13,8 @@
     $belumRooms = $order->progressRooms->where('status', 'belum')->count();
     $totalLuas = $order->progressRooms->sum('luas');
     $progressPercent = $totalRooms > 0 ? round(($doneRooms / $totalRooms) * 100) : 0;
-    $grouped = $order->progressRooms->groupBy(fn($r) => $r->lantai ?: 'Tanpa Lantai');
+    $grouped = $order->progressRooms->groupBy(fn($r) => $r->lantai ?: 'Tanpa Lantai')
+        ->sortKeysUsing(fn($a, $b) => strnatcasecmp($a, $b));
 @endphp
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -70,13 +71,18 @@
 
         <!-- Daftar Ruangan per Lantai -->
         @forelse($grouped as $lantai => $rooms)
-        <div class="card p-6 bg-white border border-gray-200 rounded-xl">
-            <h3 class="text-base font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
-                <i class="ri-building-2-line text-blue-600"></i> {{ $lantai }}
-                <span class="ml-1 text-xs font-semibold text-gray-400">({{ $rooms->where('status', 'selesai')->count() }}/{{ $rooms->count() }} selesai{{ $rooms->sum('luas') ? ' · ' . rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') . ' m²' : '' }})</span>
-            </h3>
+        <div class="card p-6 bg-white border border-gray-200 rounded-xl" x-data="{ open: false }">
+            <div class="flex items-center justify-between gap-2 pb-2 border-b border-gray-100 mb-4 cursor-pointer select-none" @click="open = !open">
+                <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                    <i class="ri-building-2-line text-blue-600"></i> {{ $lantai }}
+                    <span class="ml-1 text-xs font-semibold text-gray-400">({{ $rooms->where('status', 'selesai')->count() }}/{{ $rooms->count() }} selesai{{ $rooms->sum('luas') ? ' · ' . rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') . ' m²' : '' }})</span>
+                </h3>
+                <button type="button" class="shrink-0 p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors" title="Minimize / Expand">
+                    <i class="ri-arrow-up-s-line transition-transform" :class="open ? '' : 'rotate-180'"></i>
+                </button>
+            </div>
 
-            <div class="space-y-3">
+            <div class="space-y-3" x-show="open" x-cloak>
                 @foreach($rooms as $room)
                 <div class="p-4 rounded-xl border"
                      :class="status === 'selesai' ? 'border-green-200 bg-green-50' : (status === 'proses' ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-white')"
