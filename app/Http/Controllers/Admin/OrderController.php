@@ -71,6 +71,8 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['items' => $this->normalizeItems($request->input('items', []))]);
+
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'tanggal_jadwal' => 'required|date_format:Y-m-d\TH:i',
@@ -80,7 +82,7 @@ class OrderController extends Controller
             'status' => 'required|in:pending,confirmed,in_progress,completed,cancelled',
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'required|exists:services,id',
-            'items.*.qty' => 'required|integer|min:1',
+            'items.*.qty' => 'required|numeric|min:0.01',
             'items.*.harga' => 'required|numeric|min:0',
             'items.*.catatan' => 'nullable|string',
             'diskon' => 'nullable|numeric|min:0',
@@ -213,6 +215,8 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
+        $request->merge(['items' => $this->normalizeItems($request->input('items', []))]);
+
         $request->validate([
             'tanggal_jadwal' => 'required|date_format:Y-m-d\TH:i',
             'alamat_pengerjaan' => 'required|string',
@@ -223,7 +227,7 @@ class OrderController extends Controller
             'catatan' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'required|exists:services,id',
-            'items.*.qty' => 'required|integer|min:1',
+            'items.*.qty' => 'required|numeric|min:0.01',
             'items.*.harga' => 'required|numeric|min:0',
         ]);
 
@@ -545,6 +549,17 @@ class OrderController extends Controller
 
         $order->save();
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status order / pembayaran berhasil diperbarui.',
+                'data' => [
+                    'status' => $order->status,
+                    'status_bayar' => $order->status_bayar,
+                ],
+            ]);
+        }
+
         return redirect()->route('admin.orders.show', $order)->with('success', 'Status order / pembayaran berhasil diperbarui.');
     }
 
@@ -625,6 +640,26 @@ class OrderController extends Controller
         ]);
 
         return redirect()->route('admin.orders.show', $order)->with('success', 'Koordinat lokasi berhasil disimpan.');
+    }
+
+    /**
+     * Normalisasi angka berkoma (2,5 -> 2.5) pada item order.
+     */
+    protected function normalizeItems(?array $items): array
+    {
+        if (!$items) {
+            return [];
+        }
+
+        foreach ($items as $key => $item) {
+            foreach (['qty', 'harga'] as $field) {
+                if (isset($item[$field]) && is_string($item[$field])) {
+                    $items[$key][$field] = str_replace(',', '.', $item[$field]);
+                }
+            }
+        }
+
+        return $items;
     }
 
     public function updateCatatan(Request $request, Order $order)

@@ -46,9 +46,41 @@
             @php
                 $totalRooms = $order->progressRooms->count();
                 $doneRooms = $order->progressRooms->where('status', 'selesai')->count();
+                $prosesRooms = $order->progressRooms->where('status', 'proses')->count();
+                $belumRooms = $order->progressRooms->where('status', 'belum')->count();
                 $totalLuas = $order->progressRooms->sum('luas');
                 $percent = $totalRooms > 0 ? round(($doneRooms / $totalRooms) * 100) : 0;
             @endphp
+
+            {{-- Ringkasan Project --}}
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                    <i class="ri-door-line text-gray-500 text-sm"></i>
+                    <span class="text-sm font-bold text-gray-800">{{ $totalRooms }}</span>
+                    <span class="text-xs text-gray-500">Ruangan</span>
+                </div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
+                    <i class="ri-checkbox-circle-line text-green-600 text-sm"></i>
+                    <span class="text-sm font-bold text-green-700">{{ $doneRooms }}</span>
+                    <span class="text-xs text-green-600">Selesai</span>
+                </div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full">
+                    <i class="ri-loader-4-line text-blue-600 text-sm"></i>
+                    <span class="text-sm font-bold text-blue-700">{{ $prosesRooms }}</span>
+                    <span class="text-xs text-blue-600">Progress</span>
+                </div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full">
+                    <i class="ri-time-line text-amber-600 text-sm"></i>
+                    <span class="text-sm font-bold text-amber-700">{{ $belumRooms }}</span>
+                    <span class="text-xs text-amber-600">Belum</span>
+                </div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 border border-violet-200 rounded-full">
+                    <i class="ri-ruler-line text-violet-600 text-sm"></i>
+                    <span class="text-sm font-bold text-violet-700">{{ rtrim(rtrim(number_format($totalLuas, 2, ',', '.'), '0'), ',') }} m²</span>
+                    <span class="text-xs text-violet-600">Luas</span>
+                </div>
+            </div>
+
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <div class="text-sm font-semibold text-gray-700">
@@ -56,9 +88,6 @@
                     </div>
                     <div class="text-xs text-gray-500 mt-0.5">
                         {{ $doneRooms }} dari {{ $totalRooms }} ruangan selesai
-                        @if($totalLuas)
-                            · <span class="font-semibold text-violet-600">{{ rtrim(rtrim(number_format($totalLuas, 2, ',', '.'), '0'), ',') }} m²</span>
-                        @endif
                     </div>
                 </div>
                 <div class="text-3xl font-extrabold {{ $percent === 100 ? 'text-green-600' : 'text-primary' }}">
@@ -178,10 +207,21 @@
                                     @endif
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-semibold text-gray-800">{{ $cleaner->name }}</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-semibold text-gray-800">{{ $cleaner->name }}</span>
+                                        @if($cleaner->phc_id)
+                                            <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-gray-200 text-gray-600 tracking-wide">{{ $cleaner->phc_id }}</span>
+                                        @endif
+                                    </div>
                                     @if($cleaner->jenis)
                                         <div class="text-xs text-gray-500 mt-0.5">
                                             {{ $cleaner->jenis === 'Tetap' ? 'Cleaner Tetap' : 'Cleaner Mitra' }}
+                                        </div>
+                                    @endif
+                                    @if($cleaner->keahlian)
+                                        <div class="mt-2 flex items-start gap-1.5">
+                                            <i class="ri-award-line text-primary text-sm mt-0.5"></i>
+                                            <p class="text-sm text-gray-600 leading-relaxed">{{ $cleaner->keahlian }}</p>
                                         </div>
                                     @endif
                                 </div>

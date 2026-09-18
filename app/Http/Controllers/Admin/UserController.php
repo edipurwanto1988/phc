@@ -36,6 +36,8 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
             'status' => 'required|in:active,inactive',
             'jenis' => 'nullable|in:Tetap,Mitra',
+            'keahlian' => 'nullable|string|max:2000',
+            'phc_id' => 'nullable|string|max:10',
         ]);
 
         $role = Role::find($request->role_id);
@@ -49,6 +51,8 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'status' => $request->status,
             'jenis' => $isCleaner ? $request->jenis : null,
+            'keahlian' => $isCleaner ? $request->keahlian : null,
+            'phc_id' => $request->phc_id,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully');
@@ -71,6 +75,8 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
             'status' => 'required|in:active,inactive',
             'jenis' => 'nullable|in:Tetap,Mitra',
+            'keahlian' => 'nullable|string|max:2000',
+            'phc_id' => 'nullable|string|max:10',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
@@ -84,6 +90,8 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'status' => $request->status,
             'jenis' => $isCleaner ? $request->jenis : null,
+            'keahlian' => $isCleaner ? $request->keahlian : null,
+            'phc_id' => $request->phc_id,
         ];
 
         if ($request->password) {

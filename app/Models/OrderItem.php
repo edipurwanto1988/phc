@@ -20,7 +20,7 @@ class OrderItem extends Model
     ];
 
     protected $casts = [
-        'qty' => 'integer',
+        'qty' => 'decimal:2',
         'harga_satuan' => 'decimal:2',
         'subtotal' => 'decimal:2',
     ];

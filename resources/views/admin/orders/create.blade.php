@@ -162,7 +162,7 @@
                         <!-- Qty -->
                         <div class="w-full md:w-32">
                             <label class="block text-[11px] font-semibold text-gray-600 mb-1">Qty</label>
-                            <input type="number" :name="'items['+index+'][qty]'" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white text-center" x-model.number="item.qty" min="1" required>
+                            <input type="number" step="0.01" :name="'items['+index+'][qty]'" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white text-center" x-model.number="item.qty" min="0.01" required>
                         </div>
 
                         <!-- Satuan label display -->

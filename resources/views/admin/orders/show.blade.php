@@ -177,13 +177,15 @@
                 <!-- Status Pengerjaan -->
                 <div>
                     <label for="status" class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status Order</label>
-                    <select name="status" id="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                    <select name="status" id="status" onchange="autoSaveStatus(this)"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
                         <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pending</option>
                         <option value="confirmed" {{ $order->status === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
                         <option value="in_progress" {{ $order->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
                         <option value="completed" {{ $order->status === 'completed' ? 'selected' : '' }}>Completed</option>
                         <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
+                    <span id="status-save-feedback" class="text-[11px] font-semibold mt-1 hidden"></span>
                 </div>
 
                 <!-- Status Pembayaran -->
@@ -700,6 +702,42 @@ function autoFillPelunasan(select) {
         const sisa = Math.max(0, grandTotal - totalPaid);
         amountInput.value = sisa;
     }
+}
+
+function autoSaveStatus(select) {
+    const feedback = document.getElementById('status-save-feedback');
+    const status = select.value;
+
+    feedback.classList.remove('hidden');
+    feedback.className = 'text-[11px] font-semibold mt-1 text-gray-400';
+    feedback.textContent = 'Menyimpan...';
+
+    fetch('{{ route('admin.orders.status', $order) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(res => {
+        if (res.success) {
+            feedback.className = 'text-[11px] font-semibold mt-1 text-green-600';
+            feedback.textContent = 'Status tersimpan';
+        } else {
+            feedback.className = 'text-[11px] font-semibold mt-1 text-red-500';
+            feedback.textContent = 'Gagal menyimpan';
+        }
+    })
+    .catch(() => {
+        feedback.className = 'text-[11px] font-semibold mt-1 text-red-500';
+        feedback.textContent = 'Gagal menyimpan';
+    })
+    .finally(() => {
+        setTimeout(() => { feedback.classList.add('hidden'); }, 2000);
+    });
 }
 
 function getCurrentCoordinates() {

@@ -13,7 +13,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'username', 'email', 'password', 'role_id', 'jenis', 'phone', 'foto', 'status', 'google_id'];
+    protected $fillable = ['name', 'username', 'email', 'password', 'role_id', 'jenis', 'phone', 'foto', 'status', 'google_id', 'keahlian', 'phc_id'];
     protected $hidden = ['password', 'remember_token'];
     protected $casts = ['email_verified_at' => 'datetime', 'password' => 'hashed'];
 

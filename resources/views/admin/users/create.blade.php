@@ -21,6 +21,12 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">PHC ID <span class="text-xs text-gray-400">(maks 10 karakter)</span></label>
+                    <input type="text" name="phc_id" class="input w-full" maxlength="10" value="{{ old('phc_id') }}" placeholder="Contoh: PHC-0001">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" name="email" class="input w-full" required>
                 </div>
@@ -82,6 +88,13 @@
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+            </div>
+
+            <!-- Keahlian Khusus -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Keahlian Khusus</label>
+                <textarea name="keahlian" rows="3" class="input w-full resize-y" placeholder="Contoh: Cuci sofa, poles lantai marmer, cleaning AC, deep cleaning...">{{ old('keahlian') }}</textarea>
+                <p class="text-xs text-gray-400 mt-1">Pisahkan dengan koma jika lebih dari satu.</p>
             </div>
         </div>
         <div class="pt-6 border-t border-gray-200 flex justify-end gap-3">
