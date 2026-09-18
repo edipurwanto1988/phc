@@ -6,10 +6,39 @@
 
 @section('content')
 <div class="card">
-    <form method="POST" action="{{ route('admin.users.update', $user) }}" class="p-6">
+    <form method="POST" action="{{ route('admin.users.update', $user) }}" enctype="multipart/form-data" class="p-6">
         @csrf
         @method('PUT')
         <div class="space-y-6">
+            <!-- Foto Profil -->
+            <div class="flex items-center gap-6 p-5 bg-gray-50 border border-gray-200 rounded-xl">
+                <div class="relative group shrink-0">
+                    @if($user->foto)
+                        <img src="{{ route('admin.users.foto.view', $user) }}" alt="{{ $user->name }}"
+                            class="w-24 h-24 rounded-xl object-cover border-2 border-gray-200 shadow-sm">
+                    @else
+                        <div class="w-24 h-24 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-3xl border-2 border-gray-200 shadow-sm">
+                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                        </div>
+                    @endif
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-semibold text-gray-800 mb-1">Foto Profil</label>
+                    <p class="text-xs text-gray-500 mb-3">Upload foto profil (JPG/PNG/WebP, maks 5MB). Tersimpan otomatis ke Google Drive.</p>
+                    <div class="flex items-center gap-3">
+                        <label class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg cursor-pointer transition-colors">
+                            <i class="ri-upload-2-line"></i> {{ $user->foto ? 'Ganti Foto' : 'Upload Foto' }}
+                            <input type="file" name="foto" accept="image/*" class="hidden" onchange="this.form.submit()">
+                        </label>
+                        @if($user->foto)
+                        <button type="button" onclick="deleteFoto()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                            <i class="ri-delete-bin-line"></i> Hapus
+                        </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nama</label>
@@ -94,10 +123,22 @@
         </div>
     </form>
 </div>
+
+@if($user->foto)
+<form id="delete-foto-form" method="POST" action="{{ route('admin.users.foto.destroy', $user) }}" class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
+@endif
 @endsection
 
 @section('scripts')
 <script>
+    function deleteFoto() {
+        if (!confirm('Hapus foto profil ini?')) return;
+        document.getElementById('delete-foto-form').submit();
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const roleSelect = document.getElementById('role_id');
         const cleanerContainer = document.getElementById('cleaner-type-container');

@@ -49,6 +49,7 @@ Route::get('/halaman/{slug}', [PublicHalamanController::class, 'show'])->name('p
 // Progress pekerjaan (link publik untuk client)
 Route::get('/progress/{token}', [PublicOrderProgressController::class, 'show'])->name('public.progress.show');
 Route::get('/progress/{token}/bukti/{bukti}', [PublicOrderProgressController::class, 'viewBukti'])->name('public.progress.bukti.view');
+Route::get('/progress/{token}/cleaner/{cleaner}/foto', [PublicOrderProgressController::class, 'viewCleanerFoto'])->name('public.progress.cleaner.foto');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
@@ -93,6 +94,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::resource('/services', AdminServiceController::class)->names('admin.services');
         Route::resource('/service-categories', AdminServiceCategoryController::class)->names('admin.service-categories');
         Route::resource('/users', AdminUserController::class)->names('admin.users');
+        Route::get('/users/{user}/foto/view', [AdminUserController::class, 'viewFoto'])->name('admin.users.foto.view');
+        Route::delete('/users/{user}/foto', [AdminUserController::class, 'deleteFoto'])->name('admin.users.foto.destroy');
         Route::resource('/roles', AdminRoleController::class)->names('admin.roles');
         Route::resource('/posts', AdminPostController::class)->names('admin.posts');
         Route::resource('/testimonials', AdminTestimonialController::class)->names('admin.testimonials');

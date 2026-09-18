@@ -11,7 +11,7 @@
         <span class="text-gray-700 font-bold">Progress Pekerjaan</span>
     </nav>
 
-    <div class="bg-white border border-border rounded-2xl shadow-sm overflow-hidden">
+    <div class="bg-white border border-border rounded-2xl shadow-sm overflow-hidden" x-data="{ tab: 'progress' }">
         <!-- Header -->
         <div class="bg-primary text-white px-6 md:px-10 py-8">
             <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/70">
@@ -25,11 +25,28 @@
             </p>
         </div>
 
+        <!-- Tabs -->
+        <div class="flex border-b border-border bg-gray-50">
+            <button type="button" @click="tab = 'progress'"
+                class="flex-1 py-3.5 px-4 text-sm font-semibold transition-colors border-b-2"
+                :class="tab === 'progress' ? 'text-primary border-primary bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'">
+                <i class="ri-bar-chart-box-line mr-1.5"></i> Progress Pekerjaan
+            </button>
+            <button type="button" @click="tab = 'cleaner'"
+                class="flex-1 py-3.5 px-4 text-sm font-semibold transition-colors border-b-2"
+                :class="tab === 'cleaner' ? 'text-primary border-primary bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'">
+                <i class="ri-team-line mr-1.5"></i> Profil Cleaner
+            </button>
+        </div>
+
+        <!-- Tab 1: Progress -->
+        <div x-show="tab === 'progress'">
         <!-- Ringkasan -->
         <div class="px-6 md:px-10 py-6 border-b border-border">
             @php
                 $totalRooms = $order->progressRooms->count();
                 $doneRooms = $order->progressRooms->where('status', 'selesai')->count();
+                $totalLuas = $order->progressRooms->sum('luas');
                 $percent = $totalRooms > 0 ? round(($doneRooms / $totalRooms) * 100) : 0;
             @endphp
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -39,6 +56,9 @@
                     </div>
                     <div class="text-xs text-gray-500 mt-0.5">
                         {{ $doneRooms }} dari {{ $totalRooms }} ruangan selesai
+                        @if($totalLuas)
+                            · <span class="font-semibold text-violet-600">{{ rtrim(rtrim(number_format($totalLuas, 2, ',', '.'), '0'), ',') }} m²</span>
+                        @endif
                     </div>
                 </div>
                 <div class="text-3xl font-extrabold {{ $percent === 100 ? 'text-green-600' : 'text-primary' }}">
@@ -56,6 +76,9 @@
                 <div>
                     <h2 class="flex items-center gap-2 text-base font-bold text-gray-800 mb-4">
                         <i class="ri-building-2-line text-primary"></i> {{ $lantai }}
+                        @if($rooms->sum('luas'))
+                        <span class="text-xs font-semibold text-gray-400">· {{ rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') }} m²</span>
+                        @endif
                     </h2>
                     <div class="space-y-3">
                         @foreach($rooms as $room)
@@ -125,6 +148,56 @@
                     <p class="text-sm mt-1">Silakan hubungi tim PHC untuk informasi lebih lanjut.</p>
                 </div>
             @endforelse
+        </div>
+        </div>
+
+        <!-- Tab 2: Profil Cleaner -->
+        <div x-show="tab === 'cleaner'" x-cloak>
+            <div class="px-6 md:px-10 py-8">
+                @php
+                    $assignments = $order->assignments;
+                @endphp
+                @if($assignments->count() > 0)
+                    <div class="space-y-4">
+                        @foreach($assignments as $index => $assignment)
+                            @php $cleaner = $assignment->cleaner; @endphp
+                            @if(!$cleaner) @continue @endif
+                            <div class="flex items-center gap-4 p-4 rounded-xl border {{ $index === 0 ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-gray-50' }}">
+                                <div class="shrink-0 relative">
+                                    @if($cleaner->foto)
+                                        <img src="{{ route('public.progress.cleaner.foto', [$order->progress_token, $cleaner]) }}"
+                                            alt="{{ $cleaner->name }}"
+                                            class="w-16 h-16 rounded-full object-cover border-2 {{ $index === 0 ? 'border-blue-400' : 'border-gray-200' }} shadow-sm">
+                                    @else
+                                        <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl border-2 {{ $index === 0 ? 'border-blue-400' : 'border-gray-200' }} shadow-sm">
+                                            {{ strtoupper(substr($cleaner->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                    @if($index === 0)
+                                        <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 text-[9px] font-bold uppercase bg-blue-600 text-white rounded-md tracking-wider whitespace-nowrap">PIC</span>
+                                    @endif
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-semibold text-gray-800">{{ $cleaner->name }}</div>
+                                    @if($cleaner->jenis)
+                                        <div class="text-xs text-gray-500 mt-0.5">
+                                            {{ $cleaner->jenis === 'Tetap' ? 'Cleaner Tetap' : 'Cleaner Mitra' }}
+                                        </div>
+                                    @endif
+                                </div>
+                                @if($index === 0)
+                                    <span class="shrink-0 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">PIC / Leader</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-16 text-gray-500">
+                        <i class="ri-team-line text-5xl text-gray-300"></i>
+                        <p class="mt-4 font-semibold">Belum ada cleaner yang ditugaskan.</p>
+                    </div>
+                @endif
+            </div>
         </div>
 
         <!-- Footer -->

@@ -12,7 +12,14 @@ class OrderProgressController extends Controller
     public function show($token)
     {
         $order = Order::where('progress_token', $token)
-            ->with(['customer', 'progressRooms.buktiPhotos'])
+            ->with([
+                'customer',
+                'progressRooms.buktiPhotos',
+                'assignments' => function ($q) {
+                    $q->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
+                },
+                'assignments.cleaner',
+            ])
             ->firstOrFail();
 
         // Kelompokkan ruangan berdasarkan lantai
@@ -29,7 +36,21 @@ class OrderProgressController extends Controller
         $order = Order::where('progress_token', $token)->firstOrFail();
         abort_unless($room && $room->order_id === $order->id, 404);
 
-        $photoUrl = $bukti->path;
+        return $this->proxyImage($bukti->path);
+    }
+
+    public function viewCleanerFoto($token, \App\Models\User $cleaner)
+    {
+        $order = Order::where('progress_token', $token)->firstOrFail();
+        // Pastikan cleaner ini bagian dari order
+        $assigned = $order->assignments()->where('user_id', $cleaner->id)->exists();
+        abort_unless($assigned, 404);
+
+        return $this->proxyImage($cleaner->foto);
+    }
+
+    protected function proxyImage(?string $photoUrl)
+    {
         if (!$photoUrl) {
             return abort(404);
         }
@@ -69,7 +90,7 @@ class OrderProgressController extends Controller
 
             return abort(404, 'Gagal mengambil gambar.');
         } catch (\Exception $e) {
-            \Log::error("Public progress bukti proxy error: " . $e->getMessage());
+            \Log::error("Public progress image proxy error: " . $e->getMessage());
             return abort(500);
         }
     }
