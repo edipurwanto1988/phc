@@ -36,6 +36,7 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
             'status' => 'required|in:active,inactive',
             'jenis' => 'nullable|in:Tetap,Mitra',
+            'level' => 'nullable|in:Senior,Medium,Junior',
             'keahlian' => 'nullable|string|max:2000',
             'phc_id' => 'nullable|string|max:10',
         ]);
@@ -51,6 +52,7 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'status' => $request->status,
             'jenis' => $isCleaner ? $request->jenis : null,
+            'level' => $isCleaner ? $request->level : null,
             'keahlian' => $isCleaner ? $request->keahlian : null,
             'phc_id' => $request->phc_id,
         ]);
@@ -75,6 +77,7 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
             'status' => 'required|in:active,inactive',
             'jenis' => 'nullable|in:Tetap,Mitra',
+            'level' => 'nullable|in:Senior,Medium,Junior',
             'keahlian' => 'nullable|string|max:2000',
             'phc_id' => 'nullable|string|max:10',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
@@ -90,6 +93,7 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'status' => $request->status,
             'jenis' => $isCleaner ? $request->jenis : null,
+            'level' => $isCleaner ? $request->level : null,
             'keahlian' => $isCleaner ? $request->keahlian : null,
             'phc_id' => $request->phc_id,
         ];

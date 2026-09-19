@@ -87,6 +87,24 @@
                     @error('jenis')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
+
+                    <!-- Level Cleaner -->
+                    <div class="pt-4 border-t border-blue-100">
+                        <label class="block text-sm font-semibold text-gray-800 mt-3 mb-2">
+                            <i class="ri-medal-line text-blue-600 mr-1"></i> Level Cleaner
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            @foreach(['Senior', 'Medium', 'Junior'] as $level)
+                            <label class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition-all">
+                                <input type="radio" name="level" value="{{ $level }}" class="text-blue-600 focus:ring-blue-500 h-4 w-4" {{ old('level') === $level ? 'checked' : '' }}>
+                                <span class="font-semibold text-gray-800 text-sm">{{ $level }}</span>
+                            </label>
+                            @endforeach
+                        </div>
+                        @error('level')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
 
