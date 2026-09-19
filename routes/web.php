@@ -13,6 +13,7 @@ use App\Http\Controllers\Public\ContactController as PublicContactController;
 use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\Public\HalamanController as PublicHalamanController;
 use App\Http\Controllers\Public\OrderProgressController as PublicOrderProgressController;
+use App\Http\Controllers\Public\LokerController as PublicLokerController;
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
@@ -28,6 +29,8 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\MenuController as AdminMenuController;
 use App\Http\Controllers\Admin\HalamanController as AdminHalamanController;
 use App\Http\Controllers\Admin\OrderProgressController as AdminOrderProgressController;
+use App\Http\Controllers\Admin\LokerController as AdminLokerController;
+use App\Http\Controllers\Admin\PeriodeLokerController as AdminPeriodeLokerController;
 
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
@@ -45,6 +48,10 @@ Route::post('/kontak', [PublicContactController::class, 'submit'])->name('public
 Route::get('/blog', [PublicBlogController::class, 'index'])->name('public.blog.index');
 Route::get('/blog/{slug}', [PublicBlogController::class, 'show'])->name('public.blog.show');
 Route::get('/halaman/{slug}', [PublicHalamanController::class, 'show'])->name('public.halaman.show');
+
+// Loker (lowongan kerja / lamaran)
+Route::get('/loker', [PublicLokerController::class, 'index'])->name('public.loker.index');
+Route::post('/loker', [PublicLokerController::class, 'submit'])->name('public.loker.submit');
 
 // Progress pekerjaan (link publik untuk client)
 Route::get('/progress/{token}', [PublicOrderProgressController::class, 'show'])->name('public.progress.show');
@@ -99,6 +106,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::resource('/roles', AdminRoleController::class)->names('admin.roles');
         Route::resource('/posts', AdminPostController::class)->names('admin.posts');
         Route::resource('/testimonials', AdminTestimonialController::class)->names('admin.testimonials');
+        Route::resource('/loker', AdminLokerController::class)->names('admin.loker');
+        Route::get('/loker/{loker}/ktp/view', [AdminLokerController::class, 'viewKtp'])->name('admin.loker.ktp.view');
+        Route::resource('/periode-loker', AdminPeriodeLokerController::class)->names('admin.periode-loker');
         Route::resource('/halaman', AdminHalamanController::class)->names('admin.halaman');
         Route::post('/menu/reorder', [AdminMenuController::class, 'reorder'])->name('admin.menu.reorder');
         Route::resource('/menu', AdminMenuController::class)->names('admin.menu');

@@ -158,6 +158,20 @@
                 </a>
                 @endhasperm
 
+                <!-- Loker (Pelamar) -->
+                @hasperm('manage_services')
+                <a href="/admin/loker" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/loker*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <i class="ri-briefcase-line text-xl"></i><span>Loker (Pelamar)</span>
+                </a>
+                @endhasperm
+
+                <!-- Periode Loker -->
+                @hasperm('manage_services')
+                <a href="/admin/periode-loker" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/periode-loker*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <i class="ri-calendar-line text-xl"></i><span>Periode Loker</span>
+                </a>
+                @endhasperm
+
                   <!-- Financial Reports -->
                   @if(auth()->user()->hasPermission('view_reports') || auth()->user()->role->name === 'Cleaner')
                   <a href="/admin/expenses" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/expenses*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">

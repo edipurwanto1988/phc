@@ -195,6 +195,7 @@
                             <a href="/#layanan" class="nav-link text-sm text-text-secondary font-medium">Layanan</a>
                             <a href="/#tentang" class="nav-link text-sm text-text-secondary font-medium">Tentang</a>
                             <a href="/blog" class="nav-link text-sm text-text-secondary font-medium">Blog</a>
+                            <a href="/loker" class="nav-link text-sm text-text-secondary font-medium">Loker</a>
                             <a href="/#kontak" class="nav-link text-sm text-text-secondary font-medium">Kontak</a>
                         @endforelse
                     </div>
@@ -316,6 +317,7 @@
                             <li><a href="/#layanan" class="text-text-secondary hover:text-primary transition-colors">Layanan Kami</a></li>
                             <li><a href="/#tentang" class="text-text-secondary hover:text-primary transition-colors">Tentang Kami</a></li>
                             <li><a href="/blog" class="text-text-secondary hover:text-primary transition-colors">Blog / Tips</a></li>
+                            <li><a href="/loker" class="text-text-secondary hover:text-primary transition-colors">Loker</a></li>
                             <li><a href="/#kontak" class="text-text-secondary hover:text-primary transition-colors">Kontak</a></li>
                         @endforelse
                     </ul>
