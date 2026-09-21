@@ -35,16 +35,16 @@
 
 <!-- Expenses Table -->
 <div class="card">
-    <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-white rounded-t-xl">
+    <div class="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white rounded-t-xl">
         <h3 class="font-semibold text-gray-800">{{ auth()->user()->role->name === 'Cleaner' ? 'Daftar Gaji yang Diterima' : 'Daftar Pengeluaran Operasional' }}</h3>
         @if(auth()->user()->hasPermission('manage_expenses'))
-        <a href="{{ route('admin.expenses.create') }}" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-sm text-sm">
+        <a href="{{ route('admin.expenses.create') }}" class="btn bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-sm text-sm justify-center sm:justify-start">
             <i class="ri-add-line text-lg"></i> Tambah Pengeluaran
         </a>
         @endif
     </div>
     <div class="overflow-x-auto bg-white rounded-b-xl">
-        <table class="w-full text-left border-collapse">
+        <table class="w-full text-left border-collapse whitespace-nowrap">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
                     <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Tanggal</th>
