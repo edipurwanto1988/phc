@@ -35,9 +35,9 @@ class DashboardController extends Controller
                         $q->where('user_id', $user->id);
                     })->count(),
                 'total_services' => Service::where('is_active', true)->count(),
-                'total_revenue' => \App\Models\OrderAssignment::where('user_id', $user->id)
-                    ->where('status_gaji', 'sudah_dibayar')
-                    ->sum('gaji'),
+                'total_revenue' => \App\Models\OrderAssignmentPayment::whereHas('assignment', function($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })->sum('amount'),
                 'cleaners_count' => 1,
             ];
         } else {
@@ -68,13 +68,13 @@ class DashboardController extends Controller
 
         // 3. Get monthly revenue statistics for chart/trend
         if ($isCleaner) {
-            $revenuePerMonth = \App\Models\OrderAssignment::select(
-                    DB::raw("DATE_FORMAT(finished_at, '%Y-%m') as month"),
-                    DB::raw('SUM(gaji) as total')
+            $revenuePerMonth = \App\Models\OrderAssignmentPayment::select(
+                    DB::raw("DATE_FORMAT(payment_date, '%Y-%m') as month"),
+                    DB::raw('SUM(order_assignment_payments.amount) as total')
                 )
-                ->where('user_id', $user->id)
-                ->where('status_gaji', 'sudah_dibayar')
-                ->where('finished_at', '>=', now()->subMonths(5)->startOfMonth())
+                ->join('order_assignments', 'order_assignments.id', '=', 'order_assignment_payments.assignment_id')
+                ->where('order_assignments.user_id', $user->id)
+                ->where('payment_date', '>=', now()->subMonths(5)->startOfMonth())
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get()

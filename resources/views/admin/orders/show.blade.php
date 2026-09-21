@@ -442,7 +442,12 @@
 
                     <!-- Gaji Form (Hanya untuk Admin/Super Admin) -->
                     @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
-                    <div class="border-t border-gray-200 pt-3 space-y-2" x-data="{isPaidExpense: {{ $assignment->expense_id ? 'true' : 'false' }} }">
+                    @php
+                        $totalPaid = $assignment->totalPaid();
+                        $remaining = $assignment->remaining();
+                        $isLunas = $assignment->isLunas();
+                    @endphp
+                    <div class="border-t border-gray-200 pt-3 space-y-2" x-data="{isPaidExpense: {{ $isLunas ? 'true' : 'false' }} }">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">Gaji Cleaner (Rp)</label>
@@ -452,11 +457,40 @@
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-0.5">Status Gaji</label>
                                 <select x-model="statusGaji" class="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-gray-250 disabled:text-gray-500" required :disabled="isPaidExpense">
                                     <option value="belum_dibayar">Belum Dibayar</option>
+                                    <option value="cicilan">Cicilan</option>
                                     <option value="sudah_dibayar">Sudah Dibayar</option>
                                 </select>
                             </div>
                         </div>
-                        
+
+                        {{-- Pembayaran berjalan / riwayat cicilan --}}
+                        @if($totalPaid > 0)
+                        <div class="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 text-[11px] space-y-1">
+                            <div class="flex justify-between items-center">
+                                <span class="text-blue-700 font-semibold flex items-center gap-1">
+                                    <i class="ri-wallet-3-line text-sm"></i> Sudah Dibayar (Cicilan)
+                                </span>
+                                <span class="font-bold text-blue-800">Rp {{ number_format($totalPaid, 0, ',', '.') }}</span>
+                            </div>
+                            @if(!$isLunas)
+                            <div class="flex justify-between items-center">
+                                <span class="text-amber-600 font-semibold flex items-center gap-1">
+                                    <i class="ri-hourglass-line text-sm"></i> Sisa Belum Dibayar
+                                </span>
+                                <span class="font-bold text-amber-700">Rp {{ number_format($remaining, 0, ',', '.') }}</span>
+                            </div>
+                            @endif
+                            <div class="text-[10px] text-gray-500 border-t border-blue-100 pt-1">
+                                @foreach($assignment->payments as $pay)
+                                <div class="flex justify-between">
+                                    <span>{{ $pay->payment_date->translatedFormat('d M Y') }} — {{ $pay->type === 'pelunasan' ? 'Pelunasan' : 'Cash Bon' }}</span>
+                                    <span class="font-semibold">Rp {{ number_format($pay->amount, 0, ',', '.') }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
                         <div class="flex items-center justify-between pt-1 pb-2">
                             <!-- Status feedback -->
                             <div class="text-[11px]">
@@ -469,8 +503,8 @@
                                 <span class="text-red-500 font-bold flex items-center gap-1" x-show="error">
                                     <i class="ri-error-warning-line text-sm"></i> Gagal menyimpan
                                 </span>
-                                <span class="text-blue-600 font-semibold flex items-center gap-1" x-show="isPaidExpense">
-                                    <i class="ri-lock-line text-sm"></i> Slip Gaji Telah Dibuat
+                                <span class="text-green-650 font-semibold flex items-center gap-1" x-show="isPaidExpense">
+                                    <i class="ri-check-double-line text-sm"></i> Gaji Lunas
                                 </span>
                             </div>
                             

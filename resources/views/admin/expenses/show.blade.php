@@ -69,10 +69,15 @@
                             <th class="py-2.5 px-4 text-xs font-bold text-gray-500 uppercase">Pelanggan</th>
                             <th class="py-2.5 px-4 text-xs font-bold text-gray-500 uppercase">Tanggal Jadwal</th>
                             <th class="py-2.5 px-4 text-xs font-bold text-gray-500 uppercase text-right">Gaji Jasa</th>
+                            <th class="py-2.5 px-4 text-xs font-bold text-gray-500 uppercase text-right">Dibayar</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($expense->orderAssignments as $assignment)
+                        @php
+                            $paidForThisExpense = $assignment->payments->where('expense_id', $expense->id)->sum('amount');
+                            $paidType = $assignment->payments->where('expense_id', $expense->id)->first()->type ?? null;
+                        @endphp
                         <tr class="border-b border-gray-100">
                             <td class="py-3 px-4 text-sm font-bold text-blue-600">
                                 <a href="{{ route('admin.orders.show', $assignment->order) }}" class="hover:underline">{{ $assignment->order->order_number }}</a>
@@ -86,6 +91,14 @@
                             <td class="py-3 px-4 text-sm font-bold text-gray-800 text-right">
                                 Rp {{ number_format($assignment->gaji, 0, ',', '.') }}
                             </td>
+                            <td class="py-3 px-4 text-sm font-bold text-green-650 text-right">
+                                Rp {{ number_format($paidForThisExpense, 0, ',', '.') }}
+                                @if($paidType)
+                                <span class="block text-[10px] font-semibold {{ $paidType === 'pelunasan' ? 'text-emerald-600' : 'text-amber-600' }}">
+                                    {{ $paidType === 'pelunasan' ? 'Pelunasan' : 'Cash Bon' }}
+                                </span>
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -95,7 +108,7 @@
             <!-- Grand Total Gaji -->
             <div class="mt-4 pt-4 border-t border-gray-100 flex justify-end">
                 <div class="w-full md:w-64 text-right">
-                    <span class="text-xs text-gray-400 font-bold uppercase block">Total Gaji Dibayarkan</span>
+                    <span class="text-xs text-gray-400 font-bold uppercase block">Total Dibayarkan (Slip Ini)</span>
                     <span class="text-xl font-extrabold text-blue-650">
                         Rp {{ number_format($expense->jumlah, 0, ',', '.') }}
                     </span>

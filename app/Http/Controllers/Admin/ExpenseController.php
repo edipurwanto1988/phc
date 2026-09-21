@@ -55,11 +55,15 @@ class ExpenseController extends Controller
             $q->whereIn('name', ['Cleaner', 'Staff', 'Admin']);
         })->where('status', 'active')->orderBy('name')->get();
 
-        // Get unpaid assignments grouped by user
-        $unpaidAssignments = \App\Models\OrderAssignment::with(['order', 'cleaner'])
-            ->where('status_gaji', 'belum_dibayar')
+        // Get assignments that still have outstanding salary, grouped by user
+        // (status belum_dibayar OR cicilan), each with its paid/remaining totals.
+        $unpaidAssignments = \App\Models\OrderAssignment::with(['order', 'cleaner', 'payments'])
+            ->whereIn('status_gaji', ['belum_dibayar', 'cicilan'])
             ->where('gaji', '>', 0)
             ->get()
+            ->filter(function ($assignment) {
+                return $assignment->remaining() > 0;
+            })
             ->groupBy('user_id');
 
         return view('admin.expenses.create', compact('users', 'cleaners', 'unpaidAssignments'));
@@ -76,6 +80,9 @@ class ExpenseController extends Controller
                 'cleaner_id' => 'required|exists:users,id',
                 'assignment_ids' => 'required|array|min:1',
                 'assignment_ids.*' => 'exists:order_assignments,id',
+                // Per-assignment payment amounts (partial = cashbon, full remaining = pelunasan)
+                'amounts' => 'required|array',
+                'amounts.*' => 'required|numeric|min:0',
                 'keterangan' => 'nullable|string',
             ]);
 
@@ -84,29 +91,77 @@ class ExpenseController extends Controller
                 ->where('user_id', $cleaner->id)
                 ->get();
 
-            $totalGaji = $assignments->sum('gaji');
+            $amounts = $request->input('amounts', []);
 
             \DB::beginTransaction();
             try {
-                // Create salary expense record
+                $totalPaidNow = 0.0;
+                $paymentLinks = []; // assignment_id => type for this payment
+
+                foreach ($assignments as $assignment) {
+                    $amount = (float) ($amounts[$assignment->id] ?? 0);
+                    if ($amount <= 0) {
+                        continue;
+                    }
+
+                    $remaining = $assignment->remaining();
+                    if ($amount > $remaining + 0.01) {
+                        throw new \Exception(
+                            "Jumlah pembayaran untuk order {$assignment->order->order_number} "
+                            . "(Rp " . number_format($amount, 0, ',', '.') . ") melebihi sisa gaji "
+                            . "(Rp " . number_format($remaining, 0, ',', '.') . ")."
+                        );
+                    }
+
+                    // Determine payment type: pelunasan if this pays off the remaining balance
+                    $isLunas = abs($amount - $remaining) < 0.01;
+                    $paymentLinks[$assignment->id] = $isLunas ? 'pelunasan' : 'cashbon';
+                    $totalPaidNow += $amount;
+                }
+
+                if ($totalPaidNow <= 0) {
+                    throw new \Exception('Tidak ada nominal pembayaran yang valid (semua 0).');
+                }
+
+                // Create the salary expense record for this installment batch
                 $expense = Expense::create([
                     'tanggal' => $request->tanggal,
                     'kategori_biaya' => 'Gaji / Pembayaran Jasa Cleaner',
-                    'jumlah' => $totalGaji,
+                    'jumlah' => $totalPaidNow,
                     'keterangan' => $request->keterangan ?: "Pembayaran Gaji Cleaner: {$cleaner->name}",
                     'user_id' => $cleaner->id, // pelaksana / penerima
                     'is_gaji' => true,
                 ]);
 
-                // Update assignments status & link to expense
-                \App\Models\OrderAssignment::whereIn('id', $request->assignment_ids)
-                    ->update([
-                        'status_gaji' => 'sudah_dibayar',
+                // Record individual installment payments and update assignment status
+                foreach ($assignments as $assignment) {
+                    $amount = (float) ($amounts[$assignment->id] ?? 0);
+                    if ($amount <= 0) {
+                        continue;
+                    }
+
+                    $type = $paymentLinks[$assignment->id];
+
+                    \App\Models\OrderAssignmentPayment::create([
+                        'assignment_id' => $assignment->id,
+                        'amount' => $amount,
+                        'type' => $type,
+                        'payment_date' => $request->tanggal,
+                        'catatan' => $request->keterangan,
                         'expense_id' => $expense->id,
+                        'created_by' => \Auth::id(),
                     ]);
 
+                    // Update status: lunas if fully paid, otherwise cicilan (partial)
+                    $isLunas = $type === 'pelunasan';
+                    $assignment->update([
+                        'status_gaji' => $isLunas ? 'sudah_dibayar' : 'cicilan',
+                        'expense_id' => $expense->id,
+                    ]);
+                }
+
                 \DB::commit();
-                return redirect()->route('admin.expenses.index')->with('success', 'Slip gaji & pembayaran berhasil dibuat.');
+                return redirect()->route('admin.expenses.index')->with('success', 'Pembayaran gaji (cicilan) berhasil dicatat.');
             } catch (\Exception $e) {
                 \DB::rollBack();
                 return redirect()->back()->withInput()->withErrors(['error' => 'Gagal membuat pembayaran gaji: ' . $e->getMessage()]);
@@ -138,7 +193,7 @@ class ExpenseController extends Controller
      */
     public function show(Expense $expense)
     {
-        $expense->load(['user', 'orderAssignments.order.customer']);
+        $expense->load(['user', 'orderAssignments.order.customer', 'orderAssignments.payments']);
         return view('admin.expenses.show', compact('expense'));
     }
 
@@ -164,10 +219,18 @@ class ExpenseController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
+        // For salary (gaji) expenses, keep the amount consistent with the linked
+        // installment payments to avoid desync with assignment payment history.
+        $jumlah = $request->jumlah;
+        if ($expense->is_gaji) {
+            $linkedPaid = \App\Models\OrderAssignmentPayment::where('expense_id', $expense->id)->sum('amount');
+            $jumlah = $linkedPaid > 0 ? $linkedPaid : $request->jumlah;
+        }
+
         $expense->update([
             'tanggal' => $request->tanggal,
             'kategori_biaya' => $request->kategori_biaya,
-            'jumlah' => $request->jumlah,
+            'jumlah' => $jumlah,
             'keterangan' => $request->keterangan,
             'user_id' => $request->user_id,
         ]);
@@ -182,13 +245,33 @@ class ExpenseController extends Controller
     {
         \DB::beginTransaction();
         try {
-            // Restore unpaid status to linked assignments if this was a salary slip
             if ($expense->is_gaji) {
-                \App\Models\OrderAssignment::where('expense_id', $expense->id)
-                    ->update([
-                        'status_gaji' => 'belum_dibayar',
-                        'expense_id' => null,
-                    ]);
+                // Remove linked installment payments first
+                $assignments = \App\Models\OrderAssignment::where('expense_id', $expense->id)->get();
+                \App\Models\OrderAssignmentPayment::where('expense_id', $expense->id)->delete();
+
+                // Recompute status for each affected assignment based on remaining payments
+                foreach ($assignments as $assignment) {
+                    $assignment->load('payments');
+                    $totalPaid = $assignment->totalPaid();
+
+                    if ($totalPaid <= 0) {
+                        $assignment->update([
+                            'status_gaji' => 'belum_dibayar',
+                            'expense_id' => null,
+                        ]);
+                    } elseif ($assignment->isLunas()) {
+                        $assignment->update([
+                            'status_gaji' => 'sudah_dibayar',
+                            'expense_id' => null,
+                        ]);
+                    } else {
+                        $assignment->update([
+                            'status_gaji' => 'cicilan',
+                            'expense_id' => null,
+                        ]);
+                    }
+                }
             }
             $expense->delete();
             \DB::commit();
@@ -205,7 +288,7 @@ class ExpenseController extends Controller
             return redirect()->back()->withErrors(['error' => 'Dokumen ini bukan merupakan slip pembayaran gaji.']);
         }
 
-        $expense->load(['user', 'orderAssignments.order.customer', 'orderAssignments.order.items.service']);
+        $expense->load(['user', 'orderAssignments.order.customer', 'orderAssignments.order.items.service', 'orderAssignments.payments']);
         
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.expenses.slip', compact('expense'));
         

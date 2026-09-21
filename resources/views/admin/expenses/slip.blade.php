@@ -239,7 +239,7 @@
                 <div class="section-title">Metode Pembayaran</div>
                 <div class="info-value">
                     Kategori: Pengeluaran Gaji Jasa Cleaner<br>
-                    Status: <strong style="color: #059669;">LUNAS / SUDAH DIBAYAR</strong><br>
+                    Status: <strong style="color: #059669;">SUDAH DIBAYAR</strong><br>
                     Catatan: {{ $expense->keterangan }}
                 </div>
             </td>
@@ -250,10 +250,11 @@
     <table class="table-items">
         <thead>
             <tr>
-                <th style="width: 25%;">No. Order</th>
-                <th style="width: 30%;">Pelanggan</th>
-                <th style="width: 25%;">Tanggal Pekerjaan</th>
-                <th style="width: 20%; text-align: right;">Gaji (Rp)</th>
+                <th style="width: 20%;">No. Order</th>
+                <th style="width: 25%;">Pelanggan</th>
+                <th style="width: 20%;">Tanggal Pekerjaan</th>
+                <th style="width: 15%; text-align: right;">Gaji (Rp)</th>
+                <th style="width: 20%; text-align: right;">Dibayar (Rp)</th>
             </tr>
         </thead>
         <tbody>
@@ -263,6 +264,12 @@
                 <td>{{ $assignment->order->customer->nama }}</td>
                 <td>{{ \Carbon\Carbon::parse($assignment->order->tanggal_jadwal)->translatedFormat('d M Y, H:i') }}</td>
                 <td class="text-right">Rp {{ number_format($assignment->gaji, 0, ',', '.') }}</td>
+                <td class="text-right">
+                    @php
+                        $paidForThisExpense = $assignment->payments->where('expense_id', $expense->id)->sum('amount');
+                    @endphp
+                    Rp {{ number_format($paidForThisExpense, 0, ',', '.') }}
+                </td>
             </tr>
             @endforeach
         </tbody>

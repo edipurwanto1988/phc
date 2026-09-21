@@ -195,7 +195,7 @@ class OrderController extends Controller
     {
         $order->load(['customer', 'items.service', 'assignments' => function($q) {
             $q->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
-        }, 'assignments.cleaner', 'creator', 'progressRooms']);
+        }, 'assignments.cleaner', 'assignments.payments', 'creator', 'progressRooms']);
         
         $cleaners = User::whereHas('role', function($q) {
             $q->where('name', 'Cleaner');
@@ -320,9 +320,12 @@ class OrderController extends Controller
     {
         $request->validate([
             'gaji' => 'required|numeric|min:0',
-            'status_gaji' => 'required|in:belum_dibayar,sudah_dibayar',
+            'status_gaji' => 'required|in:belum_dibayar,cicilan,sudah_dibayar',
         ]);
 
+        // If there are partial payments and the assignment is marked as lunas,
+        // keep consistent: only allow manual 'sudah_dibayar' when there are no
+        // installment payments (payment flow drives status). Otherwise respect input.
         $assignment->update([
             'gaji' => $request->gaji,
             'status_gaji' => $request->status_gaji,
