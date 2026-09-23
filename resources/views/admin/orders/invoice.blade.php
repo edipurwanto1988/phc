@@ -436,8 +436,8 @@
                 @else
                 <strong>Catatan:</strong> 
                 <div style="margin-top: 2px;">
-                    1. Pembayaran uang muka (DP) sebesar 30% dilakukan sebelum layanan dilaksanakan.<br>
-                    2. Pembayaran full payment (pelunasan) sebesar 70% dilakukan setelah pekerjaan selesai dilaksanakan.
+                    1. Pembayaran uang muka (DP) 30% sebelum layanan dilaksanakan.<br>
+                    2. Pembayaran pelunasan (FP) 70% setelah pekerjaan selesai.
                 </div>
                 @endif
             </td>
