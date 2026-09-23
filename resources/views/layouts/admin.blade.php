@@ -82,7 +82,7 @@
                 </a>
 
                 <!-- Orders (Pesanan) -->
-                @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('view_orders'))
+                @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('view_orders') || (auth()->user()->role && auth()->user()->role->name === 'Cleaner'))
                 <a href="/admin/orders" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/orders*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
                     <i class="ri-calendar-todo-line text-xl"></i><span>Pesanan (Orders)</span>
                 </a>

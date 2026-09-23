@@ -69,4 +69,9 @@ class Order extends Model
     {
         return $this->hasMany(Expense::class, 'order_id');
     }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(OrderSchedule::class)->orderBy('tanggal', 'asc');
+    }
 }

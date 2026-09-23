@@ -130,6 +130,15 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/orders/assignments/{assignment}/photos', [AdminOrderController::class, 'uploadPhotos'])->name('admin.orders.upload-photos');
         Route::get('/orders/assignments/{assignment}/photos/{type}/view', [AdminOrderController::class, 'viewDrivePhoto'])->name('admin.orders.view-drive-photo');
         Route::delete('/orders/assignments/{assignment}/photos/{type}', [AdminOrderController::class, 'deletePhoto'])->name('admin.orders.delete-photo');
+
+        // Absensi Routes
+        Route::prefix('/orders/{order}/absensi')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\OrderAttendanceController::class, 'index'])->name('admin.orders.absensi.index');
+            Route::post('/schedules', [\App\Http\Controllers\Admin\OrderAttendanceController::class, 'storeSchedule'])->name('admin.orders.absensi.storeSchedule');
+            Route::delete('/schedules/{schedule}', [\App\Http\Controllers\Admin\OrderAttendanceController::class, 'destroySchedule'])->name('admin.orders.absensi.destroySchedule');
+            Route::post('/schedules/{schedule}/attend', [\App\Http\Controllers\Admin\OrderAttendanceController::class, 'storeAttendance'])->name('admin.orders.absensi.storeAttendance');
+            Route::patch('/attendances/{attendance}', [\App\Http\Controllers\Admin\OrderAttendanceController::class, 'updateStatus'])->name('admin.orders.absensi.updateStatus');
+        });
         Route::delete('/orders/assignments/{assignment}', [AdminOrderController::class, 'deleteAssignment'])->name('admin.orders.delete-assignment');
         Route::post('/orders/{order}/assignments/reorder', [AdminOrderController::class, 'reorderAssignments'])->name('admin.orders.assignments-reorder');
         Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.status');
