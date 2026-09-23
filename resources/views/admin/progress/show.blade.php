@@ -12,7 +12,9 @@
     $prosesRooms = $order->progressRooms->where('status', 'proses')->count();
     $belumRooms = $order->progressRooms->where('status', 'belum')->count();
     $totalLuas = $order->progressRooms->sum('luas');
+    $luasSelesai = $order->progressRooms->where('status', 'selesai')->sum('luas');
     $progressPercent = $totalRooms > 0 ? round(($doneRooms / $totalRooms) * 100) : 0;
+    $progressLuasPercent = $totalLuas > 0 ? round(($luasSelesai / $totalLuas) * 100) : 0;
     $grouped = $order->progressRooms->groupBy(fn($r) => $r->lantai ?: 'Tanpa Lantai')
         ->sortKeysUsing(fn($a, $b) => strnatcasecmp($a, $b));
 @endphp
@@ -60,12 +62,22 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between text-sm mb-1.5">
-                <span class="text-gray-600 font-medium">Progres Keseluruhan</span>
+            <!-- Progres Ruangan -->
+            <div class="flex items-center justify-between text-sm mb-1.5 mt-2">
+                <span class="text-gray-600 font-medium">Progres Ruangan</span>
                 <span class="font-bold {{ $progressPercent === 100 ? 'text-green-600' : 'text-blue-600' }}">{{ $progressPercent }}%</span>
             </div>
-            <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden mb-4">
                 <div class="h-full {{ $progressPercent === 100 ? 'bg-green-500' : 'bg-blue-600' }} rounded-full transition-all duration-500" style="width: {{ $progressPercent }}%"></div>
+            </div>
+
+            <!-- Progres Luas -->
+            <div class="flex items-center justify-between text-sm mb-1.5 mt-2">
+                <span class="text-gray-600 font-medium">Progres Berdasarkan Luas</span>
+                <span class="font-bold {{ $progressLuasPercent === 100 ? 'text-green-600' : 'text-violet-600' }}">{{ $progressLuasPercent }}%</span>
+            </div>
+            <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden mb-2">
+                <div class="h-full {{ $progressLuasPercent === 100 ? 'bg-green-500' : 'bg-violet-500' }} rounded-full transition-all duration-500" style="width: {{ $progressLuasPercent }}%"></div>
             </div>
         </div>
 
