@@ -34,7 +34,7 @@
 </div>
 
 <!-- Expenses Table -->
-<div class="card">
+<div class="card w-full max-w-full overflow-hidden">
     <div class="p-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white rounded-t-xl">
         <h3 class="font-semibold text-gray-800">{{ auth()->user()->role->name === 'Cleaner' ? 'Daftar Gaji yang Diterima' : 'Daftar Pengeluaran Operasional' }}</h3>
         @if(auth()->user()->hasPermission('manage_expenses'))
