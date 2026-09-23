@@ -260,7 +260,7 @@
             </header>
 
             <!-- Main view contents -->
-            <main class="p-4 lg:p-8 flex-1">
+            <main class="p-4 lg:p-8 flex-1 min-w-0 w-full overflow-x-hidden">
                 @if(session('success'))
                     <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2">
                         <i class="ri-checkbox-circle-line text-lg"></i>
