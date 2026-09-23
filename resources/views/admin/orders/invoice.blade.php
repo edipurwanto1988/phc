@@ -434,7 +434,11 @@
                 <strong>Catatan Order:</strong><br>
                 <span style="font-style: italic; color: #374151;">{{ $order->catatan }}</span>
                 @else
-                <strong>Catatan:</strong> Pembayaran dapat dilakukan setelah layanan selesai.
+                <strong>Catatan:</strong> 
+                <div style="margin-top: 2px;">
+                    1. Pembayaran uang muka (DP) sebesar 30% dilakukan sebelum layanan dilaksanakan.<br>
+                    2. Pembayaran full payment (pelunasan) sebesar 70% dilakukan setelah pekerjaan selesai dilaksanakan.
+                </div>
                 @endif
             </td>
             <td style="width: 40%; font-size: 8.5px; color: #4b5563; text-align: right; vertical-align: top; line-height: 1.3;">
