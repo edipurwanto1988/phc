@@ -14,6 +14,7 @@ class Expense extends Model
         'keterangan',
         'user_id',
         'is_gaji', // Mark whether it is a salary payment
+        'order_id', // Link to specific order
     ];
 
     protected $casts = [
@@ -30,5 +31,10 @@ class Expense extends Model
     public function orderAssignments()
     {
         return $this->hasMany(OrderAssignment::class, 'expense_id');
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'order_id');
     }
 }

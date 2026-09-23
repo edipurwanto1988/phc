@@ -21,6 +21,7 @@ class Loker extends Model
         'no_wa',
         'ktp',
         'ktp_drive_id',
+        'rating',
     ];
 
     public function periode(): BelongsTo

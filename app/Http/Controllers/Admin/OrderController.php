@@ -22,7 +22,7 @@ class OrderController extends Controller
     {
         $query = Order::query()->with(['customer', 'assignments' => function($q) {
             $q->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
-        }, 'assignments.cleaner']);
+        }, 'assignments.cleaner', 'expenses']);
 
         // Limit visibility for cleaners: only show orders they are assigned to
         $user = Auth::user();
@@ -706,5 +706,20 @@ class OrderController extends Controller
         };
         
         return $pdf->download('Nota-' . $order->order_number . '-' . $typeLabel . '-' . $payment->id . '.pdf');
+    }
+
+    public function profit(Order $order)
+    {
+        $order->load(['customer', 'assignments.cleaner', 'expenses']);
+        
+        $uangMasuk = $order->grand_total;
+        $uangGaji = $order->assignments->sum('gaji');
+        $uangOperasional = $order->expenses->sum('jumlah');
+        $uangKeluar = $uangGaji + $uangOperasional;
+        $profitFinal = $uangMasuk - $uangKeluar;
+        
+        return view('admin.orders.profit', compact(
+            'order', 'uangMasuk', 'uangGaji', 'uangOperasional', 'uangKeluar', 'profitFinal'
+        ));
     }
 }

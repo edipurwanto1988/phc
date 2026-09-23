@@ -15,6 +15,7 @@ class LokerController extends Controller
     {
         $periodeId = $request->get('periode_id', '');
         $nama = trim($request->get('nama', ''));
+        $rating = $request->get('rating', '');
 
         $lokeres = Loker::with('periode')
             ->when($periodeId !== '' && $periodeId !== null, function ($q) use ($periodeId) {
@@ -23,13 +24,16 @@ class LokerController extends Controller
             ->when($nama !== '', function ($q) use ($nama) {
                 return $q->where('nama', 'like', "%{$nama}%");
             })
+            ->when($rating !== '', function ($q) use ($rating) {
+                return $q->where('rating', $rating);
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(15)
-            ->appends(['periode_id' => $periodeId, 'nama' => $nama]);
+            ->appends(['periode_id' => $periodeId, 'nama' => $nama, 'rating' => $rating]);
 
         $periodes = PeriodeLoker::orderBy('created_at', 'desc')->get();
 
-        return view('admin.loker.index', compact('lokeres', 'periodes', 'periodeId', 'nama'));
+        return view('admin.loker.index', compact('lokeres', 'periodes', 'periodeId', 'nama', 'rating'));
     }
 
     public function create()
@@ -92,11 +96,12 @@ class LokerController extends Controller
             'cerita' => 'nullable|string',
             'no_wa' => 'required|string|max:20',
             'ktp' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'rating' => 'nullable|string|in:High Potential,Potential,Moderate Potential,Low Potential',
         ]);
 
         $data = $request->only([
             'periode_id', 'nama', 'email', 'alamat', 'jenis_kelamin',
-            'pengalaman', 'keahlian_khusus', 'cerita', 'no_wa',
+            'pengalaman', 'keahlian_khusus', 'cerita', 'no_wa', 'rating',
         ]);
 
         if ($request->hasFile('ktp')) {

@@ -1,0 +1,148 @@
+- generic [ref=f2e2]:
+  - complementary [ref=f2e3]:
+    - generic [ref=f2e4]:
+      - generic [ref=f2e5]:
+        - link [ref=f2e6] [cursor=pointer]:
+          - /url: /admin
+          - img "Pekanbaru Home Cleaning" [ref=f2e7]
+        - text: 
+      - paragraph [ref=f2e8]: Super Admin
+    - navigation [ref=f2e9]:
+      - link " Dashboard" [ref=f2e10] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=f2e11]: 
+        - generic [ref=f2e12]: Dashboard
+      - link " Pesanan (Orders)" [ref=f2e13] [cursor=pointer]:
+        - /url: /admin/orders
+        - generic [ref=f2e14]: 
+        - generic [ref=f2e15]: Pesanan (Orders)
+      - link " Customer" [ref=f2e16] [cursor=pointer]:
+        - /url: /admin/customers
+        - generic [ref=f2e17]: 
+        - generic [ref=f2e18]: Customer
+      - generic [ref=f2e19]:
+        - button " Master Jasa " [ref=f2e20]:
+          - generic [ref=f2e21]:
+            - generic [ref=f2e22]: 
+            - generic [ref=f2e23]: Master Jasa
+          - generic [ref=f2e24]: 
+        - text:  
+      - generic [ref=f2e25]:
+        - button " Hak Akses " [ref=f2e26]:
+          - generic [ref=f2e27]:
+            - generic [ref=f2e28]: 
+            - generic [ref=f2e29]: Hak Akses
+          - generic [ref=f2e30]: 
+        - text:  
+      - link " Blog / Tips" [ref=f2e31] [cursor=pointer]:
+        - /url: /admin/posts
+        - generic [ref=f2e32]: 
+        - generic [ref=f2e33]: Blog / Tips
+      - link " Laman Statis" [ref=f2e34] [cursor=pointer]:
+        - /url: /admin/halaman
+        - generic [ref=f2e35]: 
+        - generic [ref=f2e36]: Laman Statis
+      - link " Testimoni" [ref=f2e37] [cursor=pointer]:
+        - /url: /admin/testimonials
+        - generic [ref=f2e38]: 
+        - generic [ref=f2e39]: Testimoni
+      - link " Pengeluaran" [ref=f2e40] [cursor=pointer]:
+        - /url: /admin/expenses
+        - generic [ref=f2e41]: 
+        - generic [ref=f2e42]: Pengeluaran
+      - generic [ref=f2e43]:
+        - button " Lap. Keuangan " [ref=f2e44]:
+          - generic [ref=f2e45]:
+            - generic [ref=f2e46]: 
+            - generic [ref=f2e47]: Lap. Keuangan
+          - generic [ref=f2e48]: 
+        - text:  
+      - link " Menu Publik" [ref=f2e49] [cursor=pointer]:
+        - /url: /admin/menu
+        - generic [ref=f2e50]: 
+        - generic [ref=f2e51]: Menu Publik
+      - link " Pengaturan Web" [ref=f2e52] [cursor=pointer]:
+        - /url: /admin/settings
+        - generic [ref=f2e53]: 
+        - generic [ref=f2e54]: Pengaturan Web
+    - generic [ref=f2e55]:
+      - generic [ref=f2e56]:
+        - generic [ref=f2e57]: S
+        - generic [ref=f2e58]:
+          - paragraph [ref=f2e59]: Super Admin PHC
+          - paragraph [ref=f2e60]: superadmin@phc.com
+      - button "" [ref=f2e62]
+  - generic [ref=f2e64]:
+    - banner [ref=f2e65]:
+      - generic [ref=f2e66]:
+        - text: 
+        - heading " Tambah Pengeluaran & Gaji" [level=2] [ref=f2e67]:
+          - generic [ref=f2e68]: 
+          - text: Tambah Pengeluaran & Gaji
+      - generic [ref=f2e69]:
+        - generic [ref=f2e70]: 10:35
+        - link " Kunjungi Situs" [ref=f2e71] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f2e72]: 
+          - generic [ref=f2e73]: Kunjungi Situs
+    - main [ref=f2e74]:
+      - generic [ref=f2e75]:
+        - generic [ref=f2e76]:
+          - button " Pengeluaran Operasional" [ref=f2e77]:
+            - generic [ref=f2e78]: 
+            - text: Pengeluaran Operasional
+          - button " Pembayaran Gaji Cleaner" [active] [ref=f2e79]:
+            - generic [ref=f2e80]: 
+            - text: Pembayaran Gaji Cleaner
+        - generic [ref=f2e104]:
+          - generic [ref=f2e105]:
+            - generic [ref=f2e106]:
+              - generic [ref=f2e107]: Tanggal Pembayaran
+              - textbox "Tanggal Pembayaran" [ref=f2e108]: 2026-09-19
+            - generic [ref=f2e109]:
+              - generic [ref=f2e110]: Pilih Cleaner (Yang memiliki gaji belum lunas)
+              - combobox "Pilih Cleaner (Yang memiliki gaji belum lunas)" [ref=f2e111]:
+                - option "-- Pilih Cleaner --"
+                - option "Dian (Cleaner) (1 Order Belum Lunas)" [selected]
+          - generic [ref=f2e115]:
+            - generic [ref=f2e116]: Pilih Order & Masukkan Nominal Pembayaran (Cash Bon / Pelunasan)
+            - table [ref=f2e118]:
+              - rowgroup [ref=f2e119]:
+                - row [ref=f2e120]:
+                  - columnheader [ref=f2e121]:
+                    - checkbox [ref=f2e122]
+                  - columnheader "No. Order" [ref=f2e123]
+                  - columnheader "Pelanggan" [ref=f2e124]
+                  - columnheader "Tanggal Kerja" [ref=f2e125]
+                  - columnheader "Gaji (Rp)" [ref=f2e126]
+                  - columnheader "Sudah Dibayar" [ref=f2e127]
+                  - columnheader "Sisa" [ref=f2e128]
+                  - columnheader "Bayar Sekarang (Rp)" [ref=f2e129]
+              - rowgroup [ref=f2e130]:
+                - row [ref=f2e131]:
+                  - cell [ref=f2e132]:
+                    - checkbox [ref=f2e133]
+                  - cell "PHC-20260829-005" [ref=f2e134]
+                  - cell "Oliver Gaucher" [ref=f2e135]
+                  - cell "29 Agt 2026" [ref=f2e136]
+                  - cell "Rp 100.000" [ref=f2e137]
+                  - cell "Rp 0" [ref=f2e138]
+                  - cell "Rp 100.000" [ref=f2e139]
+                  - cell "Rp Pelunasan" [ref=f2e140]:
+                    - generic [ref=f2e141]:
+                      - generic [ref=f2e142]: Rp
+                      - spinbutton [ref=f2e143]: "100000"
+                    - text: Pelunasan
+            - generic [ref=f2e144]:
+              - generic [ref=f2e145]:
+                - generic [ref=f2e146]: Total Pembayaran
+                - text: 0 Pekerjaan dipilih
+              - generic [ref=f2e147]: Rp 0
+          - generic [ref=f2e149]:
+            - generic [ref=f2e150]: Catatan / Keterangan Slip
+            - textbox "Catatan / Keterangan Slip" [ref=f2e151]:
+              - /placeholder: "Contoh: Cash bon ke-1 / pelunasan gaji periode..."
+          - generic [ref=f2e112]:
+            - button "Proses Pembayaran Gaji" [disabled] [ref=f2e113]
+            - link "Batal" [ref=f2e114] [cursor=pointer]:
+              - /url: http://127.0.0.1:8000/admin/expenses

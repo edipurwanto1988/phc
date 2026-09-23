@@ -12,7 +12,7 @@
         <div class="flex items-center gap-2">
             <form method="GET" action="{{ route('admin.loker.index') }}" class="flex gap-2 items-center">
                 <input type="text" name="nama" value="{{ $nama }}" class="w-40 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Cari nama...">
-                <select name="periode_id" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                <select name="periode_id" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" onchange="this.form.submit()">
                     <option value="">-- Semua Periode --</option>
                     @foreach($periodes as $periode)
                     <option value="{{ $periode->id }}" {{ (string)$periodeId === (string)$periode->id ? 'selected' : '' }}>
@@ -20,10 +20,17 @@
                     </option>
                     @endforeach
                 </select>
+                <select name="rating" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" onchange="this.form.submit()">
+                    <option value="">-- Semua Rating --</option>
+                    <option value="High Potential" {{ $rating === 'High Potential' ? 'selected' : '' }}>High Potential</option>
+                    <option value="Potential" {{ $rating === 'Potential' ? 'selected' : '' }}>Potential</option>
+                    <option value="Moderate Potential" {{ $rating === 'Moderate Potential' ? 'selected' : '' }}>Moderate Potential</option>
+                    <option value="Low Potential" {{ $rating === 'Low Potential' ? 'selected' : '' }}>Low Potential</option>
+                </select>
                 <button type="submit" class="btn border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm font-semibold" title="Filter">
                     <i class="ri-filter-3-line"></i>
                 </button>
-                @if($periodeId !== '' || $nama !== '')
+                @if($periodeId !== '' || $nama !== '' || $rating !== '')
                 <a href="{{ route('admin.loker.index') }}" class="btn border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm font-semibold" title="Reset">
                     <i class="ri-refresh-line"></i>
                 </a>
@@ -43,6 +50,7 @@
                     <th class="py-3 px-6 text-sm font-semibold text-gray-600">No. WhatsApp</th>
                     <th class="py-3 px-6 text-sm font-semibold text-gray-600">Jenis Kelamin</th>
                     <th class="py-3 px-6 text-sm font-semibold text-gray-600">Keahlian Khusus</th>
+                    <th class="py-3 px-6 text-sm font-semibold text-gray-600">Rating</th>
                     <th class="py-3 px-6 text-sm font-semibold text-gray-600 w-24 text-center">KTP</th>
                     <th class="py-3 px-6 text-sm font-semibold text-gray-600 w-40 text-center">Tanggal</th>
                     <th class="py-3 px-6 text-sm font-semibold text-gray-600 w-28 text-center">Aksi</th>
@@ -73,6 +81,19 @@
                     </td>
                     <td class="py-4 px-6 text-sm text-gray-600">{{ $loker->jenis_kelamin }}</td>
                     <td class="py-4 px-6 text-sm text-gray-600 max-w-xs leading-relaxed">{{ $loker->keahlian_khusus ?: '-' }}</td>
+                    <td class="py-4 px-6 text-sm text-gray-600">
+                        @if($loker->rating === 'High Potential')
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">High</span>
+                        @elseif($loker->rating === 'Potential')
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">Potential</span>
+                        @elseif($loker->rating === 'Moderate Potential')
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700">Moderate</span>
+                        @elseif($loker->rating === 'Low Potential')
+                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">Low</span>
+                        @else
+                            <span class="text-xs text-gray-400">-</span>
+                        @endif
+                    </td>
                     <td class="py-4 px-6 text-center">
                         @if($loker->ktp)
                         <a href="{{ route('admin.loker.ktp.view', $loker) }}" target="_blank" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800">
@@ -103,7 +124,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="py-8 text-center text-sm text-gray-500 font-medium">Belum ada pelamar Loker yang masuk.</td>
+                    <td colspan="9" class="py-8 text-center text-sm text-gray-500 font-medium">Belum ada pelamar Loker yang masuk.</td>
                 </tr>
                 @endforelse
             </tbody>

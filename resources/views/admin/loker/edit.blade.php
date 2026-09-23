@@ -71,9 +71,21 @@
             <textarea name="pengalaman" id="pengalaman" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">{{ old('pengalaman', $loker->pengalaman) }}</textarea>
         </div>
 
-        <div class="mb-4">
-            <label for="keahlian_khusus" class="block text-sm font-semibold text-gray-700 mb-1">Keahlian Khusus</label>
-            <input type="text" name="keahlian_khusus" id="keahlian_khusus" value="{{ old('keahlian_khusus', $loker->keahlian_khusus) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: kaca, poles lantai, dll">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label for="keahlian_khusus" class="block text-sm font-semibold text-gray-700 mb-1">Keahlian Khusus</label>
+                <input type="text" name="keahlian_khusus" id="keahlian_khusus" value="{{ old('keahlian_khusus', $loker->keahlian_khusus) }}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: kaca, poles lantai, dll">
+            </div>
+            <div>
+                <label for="rating" class="block text-sm font-semibold text-gray-700 mb-1">Rating</label>
+                <select name="rating" id="rating" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                    <option value="">-- Pilih Rating --</option>
+                    <option value="High Potential" {{ old('rating', $loker->rating) == 'High Potential' ? 'selected' : '' }}>High Potential — Potensi sangat tinggi</option>
+                    <option value="Potential" {{ old('rating', $loker->rating) == 'Potential' ? 'selected' : '' }}>Potential — Potensi baik</option>
+                    <option value="Moderate Potential" {{ old('rating', $loker->rating) == 'Moderate Potential' ? 'selected' : '' }}>Moderate Potential — Potensi sedang</option>
+                    <option value="Low Potential" {{ old('rating', $loker->rating) == 'Low Potential' ? 'selected' : '' }}>Low Potential — Potensi rendah</option>
+                </select>
+            </div>
         </div>
 
         <div class="mb-4">

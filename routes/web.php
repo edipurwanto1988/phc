@@ -122,6 +122,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/reports/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
         
         // Extra Assignment Route for orders
+        Route::get('/orders/{order}/profit', [AdminOrderController::class, 'profit'])->name('admin.orders.profit');
         Route::get('/orders/{order}/download-invoice', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.download-invoice');
         Route::get('/orders/payments/{payment}/download-invoice', [AdminOrderController::class, 'downloadPaymentInvoice'])->name('admin.orders.payments.download-invoice');
         Route::post('/orders/{order}/assign', [AdminOrderController::class, 'assignCleaner'])->name('admin.orders.assign');

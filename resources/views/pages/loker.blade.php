@@ -18,7 +18,7 @@
             Bergabunglah bersama tim PHC Pekanbaru. Isi formulir lamaran di bawah ini, tim kami akan menghubungi Anda melalui WhatsApp.
         </p>
         @if($periodeAktif)
-        <div class="mt-4 mb-6 inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-sm font-medium px-4 py-2 rounded-full">
+        <div class="hidden mt-4 mb-6 inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-sm font-medium px-4 py-2 rounded-full">
             <i class="ri-calendar-check-line"></i>
             Pendaftaran sedang dibuka: {{ $periodeAktif->nama }}
             @if($periodeAktif->tanggal_mulai || $periodeAktif->tanggal_selesai)
@@ -28,7 +28,7 @@
             @endif
         </div>
         @else
-        <div class="mt-4 mb-6 inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm font-medium px-4 py-2 rounded-full">
+        <div class="hidden mt-4 mb-6 inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm font-medium px-4 py-2 rounded-full">
             <i class="ri-information-line"></i>
             Loker sementara masih belum tersedia. Silakan cek kembali nanti.
         </div>

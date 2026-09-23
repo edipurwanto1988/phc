@@ -149,6 +149,11 @@
                             <a href="{{ route('admin.orders.show', $order) }}" class="text-gray-500 hover:text-gray-750 transition-colors" title="Lihat Detail">
                                 <i class="ri-eye-line text-lg"></i>
                             </a>
+                            @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('view_reports'))
+                            <a href="{{ route('admin.orders.profit', $order) }}" class="text-orange-600 hover:text-orange-800 transition-colors" title="Simulasi Profit">
+                                <i class="ri-money-dollar-circle-line text-lg"></i>
+                            </a>
+                            @endif
                             @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
                             <a href="{{ route('admin.orders.download-invoice', $order) }}" class="text-blue-600 hover:text-blue-800 transition-colors" title="Download Invoice">
                                 <i class="ri-download-2-line text-lg"></i>

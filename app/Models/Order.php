@@ -64,4 +64,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderProgressRoom::class)->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
     }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class, 'order_id');
+    }
 }

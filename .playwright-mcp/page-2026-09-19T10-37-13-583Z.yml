@@ -1,0 +1,126 @@
+- generic [ref=f4e2]:
+  - complementary [ref=f4e3]:
+    - generic [ref=f4e4]:
+      - generic [ref=f4e5]:
+        - link [ref=f4e6] [cursor=pointer]:
+          - /url: /admin
+          - img "Pekanbaru Home Cleaning" [ref=f4e7]
+        - text: 
+      - paragraph [ref=f4e8]: Super Admin
+    - navigation [ref=f4e9]:
+      - link " Dashboard" [ref=f4e10] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=f4e11]: 
+        - generic [ref=f4e12]: Dashboard
+      - link " Pesanan (Orders)" [ref=f4e13] [cursor=pointer]:
+        - /url: /admin/orders
+        - generic [ref=f4e14]: 
+        - generic [ref=f4e15]: Pesanan (Orders)
+      - link " Customer" [ref=f4e16] [cursor=pointer]:
+        - /url: /admin/customers
+        - generic [ref=f4e17]: 
+        - generic [ref=f4e18]: Customer
+      - generic [ref=f4e19]:
+        - button " Master Jasa " [ref=f4e20]:
+          - generic [ref=f4e21]:
+            - generic [ref=f4e22]: 
+            - generic [ref=f4e23]: Master Jasa
+          - generic [ref=f4e24]: 
+        - text:  
+      - generic [ref=f4e25]:
+        - button " Hak Akses " [ref=f4e26]:
+          - generic [ref=f4e27]:
+            - generic [ref=f4e28]: 
+            - generic [ref=f4e29]: Hak Akses
+          - generic [ref=f4e30]: 
+        - text:  
+      - link " Blog / Tips" [ref=f4e31] [cursor=pointer]:
+        - /url: /admin/posts
+        - generic [ref=f4e32]: 
+        - generic [ref=f4e33]: Blog / Tips
+      - link " Laman Statis" [ref=f4e34] [cursor=pointer]:
+        - /url: /admin/halaman
+        - generic [ref=f4e35]: 
+        - generic [ref=f4e36]: Laman Statis
+      - link " Testimoni" [ref=f4e37] [cursor=pointer]:
+        - /url: /admin/testimonials
+        - generic [ref=f4e38]: 
+        - generic [ref=f4e39]: Testimoni
+      - link " Pengeluaran" [ref=f4e40] [cursor=pointer]:
+        - /url: /admin/expenses
+        - generic [ref=f4e41]: 
+        - generic [ref=f4e42]: Pengeluaran
+      - generic [ref=f4e43]:
+        - button " Lap. Keuangan " [ref=f4e44]:
+          - generic [ref=f4e45]:
+            - generic [ref=f4e46]: 
+            - generic [ref=f4e47]: Lap. Keuangan
+          - generic [ref=f4e48]: 
+        - text:  
+      - link " Menu Publik" [ref=f4e49] [cursor=pointer]:
+        - /url: /admin/menu
+        - generic [ref=f4e50]: 
+        - generic [ref=f4e51]: Menu Publik
+      - link " Pengaturan Web" [ref=f4e52] [cursor=pointer]:
+        - /url: /admin/settings
+        - generic [ref=f4e53]: 
+        - generic [ref=f4e54]: Pengaturan Web
+    - generic [ref=f4e55]:
+      - generic [ref=f4e56]:
+        - generic [ref=f4e57]: S
+        - generic [ref=f4e58]:
+          - paragraph [ref=f4e59]: Super Admin PHC
+          - paragraph [ref=f4e60]: superadmin@phc.com
+      - button "" [ref=f4e62]
+  - generic [ref=f4e64]:
+    - banner [ref=f4e65]:
+      - generic [ref=f4e66]:
+        - text: 
+        - heading " Tambah Pengeluaran & Gaji" [level=2] [ref=f4e67]:
+          - generic [ref=f4e68]: 
+          - text: Tambah Pengeluaran & Gaji
+      - generic [ref=f4e69]:
+        - generic [ref=f4e70]: 10:37
+        - link " Kunjungi Situs" [ref=f4e71] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f4e72]: 
+          - generic [ref=f4e73]: Kunjungi Situs
+    - main [ref=f4e74]:
+      - generic [ref=f4e75]:
+        - generic [ref=f4e76]:
+          - button " Pengeluaran Operasional" [ref=f4e77]:
+            - generic [ref=f4e78]: 
+            - text: Pengeluaran Operasional
+          - button " Pembayaran Gaji Cleaner" [ref=f4e79]:
+            - generic [ref=f4e80]: 
+            - text: Pembayaran Gaji Cleaner
+        - generic [ref=f4e82]:
+          - generic [ref=f4e83]:
+            - generic [ref=f4e84]:
+              - generic [ref=f4e85]: Tanggal Pengeluaran
+              - textbox "Tanggal Pengeluaran" [ref=f4e86]: 2026-09-19
+            - generic [ref=f4e87]:
+              - generic [ref=f4e88]: Pelaksana / Penanggung Jawab
+              - combobox "Pelaksana / Penanggung Jawab" [ref=f4e89]:
+                - option "-- Pilih Pelaksana --"
+                - option "Admin Operasional (Super Admin)"
+                - option "Dewi (Cleaner)"
+                - option "Dian (Cleaner) (Cleaner)"
+                - option "Staff Operator (Staff)"
+                - option "Super Admin PHC (Super Admin)" [selected]
+          - generic [ref=f4e90]:
+            - generic [ref=f4e91]:
+              - generic [ref=f4e92]: Kategori Biaya
+              - textbox "Kategori Biaya" [ref=f4e93]:
+                - /placeholder: "Contoh: Pembelian Bahan, Uang Makan, Transportasi"
+            - generic [ref=f4e94]:
+              - generic [ref=f4e95]: Jumlah Biaya (Rp)
+              - spinbutton "Jumlah Biaya (Rp)" [ref=f4e96]
+          - generic [ref=f4e97]:
+            - generic [ref=f4e98]: Keterangan Tambahan
+            - textbox "Keterangan Tambahan" [ref=f4e99]:
+              - /placeholder: Rincian detail pengeluaran...
+          - generic [ref=f4e100]:
+            - button "Simpan Pengeluaran" [ref=f4e101]
+            - link "Batal" [ref=f4e102] [cursor=pointer]:
+              - /url: http://127.0.0.1:8000/admin/expenses

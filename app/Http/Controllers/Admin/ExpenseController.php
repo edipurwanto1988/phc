@@ -66,7 +66,9 @@ class ExpenseController extends Controller
             })
             ->groupBy('user_id');
 
-        return view('admin.expenses.create', compact('users', 'cleaners', 'unpaidAssignments'));
+        $orders = \App\Models\Order::with('customer')->orderBy('created_at', 'desc')->get();
+
+        return view('admin.expenses.create', compact('users', 'cleaners', 'unpaidAssignments', 'orders'));
     }
 
     /**
@@ -174,6 +176,7 @@ class ExpenseController extends Controller
             'jumlah' => 'required|numeric|min:0',
             'keterangan' => 'nullable|string',
             'user_id' => 'required|exists:users,id',
+            'order_id' => 'nullable|exists:orders,id',
         ]);
 
         Expense::create([
@@ -183,6 +186,7 @@ class ExpenseController extends Controller
             'keterangan' => $request->keterangan,
             'user_id' => $request->user_id,
             'is_gaji' => false,
+            'order_id' => $request->order_id,
         ]);
 
         return redirect()->route('admin.expenses.index')->with('success', 'Data pengeluaran berhasil ditambahkan.');
@@ -203,7 +207,8 @@ class ExpenseController extends Controller
     public function edit(Expense $expense)
     {
         $users = User::where('status', 'active')->orderBy('name')->get();
-        return view('admin.expenses.edit', compact('expense', 'users'));
+        $orders = \App\Models\Order::with('customer')->orderBy('created_at', 'desc')->get();
+        return view('admin.expenses.edit', compact('expense', 'users', 'orders'));
     }
 
     /**
@@ -217,6 +222,7 @@ class ExpenseController extends Controller
             'jumlah' => 'required|numeric|min:0',
             'keterangan' => 'nullable|string',
             'user_id' => 'required|exists:users,id',
+            'order_id' => 'nullable|exists:orders,id',
         ]);
 
         // For salary (gaji) expenses, keep the amount consistent with the linked
@@ -233,6 +239,7 @@ class ExpenseController extends Controller
             'jumlah' => $jumlah,
             'keterangan' => $request->keterangan,
             'user_id' => $request->user_id,
+            'order_id' => $request->order_id,
         ]);
 
         return redirect()->route('admin.expenses.index')->with('success', 'Data pengeluaran berhasil diperbarui.');

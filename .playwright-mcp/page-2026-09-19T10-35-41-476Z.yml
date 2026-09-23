@@ -1,0 +1,50 @@
+- main [ref=e2]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - link [ref=e10] [cursor=pointer]:
+        - /url: http://127.0.0.1:8000
+        - img "Pekanbaru Home Cleaning" [ref=e11]
+      - generic [ref=e12]:
+        - generic [ref=e13]: Admin Portal
+        - heading "Halaman untuk kelola konten." [level=1] [ref=e15]
+        - paragraph [ref=e16]: Masuk untuk mengatur pesanan, customer, layanan jasa, testimoni, menu, dan data utama website.
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e19]: 
+          - generic [ref=e20]: Konten
+        - generic [ref=e21]:
+          - generic [ref=e22]: 
+          - generic [ref=e23]: Testimoni
+        - generic [ref=e24]:
+          - generic [ref=e25]: 
+          - generic [ref=e26]: Akses
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - generic [ref=e31]: 
+          - text: Area Admin
+        - heading "Masuk ke dashboard" [level=2] [ref=e32]
+        - paragraph [ref=e33]: Gunakan akun administrator yang sudah terdaftar.
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e36]: Email
+          - generic [ref=e37]:
+            - generic: 
+            - textbox "Email" [active] [ref=e38]:
+              - /placeholder: admin@pekanbaruhomecleaning.com
+        - generic [ref=e39]:
+          - generic [ref=e40]: Password
+          - generic [ref=e41]:
+            - generic: 
+            - textbox "Password" [ref=e42]:
+              - /placeholder: Masukkan password
+        - button "Login " [ref=e43]:
+          - generic [ref=e44]: Login
+          - generic [ref=e45]: 
+        - generic [ref=e46]: atau
+        - link "Login dengan Google" [ref=e51] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000/login/google
+      - generic [ref=e58]:
+        - generic [ref=e59]: PHC Pekanbaru
+        - link "Kembali ke website" [ref=e60] [cursor=pointer]:
+          - /url: http://127.0.0.1:8000
