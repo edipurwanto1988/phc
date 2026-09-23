@@ -233,7 +233,7 @@
         </aside>
 
         <!-- Content Area -->
-        <div id="admin-content" class="flex-1 flex flex-col min-h-screen">
+        <div id="admin-content" class="flex-1 min-w-0 flex flex-col min-h-screen">
             <!-- Header bar -->
             <header class="bg-white border-b border-gray-200 h-14 lg:h-16 px-4 lg:px-8 flex justify-between items-center sticky top-0 z-20 shadow-sm shrink-0">
                 <div class="flex items-center gap-3">
