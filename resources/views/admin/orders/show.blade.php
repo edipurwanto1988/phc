@@ -213,41 +213,78 @@
                 @if($order->payments->count() > 0)
                     <div class="space-y-2 mb-4">
                         @foreach($order->payments as $payment)
-                            <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
-                                <div>
-                                    <div class="text-sm font-bold text-gray-800">Rp {{ number_format($payment->amount, 0, ',', '.') }}</div>
-                                    <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($payment->payment_date)->translatedFormat('d M Y') }}</div>
-                                    <div class="mt-1">
-                                        @php
-                                            $typeLabel = match($payment->type) {
-                                                'down_payment' => 'Down Payment',
-                                                'pelunasan' => 'Pelunasan',
-                                                default => 'Cicilan',
-                                            };
-                                            $typeClass = match($payment->type) {
-                                                'down_payment' => 'bg-amber-100 text-amber-700',
-                                                'pelunasan' => 'bg-green-100 text-green-700',
-                                                default => 'bg-blue-100 text-blue-700',
-                                            };
-                                        @endphp
-                                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $typeClass }}">
-                                            {{ $typeLabel }}
-                                        </span>
-                                        @if($payment->notes)
-                                            <span class="text-xs text-gray-600 ml-1">- {{ $payment->notes }}</span>
-                                        @endif
+                            <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm" x-data="{ editingPayment: false }">
+                                <div class="flex items-start justify-between" x-show="!editingPayment">
+                                    <div>
+                                        <div class="text-sm font-bold text-gray-800">Rp {{ number_format($payment->amount, 0, ',', '.') }}</div>
+                                        <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($payment->payment_date)->translatedFormat('d M Y') }}</div>
+                                        <div class="mt-1">
+                                            @php
+                                                $typeLabel = match($payment->type) {
+                                                    'down_payment' => 'Down Payment',
+                                                    'pelunasan' => 'Pelunasan',
+                                                    default => 'Cicilan',
+                                                };
+                                                $typeClass = match($payment->type) {
+                                                    'down_payment' => 'bg-amber-100 text-amber-700',
+                                                    'pelunasan' => 'bg-green-100 text-green-700',
+                                                    default => 'bg-blue-100 text-blue-700',
+                                                };
+                                            @endphp
+                                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full {{ $typeClass }}">
+                                                {{ $typeLabel }}
+                                            </span>
+                                            @if($payment->notes)
+                                                <div class="text-xs text-gray-600 mt-1 italic whitespace-pre-line">{!! nl2br(e($payment->notes)) !!}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button type="button" @click="editingPayment = true" class="text-gray-500 hover:text-gray-700 p-2 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors" title="Edit Pembayaran">
+                                            <i class="ri-edit-line"></i>
+                                        </button>
+                                        <a href="{{ route('admin.orders.payments.download-invoice', $payment) }}" class="text-blue-500 hover:text-blue-700 p-2 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors" title="Download Nota Pembayaran">
+                                            <i class="ri-download-2-line"></i>
+                                        </a>
+                                        <form action="{{ route('admin.orders.payments.destroy', $payment) }}" method="POST" onsubmit="return confirm('Hapus data pembayaran ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:text-red-700 p-2 bg-red-50 hover:bg-red-100 rounded-md transition-colors">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-1">
-                                    <a href="{{ route('admin.orders.payments.download-invoice', $payment) }}" class="text-blue-500 hover:text-blue-700 p-2 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors" title="Download Nota Pembayaran">
-                                        <i class="ri-download-2-line"></i>
-                                    </a>
-                                    <form action="{{ route('admin.orders.payments.destroy', $payment) }}" method="POST" onsubmit="return confirm('Hapus data pembayaran ini?')">
+                                <div x-show="editingPayment" style="display: none;" class="mt-2 pt-2 border-t border-gray-100">
+                                    <form action="{{ route('admin.orders.payments.update', $payment) }}" method="POST" class="space-y-3">
                                         @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-700 p-2 bg-red-50 hover:bg-red-100 rounded-md transition-colors">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
+                                        @method('PUT')
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Jumlah (Rp)</label>
+                                                <input type="number" name="amount" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs" required min="1" value="{{ $payment->amount }}">
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Tanggal</label>
+                                                <input type="date" name="payment_date" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs" required value="{{ \Carbon\Carbon::parse($payment->payment_date)->format('Y-m-d') }}">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status</label>
+                                            <select name="type" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white" required>
+                                                <option value="down_payment" {{ $payment->type == 'down_payment' ? 'selected' : '' }}>Down Payment (DP)</option>
+                                                <option value="partial" {{ $payment->type == 'partial' ? 'selected' : '' }}>Cicilan / Partial</option>
+                                                <option value="pelunasan" {{ $payment->type == 'pelunasan' ? 'selected' : '' }}>Pelunasan (Order Lunas)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Catatan</label>
+                                            <textarea name="notes" rows="2" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs resize-y" placeholder="Opsional">{{ $payment->notes }}</textarea>
+                                        </div>
+                                        <div class="flex justify-end gap-2">
+                                            <button type="button" @click="editingPayment = false" class="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Batal</button>
+                                            <button type="submit" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-all">Simpan</button>
+                                        </div>
                                     </form>
                                 </div>
                             </div>
@@ -299,7 +336,7 @@
                         
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Catatan</label>
-                            <input type="text" name="notes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Opsional (contoh: DP kedua via Transfer)">
+                            <textarea name="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-y" placeholder="Opsional (contoh: DP kedua via Transfer)"></textarea>
                         </div>
                         
                         <div class="pt-2">

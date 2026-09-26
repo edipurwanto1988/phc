@@ -611,6 +611,54 @@ class OrderController extends Controller
         return redirect()->route('admin.orders.show', $order)->with('success', 'Data pembayaran berhasil ditambahkan.');
     }
 
+    public function updatePayment(Request $request, \App\Models\OrderPayment $payment)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_date' => 'required|date',
+            'type' => 'required|string|in:partial,down_payment,pelunasan',
+            'notes' => 'nullable|string',
+        ]);
+
+        $order = $payment->order;
+        $totalPaidOthers = $order->payments()->where('id', '!=', $payment->id)->sum('amount');
+        $sisa = $order->grand_total - $totalPaidOthers;
+
+        if ($request->type === 'down_payment' && (float) $request->amount >= $order->grand_total) {
+            return redirect()
+                ->route('admin.orders.show', $order)
+                ->with('error', 'Down Payment (DP) harus lebih kecil dari grand total.');
+        }
+
+        if ((float) $request->amount > $sisa) {
+            return redirect()
+                ->route('admin.orders.show', $order)
+                ->with('error', 'Pembayaran ditolak: jumlah melebihi sisa tagihan.');
+        }
+
+        $payment->update([
+            'amount' => $request->amount,
+            'payment_date' => $request->payment_date,
+            'type' => $request->type,
+            'notes' => $request->notes,
+        ]);
+
+        if ($request->type === 'pelunasan') {
+            $order->update(['status_bayar' => 'paid']);
+        } else {
+            $totalPaid = $order->payments()->sum('amount');
+            if ($totalPaid >= $order->grand_total) {
+                $order->update(['status_bayar' => 'paid']);
+            } elseif ($totalPaid > 0) {
+                $order->update(['status_bayar' => 'partial']);
+            } else {
+                $order->update(['status_bayar' => 'unpaid']);
+            }
+        }
+
+        return redirect()->route('admin.orders.show', $order)->with('success', 'Data pembayaran berhasil diperbarui.');
+    }
+
     public function destroyPayment(\App\Models\OrderPayment $payment)
     {
         $order = $payment->order;

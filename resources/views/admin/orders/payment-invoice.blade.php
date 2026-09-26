@@ -283,7 +283,7 @@
             </tr>
             @if($payment->notes)
             <tr>
-                <td style="color: #6b7280; font-size: 9px;" colspan="2">Catatan: {{ $payment->notes }}</td>
+                <td style="color: #6b7280; font-size: 9px;" colspan="2">Catatan: <br>{!! nl2br(e($payment->notes)) !!}</td>
             </tr>
             @endif
         </table>
