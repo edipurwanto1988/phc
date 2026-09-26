@@ -432,7 +432,7 @@
             <td style="width: 60%; font-size: 8.5px; color: #4b5563; vertical-align: top; line-height: 1.3;">
                 @if($order->catatan)
                 <strong>Catatan Order:</strong><br>
-                <span style="font-style: italic; color: #374151;">{{ $order->catatan }}</span>
+                <span style="font-style: italic; color: #374151;">{!! nl2br(e($order->catatan)) !!}</span>
                 @else
                 <strong>Catatan:</strong><br>
                 1. Pembayaran uang muka (DP) 30% sebelum layanan dilaksanakan.<br>
