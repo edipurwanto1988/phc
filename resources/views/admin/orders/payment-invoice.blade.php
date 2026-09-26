@@ -315,6 +315,24 @@
         </div>
     </div>
 
+    <!-- Additional Note and Info -->
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <tr>
+            <td style="width: 60%; font-size: 8.5px; color: #4b5563; vertical-align: top; line-height: 1.3;">
+                @if($order->catatan)
+                <strong>Catatan Order:</strong><br>
+                <span style="font-style: italic; color: #374151;">{!! nl2br(e($order->catatan)) !!}</span>
+                @else
+                <strong>Ketentuan Tambahan:</strong><br>
+                1. Pembayaran uang muka (DP) 30% sebelum layanan dilaksanakan.<br>
+                2. Pembayaran pelunasan (FP) 70% setelah pekerjaan selesai.
+                @endif
+            </td>
+            <td style="width: 40%; font-size: 8.5px; color: #4b5563; text-align: right; vertical-align: top; line-height: 1.3;">
+            </td>
+        </tr>
+    </table>
+
     <!-- Footer -->
     <div class="footer">
         <div class="footer-phone">INFORMASI & PEMESANAN: 0823-6622-0069</div>

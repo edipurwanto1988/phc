@@ -393,8 +393,13 @@
                         };
                     @endphp
                     <tr>
-                        <td class="summary-label" style="padding-top: 5px;">{{ $typeLabel }} {{ $payment->notes ? "({$payment->notes})" : "" }}</td>
-                        <td class="summary-value" style="padding-top: 5px; color: #15803d;">- Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
+                        <td class="summary-label" style="padding-top: 5px;">
+                            {{ $typeLabel }} 
+                            @if($payment->notes)
+                                <br><span style="font-size: 8px; color: #6b7280;">({!! nl2br(e($payment->notes)) !!})</span>
+                            @endif
+                        </td>
+                        <td class="summary-value" style="padding-top: 5px; color: #15803d; vertical-align: top;">- Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: right; font-size: 8px; color: #6b7280; padding-top: 2px;">
