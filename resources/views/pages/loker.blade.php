@@ -93,6 +93,7 @@
                 <div>
                     <label for="no_wa" class="block text-sm font-semibold text-gray-700 mb-1">No. WhatsApp <span class="text-red-500">*</span></label>
                     <input type="text" name="no_wa" id="no_wa" value="{{ old('no_wa') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="08xxxxxxxxxx" required>
+                    <p id="wa_error" class="hidden text-xs text-red-600 mt-1"><i class="ri-error-warning-line"></i> Nomor WhatsApp ini sudah terdaftar.</p>
                 </div>
             </div>
 
@@ -128,12 +129,47 @@
             </div>
 
             <div class="pt-4 border-t border-gray-100">
-                <button type="submit" class="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg text-sm transition-all shadow-sm">
+                <button type="submit" id="submit_btn" class="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg text-sm transition-all shadow-sm">
                     <i class="ri-send-plane-line"></i> Kirim Lamaran
                 </button>
             </div>
         </form>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const noWaInput = document.getElementById('no_wa');
+            const submitBtn = document.getElementById('submit_btn');
+            const waError = document.getElementById('wa_error');
+
+            let checkTimeout;
+
+            noWaInput.addEventListener('input', function() {
+                clearTimeout(checkTimeout);
+                waError.classList.add('hidden');
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                const noWa = this.value.trim();
+                if (noWa.length < 8) return;
+
+                checkTimeout = setTimeout(() => {
+                    fetch(`{{ route('public.loker.check-wa') }}?no_wa=${encodeURIComponent(noWa)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.exists) {
+                                waError.classList.remove('hidden');
+                                submitBtn.disabled = true;
+                                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                            }
+                        })
+                        .catch(err => console.error('Error checking WA:', err));
+                }, 500);
+            });
+        });
+    </script>
+    @endpush
     @else
     <div class="bg-white border border-border rounded-2xl shadow-sm p-10 text-center">
         <div class="text-gray-400 text-5xl mb-4"><i class="ri-calendar-close-line"></i></div>

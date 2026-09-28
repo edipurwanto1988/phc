@@ -108,6 +108,16 @@ class LokerController extends Controller
         return back()->with('success', 'Terima kasih! Lamaran Anda berhasil dikirim. Kami akan menghubungi Anda melalui WhatsApp.');
     }
 
+    public function checkWa(Request $request)
+    {
+        $noWa = preg_replace('/[^0-9]/', '', $request->no_wa);
+        $existing = Loker::where('no_wa', $request->no_wa)
+            ->orWhere('no_wa', $noWa)
+            ->first();
+
+        return response()->json(['exists' => (bool)$existing]);
+    }
+
     protected function uploadKtp($file, string $noWa, array &$data)
     {
         $safeNoWa = preg_replace('/[^0-9]/', '', $noWa);

@@ -51,6 +51,7 @@ Route::get('/halaman/{slug}', [PublicHalamanController::class, 'show'])->name('p
 
 // Loker (lowongan kerja / lamaran)
 Route::get('/loker', [PublicLokerController::class, 'index'])->name('public.loker.index');
+Route::get('/loker/check-wa', [PublicLokerController::class, 'checkWa'])->name('public.loker.check-wa');
 Route::post('/loker', [PublicLokerController::class, 'submit'])->name('public.loker.submit');
 
 // Progress pekerjaan (link publik untuk client)
