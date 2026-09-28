@@ -216,7 +216,18 @@
                             <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm" x-data="{ editingPayment: false }">
                                 <div class="flex items-start justify-between" x-show="!editingPayment">
                                     <div>
-                                        <div class="text-sm font-bold text-gray-800">Rp {{ number_format($payment->amount, 0, ',', '.') }}</div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-bold text-gray-800">Rp {{ number_format($payment->amount, 0, ',', '.') }}</span>
+                                            @if(($payment->status ?? 'lunas') === 'lunas')
+                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-0.5">
+                                                    <i class="ri-checkbox-circle-line"></i> Lunas
+                                                </span>
+                                            @else
+                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 flex items-center gap-0.5">
+                                                    <i class="ri-time-line"></i> Belum Lunas
+                                                </span>
+                                            @endif
+                                        </div>
                                         <div class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($payment->payment_date)->translatedFormat('d M Y') }}</div>
                                         <div class="mt-1">
                                             @php
@@ -269,13 +280,22 @@
                                                 <input type="date" name="payment_date" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs" required value="{{ \Carbon\Carbon::parse($payment->payment_date)->format('Y-m-d') }}">
                                             </div>
                                         </div>
-                                        <div>
-                                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status</label>
-                                            <select name="type" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white" required>
-                                                <option value="down_payment" {{ $payment->type == 'down_payment' ? 'selected' : '' }}>Down Payment (DP)</option>
-                                                <option value="partial" {{ $payment->type == 'partial' ? 'selected' : '' }}>Cicilan / Partial</option>
-                                                <option value="pelunasan" {{ $payment->type == 'pelunasan' ? 'selected' : '' }}>Pelunasan (Order Lunas)</option>
-                                            </select>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Tipe</label>
+                                                <select name="type" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white" required>
+                                                    <option value="down_payment" {{ $payment->type == 'down_payment' ? 'selected' : '' }}>Down Payment (DP)</option>
+                                                    <option value="partial" {{ $payment->type == 'partial' ? 'selected' : '' }}>Cicilan / Partial</option>
+                                                    <option value="pelunasan" {{ $payment->type == 'pelunasan' ? 'selected' : '' }}>Pelunasan</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status Pembayaran</label>
+                                                <select name="status" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white font-bold" required>
+                                                    <option value="lunas" {{ ($payment->status ?? 'lunas') === 'lunas' ? 'selected' : '' }} class="text-emerald-700 font-bold">Lunas</option>
+                                                    <option value="belum" {{ ($payment->status ?? 'lunas') === 'belum' ? 'selected' : '' }} class="text-amber-700 font-bold">Belum</option>
+                                                </select>
+                                            </div>
                                         </div>
                                         <div>
                                             <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Catatan</label>
@@ -290,10 +310,27 @@
                             </div>
                         @endforeach
                         
+                        @php
+                            $totalLunas = $order->payments->where('status', '!=', 'belum')->sum('amount');
+                            $totalBelum = $order->payments->where('status', 'belum')->sum('amount');
+                            $sisaTagihan = max(0, $order->grand_total - $totalLunas);
+                        @endphp
                         <!-- Rangkuman Bayar -->
-                        <div class="mt-2 p-3 bg-blue-50 text-blue-800 text-xs font-semibold border border-blue-100 rounded-lg flex justify-between">
-                            <span>Total Terbayar: Rp {{ number_format($order->payments->sum('amount'), 0, ',', '.') }}</span>
-                            <span>Sisa: Rp {{ number_format(max(0, $order->grand_total - $order->payments->sum('amount')), 0, ',', '.') }}</span>
+                        <div class="mt-2 p-3 bg-blue-50 text-blue-900 text-xs font-semibold border border-blue-100 rounded-lg space-y-1">
+                            <div class="flex justify-between items-center">
+                                <span>Total Masuk (Lunas):</span>
+                                <span class="text-emerald-700 font-bold">Rp {{ number_format($totalLunas, 0, ',', '.') }}</span>
+                            </div>
+                            @if($totalBelum > 0)
+                            <div class="flex justify-between items-center text-amber-700">
+                                <span>Menunggu Bayar (Belum):</span>
+                                <span class="font-bold">Rp {{ number_format($totalBelum, 0, ',', '.') }}</span>
+                            </div>
+                            @endif
+                            <div class="flex justify-between items-center border-t border-blue-200 pt-1 text-gray-800">
+                                <span>Sisa Tagihan:</span>
+                                <span class="font-bold text-red-600">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</span>
+                            </div>
                         </div>
                     </div>
                 @else
@@ -312,24 +349,31 @@
                         @csrf
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Jumlah (Rp)</label>
-                            <input type="number" name="amount" id="payment_amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required min="1" placeholder="Contoh: 50000" value="{{ max(0, $order->grand_total - $order->payments->sum('amount')) }}">
+                            <input type="number" name="amount" id="payment_amount" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required min="1" placeholder="Contoh: 50000" value="{{ max(0, $order->grand_total - $order->payments->where('status', '!=', 'belum')->sum('amount')) }}">
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Tanggal</label>
-                                <input type="date" name="payment_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" required value="{{ date('Y-m-d') }}">
+                                <input type="date" name="payment_date" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs" required value="{{ date('Y-m-d') }}">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status Pembayaran Ini</label>
-                                <select name="type" id="payment_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white" required onchange="autoFillPelunasan(this)">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Tipe</label>
+                                <select name="type" id="payment_type" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white" required onchange="autoFillPelunasan(this)">
                                     @if($order->payments->count() === 0)
-                                        <option value="down_payment">Down Payment (DP)</option>
-                                        <option value="pelunasan">Pelunasan (Order Lunas)</option>
+                                        <option value="down_payment">DP</option>
+                                        <option value="pelunasan">Pelunasan</option>
                                     @else
-                                        <option value="partial">Cicilan / Partial</option>
-                                        <option value="pelunasan">Pelunasan (Order Lunas)</option>
+                                        <option value="partial">Cicilan</option>
+                                        <option value="pelunasan">Pelunasan</option>
                                     @endif
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status</label>
+                                <select name="status" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white font-bold" required>
+                                    <option value="lunas" class="text-emerald-700 font-bold" selected>Lunas</option>
+                                    <option value="belum" class="text-amber-700 font-bold">Belum</option>
                                 </select>
                             </div>
                         </div>

@@ -572,12 +572,17 @@ class OrderController extends Controller
             'amount' => 'required|numeric|min:1',
             'payment_date' => 'required|date',
             'type' => 'required|string|in:partial,down_payment,pelunasan',
+            'status' => 'nullable|string|in:lunas,belum',
             'notes' => 'nullable|string',
         ]);
 
-        // Hitung sisa yang harus dibayar
-        $totalPaid = $order->payments()->sum('amount');
-        $sisa = $order->grand_total - $totalPaid;
+        $status = $request->input('status', 'lunas');
+
+        // Hitung sisa yang harus dibayar berdasarkan pembayaran yang lunas
+        $totalPaidLunas = $order->payments()->where(function($q) {
+            $q->where('status', 'lunas')->orWhereNull('status');
+        })->sum('amount');
+        $sisa = $order->grand_total - $totalPaidLunas;
 
         // Down Payment harus lebih kecil dari grand total (tidak boleh sama / lunas)
         if ($request->type === 'down_payment' && (float) $request->amount >= $order->grand_total) {
@@ -597,15 +602,22 @@ class OrderController extends Controller
             'amount' => $request->amount,
             'payment_date' => $request->payment_date,
             'type' => $request->type,
+            'status' => $status,
             'notes' => $request->notes,
             'created_by' => Auth::id(),
         ]);
         
-        // Auto update status_bayar if type is pelunasan
-        if ($request->type === 'pelunasan') {
+        // Auto update status_bayar berdasarkan pembayaran yang LUNAS
+        $newTotalPaidLunas = $order->payments()->where(function($q) {
+            $q->where('status', 'lunas')->orWhereNull('status');
+        })->sum('amount');
+
+        if ($newTotalPaidLunas >= $order->grand_total || ($request->type === 'pelunasan' && $status === 'lunas')) {
             $order->update(['status_bayar' => 'paid']);
-        } elseif ($order->status_bayar === 'unpaid') {
+        } elseif ($newTotalPaidLunas > 0) {
             $order->update(['status_bayar' => 'partial']);
+        } else {
+            $order->update(['status_bayar' => 'unpaid']);
         }
 
         return redirect()->route('admin.orders.show', $order)->with('success', 'Data pembayaran berhasil ditambahkan.');
@@ -617,12 +629,19 @@ class OrderController extends Controller
             'amount' => 'required|numeric|min:1',
             'payment_date' => 'required|date',
             'type' => 'required|string|in:partial,down_payment,pelunasan',
+            'status' => 'required|string|in:lunas,belum',
             'notes' => 'nullable|string',
         ]);
 
         $order = $payment->order;
-        $totalPaidOthers = $order->payments()->where('id', '!=', $payment->id)->sum('amount');
-        $sisa = $order->grand_total - $totalPaidOthers;
+        $status = $request->input('status', 'lunas');
+
+        $totalPaidLunasOthers = $order->payments()
+            ->where('id', '!=', $payment->id)
+            ->where(function($q) {
+                $q->where('status', 'lunas')->orWhereNull('status');
+            })->sum('amount');
+        $sisa = $order->grand_total - $totalPaidLunasOthers;
 
         if ($request->type === 'down_payment' && (float) $request->amount >= $order->grand_total) {
             return redirect()
@@ -640,20 +659,21 @@ class OrderController extends Controller
             'amount' => $request->amount,
             'payment_date' => $request->payment_date,
             'type' => $request->type,
+            'status' => $status,
             'notes' => $request->notes,
         ]);
 
-        if ($request->type === 'pelunasan') {
+        // Auto update status_bayar order berdasarkan pembayaran yang LUNAS
+        $newTotalPaidLunas = $order->payments()->where(function($q) {
+            $q->where('status', 'lunas')->orWhereNull('status');
+        })->sum('amount');
+
+        if ($newTotalPaidLunas >= $order->grand_total || ($request->type === 'pelunasan' && $status === 'lunas')) {
             $order->update(['status_bayar' => 'paid']);
+        } elseif ($newTotalPaidLunas > 0) {
+            $order->update(['status_bayar' => 'partial']);
         } else {
-            $totalPaid = $order->payments()->sum('amount');
-            if ($totalPaid >= $order->grand_total) {
-                $order->update(['status_bayar' => 'paid']);
-            } elseif ($totalPaid > 0) {
-                $order->update(['status_bayar' => 'partial']);
-            } else {
-                $order->update(['status_bayar' => 'unpaid']);
-            }
+            $order->update(['status_bayar' => 'unpaid']);
         }
 
         return redirect()->route('admin.orders.show', $order)->with('success', 'Data pembayaran berhasil diperbarui.');
@@ -664,15 +684,17 @@ class OrderController extends Controller
         $order = $payment->order;
         $payment->delete();
 
-        // If no payments left, maybe set back to unpaid
-        if ($order->payments()->count() === 0) {
-            $order->update(['status_bayar' => 'unpaid']);
+        // Update status_bayar order berdasarkan sisa pembayaran lunas
+        $newTotalPaidLunas = $order->payments()->where(function($q) {
+            $q->where('status', 'lunas')->orWhereNull('status');
+        })->sum('amount');
+
+        if ($newTotalPaidLunas >= $order->grand_total) {
+            $order->update(['status_bayar' => 'paid']);
+        } elseif ($newTotalPaidLunas > 0) {
+            $order->update(['status_bayar' => 'partial']);
         } else {
-            // Check if there are no pelunasan left
-            $hasPelunasan = $order->payments()->where('type', 'pelunasan')->exists();
-            if (!$hasPelunasan && $order->status_bayar === 'paid') {
-                $order->update(['status_bayar' => 'partial']);
-            }
+            $order->update(['status_bayar' => 'unpaid']);
         }
 
         return back()->with('success', 'Data pembayaran berhasil dihapus.');

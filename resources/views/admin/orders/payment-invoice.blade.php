@@ -278,6 +278,12 @@
                 <td style="text-align: right; font-weight: bold;">{{ $typeLabel }}</td>
             </tr>
             <tr>
+                <td style="color: #1e3a8a; font-weight: bold;">Status Pembayaran</td>
+                <td style="text-align: right; font-weight: bold; color: {{ ($payment->status ?? 'lunas') === 'lunas' ? '#15803d' : '#dc2626' }};">
+                    {{ ($payment->status ?? 'lunas') === 'lunas' ? 'LUNAS (SUDAH DIBAYAR)' : 'BELUM LUNAS' }}
+                </td>
+            </tr>
+            <tr>
                 <td style="font-weight: 800; font-size: 12px; color: #15803d;">JUMLAH DIBAYAR</td>
                 <td style="text-align: right; font-weight: 800; font-size: 14px; color: #15803d;">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
             </tr>

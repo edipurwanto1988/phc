@@ -11,6 +11,7 @@ class OrderPayment extends Model
         'amount',
         'payment_date',
         'type',
+        'status',
         'notes',
         'created_by',
     ];

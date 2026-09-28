@@ -19,6 +19,9 @@ class ReportController extends Controller
                 DB::raw("MONTH(payment_date) as month"),
                 DB::raw("SUM(amount) as revenue")
             )
+            ->where(function($q) {
+                $q->where('status', 'lunas')->orWhereNull('status');
+            })
             ->whereYear('payment_date', $year)
             ->groupBy('month')
             ->orderBy('month')
@@ -80,7 +83,9 @@ class ReportController extends Controller
             ];
         }
 
-        $cashIn = (float) \App\Models\OrderPayment::sum('amount') 
+        $cashIn = (float) \App\Models\OrderPayment::where(function($q) {
+                    $q->where('status', 'lunas')->orWhereNull('status');
+                })->sum('amount') 
                 + (float) Order::whereDoesntHave('payments')->where('status_bayar', 'paid')->sum('grand_total');
         $cashOut = (float) Expense::sum('jumlah');
         $cashBalance = $cashIn - $cashOut;
@@ -116,8 +121,11 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
 
-        // Uang masuk diambil dari tabel order_payments (mencakup DP, cicilan/partial, dan pelunasan)
+        // Uang masuk diambil dari tabel order_payments yang berstatus lunas
         $inflow = \App\Models\OrderPayment::with(['order.customer'])
+            ->where(function($q) {
+                $q->where('status', 'lunas')->orWhereNull('status');
+            })
             ->whereBetween('payment_date', [$startDate, $endDate])
             ->get();
 
@@ -130,7 +138,10 @@ class ReportController extends Controller
         $balance = $totalInflow - $totalOutflow;
 
         // Calculate lifetime balance prior to startDate to determine beginning balance (saldo awal)
-        $previousInflow = \App\Models\OrderPayment::where('payment_date', '<', $startDate)
+        $previousInflow = \App\Models\OrderPayment::where(function($q) {
+                $q->where('status', 'lunas')->orWhereNull('status');
+            })
+            ->where('payment_date', '<', $startDate)
             ->sum('amount');
 
         $previousOutflow = Expense::where('tanggal', '<', $startDate)
@@ -181,7 +192,9 @@ class ReportController extends Controller
         });
 
         // Lifetime balance (untuk statistik header box tetap konsisten)
-        $cashIn = \App\Models\OrderPayment::sum('amount');
+        $cashIn = \App\Models\OrderPayment::where(function($q) {
+            $q->where('status', 'lunas')->orWhereNull('status');
+        })->sum('amount');
         $cashOut = Expense::sum('jumlah');
         $cashBalance = $cashIn - $cashOut;
 
