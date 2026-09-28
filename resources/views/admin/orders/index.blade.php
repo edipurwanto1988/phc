@@ -82,8 +82,9 @@
                         <div class="text-sm font-semibold text-gray-800">{{ $order->customer->nama }}</div>
                         <div class="text-xs text-gray-500">{{ $order->customer->no_wa }}</div>
                     </td>
-                    <td class="py-4 px-6 text-sm text-gray-600 font-medium">
-                        {{ $order->tanggal_jadwal->translatedFormat('d M Y, H:i') }} WIB
+                    <td class="py-4 px-6">
+                        <div class="text-sm font-semibold text-gray-800">{{ $order->tanggal_jadwal->translatedFormat('d M Y') }}</div>
+                        <div class="text-xs text-gray-500">{{ $order->tanggal_jadwal->translatedFormat('H:i') }} WIB</div>
                     </td>
                     <td class="py-4 px-6 text-sm font-bold text-gray-850 text-right">
                         @if(auth()->user()->role->name === 'Cleaner')
