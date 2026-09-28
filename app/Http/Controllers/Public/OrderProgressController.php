@@ -25,7 +25,7 @@ class OrderProgressController extends Controller
         // Kelompokkan ruangan berdasarkan lantai
         $grouped = $order->progressRooms->groupBy(function ($room) {
             return $room->lantai ?: 'Tanpa Lantai';
-        });
+        })->sortKeysUsing(fn($a, $b) => strnatcasecmp($a, $b));
 
         return view('pages.progress', compact('order', 'grouped'));
     }

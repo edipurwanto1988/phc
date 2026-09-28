@@ -49,11 +49,13 @@
                 $prosesRooms = $order->progressRooms->where('status', 'proses')->count();
                 $belumRooms = $order->progressRooms->where('status', 'belum')->count();
                 $totalLuas = $order->progressRooms->sum('luas');
+                $luasSelesai = $order->progressRooms->where('status', 'selesai')->sum('luas');
                 $percent = $totalRooms > 0 ? round(($doneRooms / $totalRooms) * 100) : 0;
+                $progressLuasPercent = $totalLuas > 0 ? round(($luasSelesai / $totalLuas) * 100) : 0;
             @endphp
 
             {{-- Ringkasan Project --}}
-            <div class="flex flex-wrap items-center gap-2 mb-4">
+            <div class="flex flex-wrap items-center gap-2 mb-5">
                 <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                     <i class="ri-door-line text-gray-500 text-sm"></i>
                     <span class="text-sm font-bold text-gray-800">{{ $totalRooms }}</span>
@@ -74,29 +76,48 @@
                     <span class="text-sm font-bold text-amber-700">{{ $belumRooms }}</span>
                     <span class="text-xs text-amber-600">Belum</span>
                 </div>
+                @if($totalLuas > 0)
                 <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 border border-violet-200 rounded-full">
                     <i class="ri-ruler-line text-violet-600 text-sm"></i>
                     <span class="text-sm font-bold text-violet-700">{{ rtrim(rtrim(number_format($totalLuas, 2, ',', '.'), '0'), ',') }} m²</span>
                     <span class="text-xs text-violet-600">Luas</span>
                 </div>
+                @endif
             </div>
 
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <div class="text-sm font-semibold text-gray-700">
-                        Progres Keseluruhan
+            <!-- Progres Ruangan -->
+            <div class="{{ $totalLuas > 0 ? 'mb-4' : '' }}">
+                <div class="flex items-center justify-between text-sm mb-1.5">
+                    <div>
+                        <span class="text-gray-700 font-semibold">Progres Ruangan</span>
+                        <span class="text-xs text-gray-500 ml-1.5">({{ $doneRooms }} dari {{ $totalRooms }} ruangan selesai)</span>
                     </div>
-                    <div class="text-xs text-gray-500 mt-0.5">
-                        {{ $doneRooms }} dari {{ $totalRooms }} ruangan selesai
-                    </div>
+                    <span class="text-base font-extrabold {{ $percent === 100 ? 'text-green-600' : 'text-primary' }}">
+                        {{ $percent }}%
+                    </span>
                 </div>
-                <div class="text-3xl font-extrabold {{ $percent === 100 ? 'text-green-600' : 'text-primary' }}">
-                    {{ $percent }}%
+                <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full {{ $percent === 100 ? 'bg-green-500' : 'bg-primary' }} rounded-full transition-all duration-500" style="width: {{ $percent }}%"></div>
                 </div>
             </div>
-            <div class="w-full h-3 bg-gray-100 rounded-full mt-3 overflow-hidden">
-                <div class="h-full {{ $percent === 100 ? 'bg-green-500' : 'bg-primary' }} rounded-full transition-all duration-500" style="width: {{ $percent }}%"></div>
+
+            <!-- Progres Berdasarkan Luas Ruangan -->
+            @if($totalLuas > 0)
+            <div>
+                <div class="flex items-center justify-between text-sm mb-1.5 mt-2">
+                    <div>
+                        <span class="text-gray-700 font-semibold">Progres Berdasarkan Luas Ruangan</span>
+                        <span class="text-xs text-gray-500 ml-1.5">({{ rtrim(rtrim(number_format($luasSelesai, 2, ',', '.'), '0'), ',') }} m² dari {{ rtrim(rtrim(number_format($totalLuas, 2, ',', '.'), '0'), ',') }} m² selesai)</span>
+                    </div>
+                    <span class="text-base font-extrabold {{ $progressLuasPercent === 100 ? 'text-green-600' : 'text-violet-600' }}">
+                        {{ $progressLuasPercent }}%
+                    </span>
+                </div>
+                <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full {{ $progressLuasPercent === 100 ? 'bg-green-500' : 'bg-violet-500' }} rounded-full transition-all duration-500" style="width: {{ $progressLuasPercent }}%"></div>
+                </div>
             </div>
+            @endif
         </div>
 
         <!-- Daftar Lantai & Ruangan -->
@@ -106,9 +127,9 @@
                     <div class="flex items-center justify-between gap-2 cursor-pointer select-none" @click="open = !open">
                         <h2 class="flex items-center gap-2 text-base font-bold text-gray-800">
                             <i class="ri-building-2-line text-primary"></i> {{ $lantai }}
-                            @if($rooms->sum('luas'))
-                            <span class="text-xs font-semibold text-gray-400">· {{ rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') }} m²</span>
-                            @endif
+                            <span class="text-xs font-semibold text-gray-400">
+                                · {{ $rooms->where('status', 'selesai')->count() }}/{{ $rooms->count() }} selesai{{ $rooms->sum('luas') ? ' · ' . rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') . ' m²' : '' }}
+                            </span>
                         </h2>
                         <button type="button" class="shrink-0 p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors" title="Minimize / Expand">
                             <i class="ri-arrow-up-s-line transition-transform" :class="open ? '' : 'rotate-180'"></i>

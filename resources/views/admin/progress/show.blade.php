@@ -64,7 +64,10 @@
 
             <!-- Progres Ruangan -->
             <div class="flex items-center justify-between text-sm mb-1.5 mt-2">
-                <span class="text-gray-600 font-medium">Progres Ruangan</span>
+                <div>
+                    <span class="text-gray-600 font-medium">Progres Ruangan</span>
+                    <span class="text-xs text-gray-400 ml-1.5">({{ $doneRooms }} dari {{ $totalRooms }} selesai)</span>
+                </div>
                 <span class="font-bold {{ $progressPercent === 100 ? 'text-green-600' : 'text-blue-600' }}">{{ $progressPercent }}%</span>
             </div>
             <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden mb-4">
@@ -73,7 +76,10 @@
 
             <!-- Progres Luas -->
             <div class="flex items-center justify-between text-sm mb-1.5 mt-2">
-                <span class="text-gray-600 font-medium">Progres Berdasarkan Luas</span>
+                <div>
+                    <span class="text-gray-600 font-medium">Progres Berdasarkan Luas</span>
+                    <span class="text-xs text-gray-400 ml-1.5">({{ rtrim(rtrim(number_format($luasSelesai, 2, ',', '.'), '0'), ',') }} m² dari {{ rtrim(rtrim(number_format($totalLuas, 2, ',', '.'), '0'), ',') }} m² selesai)</span>
+                </div>
                 <span class="font-bold {{ $progressLuasPercent === 100 ? 'text-green-600' : 'text-violet-600' }}">{{ $progressLuasPercent }}%</span>
             </div>
             <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden mb-2">
