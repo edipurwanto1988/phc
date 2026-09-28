@@ -60,33 +60,33 @@
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">No. Order</th>
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Customer</th>
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Jadwal Pengerjaan</th>
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-right">{{ auth()->user()->role->name === 'Cleaner' ? 'Gaji Diterima' : 'Grand Total' }}</th>
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-center">Status</th>
+                    <th class="py-3.5 px-3 text-sm font-semibold text-gray-600">No. Order</th>
+                    <th class="py-3.5 px-3 text-sm font-semibold text-gray-600">Customer</th>
+                    <th class="py-3.5 px-3 text-sm font-semibold text-gray-600">Jadwal Pengerjaan</th>
+                    <th class="py-3.5 px-3 text-sm font-semibold text-gray-600 text-right">{{ auth()->user()->role->name === 'Cleaner' ? 'Gaji Diterima' : 'Grand Total' }}</th>
+                    <th class="py-3.5 px-3 text-sm font-semibold text-gray-600 text-center">Status</th>
                     @if(auth()->user()->role->name !== 'Cleaner')
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-center">Pembayaran</th>
+                    <th class="py-3.5 px-3 text-sm font-semibold text-gray-600 text-center">Pembayaran</th>
                     @endif
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600">Cleaner Ditugaskan</th>
-                    <th class="py-3.5 px-6 text-sm font-semibold text-gray-600 text-center w-20">Aksi</th>
+                    <th class="py-3.5 px-3 text-sm font-semibold text-gray-600">Cleaner Ditugaskan</th>
+                    <th class="py-3.5 px-3 text-sm font-semibold text-gray-600 text-center w-20">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($orders as $order)
                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="py-4 px-6 text-sm font-bold text-blue-600">
+                    <td class="py-4 px-3 text-sm font-bold text-blue-600">
                         <a href="{{ route('admin.orders.show', $order) }}" class="hover:underline">{{ $order->order_number }}</a>
                     </td>
-                    <td class="py-4 px-6">
+                    <td class="py-4 px-3">
                         <div class="text-sm font-semibold text-gray-800">{{ $order->customer->nama }}</div>
                         <div class="text-xs text-gray-500">{{ $order->customer->no_wa }}</div>
                     </td>
-                    <td class="py-4 px-6">
+                    <td class="py-4 px-3">
                         <div class="text-sm font-semibold text-gray-800">{{ $order->tanggal_jadwal->translatedFormat('d M Y') }}</div>
                         <div class="text-xs text-gray-500">{{ $order->tanggal_jadwal->translatedFormat('H:i') }} WIB</div>
                     </td>
-                    <td class="py-4 px-6 text-sm font-bold text-gray-850 text-right">
+                    <td class="py-4 px-3 text-sm font-bold text-gray-850 text-right">
                         @if(auth()->user()->role->name === 'Cleaner')
                             @php
                                 $myAssign = $order->assignments->where('user_id', auth()->id())->first();
@@ -99,7 +99,7 @@
                             Rp {{ number_format($order->grand_total, 0, ',', '.') }}
                         @endif
                     </td>
-                    <td class="py-4 px-6 text-center">
+                    <td class="py-4 px-3 text-center">
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full 
                             @if($order->status === 'pending') bg-yellow-100 text-yellow-700
                             @elseif($order->status === 'confirmed') bg-blue-100 text-blue-700
@@ -110,7 +110,7 @@
                         </span>
                     </td>
                     @if(auth()->user()->role->name !== 'Cleaner')
-                    <td class="py-4 px-6 text-center">
+                    <td class="py-4 px-3 text-center">
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full 
                             @if($order->status_bayar === 'paid') bg-green-100 text-green-700
                             @elseif($order->status_bayar === 'partial') bg-blue-100 text-blue-700
@@ -119,7 +119,7 @@
                         </span>
                     </td>
                     @endif
-                    <td class="py-4 px-6 text-sm text-gray-650">
+                    <td class="py-4 px-3 text-sm text-gray-650">
                         @php 
                             // Sorted assignments (by sort_order then id)
                             $assignments = $order->assignments;
@@ -142,7 +142,7 @@
                             </span>
                         @endif
                     </td>
-                    <td class="py-4 px-6 text-center">
+                    <td class="py-4 px-3 text-center">
                         <div class="flex items-center justify-center gap-3">
                             @if($order->status !== 'cancelled')
                             <a href="{{ route('admin.orders.absensi.index', $order) }}" class="text-indigo-600 hover:text-indigo-800 transition-colors" title="Data Absensi">
