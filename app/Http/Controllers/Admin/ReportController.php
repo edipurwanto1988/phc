@@ -15,13 +15,33 @@ class ReportController extends Controller
     {
         $year = $request->input('year', now()->year);
         
-        $monthlyRevenue = Order::select(
-                DB::raw("MONTH(tanggal_jadwal) as month"),
-                DB::raw("COUNT(*) as total_orders"),
+        $monthlyRevenuePayments = \App\Models\OrderPayment::select(
+                DB::raw("MONTH(payment_date) as month"),
+                DB::raw("SUM(amount) as revenue")
+            )
+            ->whereYear('payment_date', $year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $monthlyRevenueLegacy = Order::whereDoesntHave('payments')
+            ->where('status_bayar', 'paid')
+            ->whereYear(DB::raw("COALESCE(tanggal_order, created_at)"), $year)
+            ->select(
+                DB::raw("MONTH(COALESCE(tanggal_order, created_at)) as month"),
                 DB::raw("SUM(grand_total) as revenue")
             )
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $monthlyOrders = Order::select(
+                DB::raw("MONTH(tanggal_jadwal) as month"),
+                DB::raw("COUNT(*) as total_orders")
+            )
             ->whereYear('tanggal_jadwal', $year)
-            ->where('status_bayar', 'paid')
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -43,8 +63,8 @@ class ReportController extends Controller
         $totalExpenseYear = 0;
 
         for ($m = 1; $m <= 12; $m++) {
-            $orders = $monthlyRevenue->has($m) ? $monthlyRevenue[$m]->total_orders : 0;
-            $revenue = $monthlyRevenue->has($m) ? (float) $monthlyRevenue[$m]->revenue : 0.0;
+            $orders = $monthlyOrders->has($m) ? $monthlyOrders[$m]->total_orders : 0;
+            $revenue = (float) ($monthlyRevenuePayments[$m]->revenue ?? 0) + (float) ($monthlyRevenueLegacy[$m]->revenue ?? 0);
             $expense = $monthlyExpenses->has($m) ? (float) $monthlyExpenses[$m]->expense : 0.0;
             
             $totalOrdersYear += $orders;
@@ -60,8 +80,9 @@ class ReportController extends Controller
             ];
         }
 
-        $cashIn = Order::where('status_bayar', 'paid')->sum('grand_total');
-        $cashOut = Expense::sum('jumlah');
+        $cashIn = (float) \App\Models\OrderPayment::sum('amount') 
+                + (float) Order::whereDoesntHave('payments')->where('status_bayar', 'paid')->sum('grand_total');
+        $cashOut = (float) Expense::sum('jumlah');
         $cashBalance = $cashIn - $cashOut;
 
         $serviceBreakdown = OrderItem::select(

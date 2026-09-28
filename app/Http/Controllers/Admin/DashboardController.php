@@ -18,6 +18,14 @@ class DashboardController extends Controller
 
         // 1. Get statistics
         if ($isCleaner) {
+            $cleanerPaymentsTotal = (float) \App\Models\OrderAssignmentPayment::whereHas('assignment', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->sum('amount');
+            $cleanerLegacyTotal = (float) \App\Models\OrderAssignment::where('user_id', $user->id)
+                ->where('status_gaji', 'sudah_dibayar')
+                ->whereDoesntHave('payments')
+                ->sum('gaji');
+
             $stats = [
                 'total_orders' => Order::whereHas('assignments', function($q) use ($user) {
                     $q->where('user_id', $user->id);
@@ -35,19 +43,21 @@ class DashboardController extends Controller
                         $q->where('user_id', $user->id);
                     })->count(),
                 'total_services' => Service::where('is_active', true)->count(),
-                'total_revenue' => \App\Models\OrderAssignmentPayment::whereHas('assignment', function($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                })->sum('amount'),
+                'total_revenue' => $cleanerPaymentsTotal + $cleanerLegacyTotal,
                 'cleaners_count' => 1,
             ];
         } else {
+            // Real cash inflow: OrderPayment (DP, cicilan, pelunasan) + paid orders without separate order_payments
+            $realPaymentsTotal = (float) \App\Models\OrderPayment::sum('amount');
+            $legacyPaidTotal = (float) Order::whereDoesntHave('payments')->where('status_bayar', 'paid')->sum('grand_total');
+
             $stats = [
                 'total_orders' => Order::count(),
                 'active_orders' => Order::whereIn('status', ['pending', 'confirmed', 'in_progress'])->count(),
                 'completed_orders' => Order::where('status', 'completed')->count(),
                 'total_customers' => Customer::where('status', 'active')->count(),
                 'total_services' => Service::where('is_active', true)->count(),
-                'total_revenue' => Order::where('status_bayar', 'paid')->sum('grand_total'),
+                'total_revenue' => $realPaymentsTotal + $legacyPaidTotal,
                 'cleaners_count' => User::whereHas('role', function($q) {
                     $q->where('name', 'Cleaner');
                 })->count(),
@@ -66,38 +76,83 @@ class DashboardController extends Controller
 
         $recentOrders = $recentOrdersQuery->limit(5)->get();
 
+        $startDate = now()->startOfMonth()->subMonths(5);
+
         // 3. Get monthly revenue statistics for chart/trend
         if ($isCleaner) {
-            $revenuePerMonth = \App\Models\OrderAssignmentPayment::select(
+            $revenuePayments = \App\Models\OrderAssignmentPayment::select(
                     DB::raw("DATE_FORMAT(payment_date, '%Y-%m') as month"),
                     DB::raw('SUM(order_assignment_payments.amount) as total')
                 )
                 ->join('order_assignments', 'order_assignments.id', '=', 'order_assignment_payments.assignment_id')
                 ->where('order_assignments.user_id', $user->id)
-                ->where('payment_date', '>=', now()->subMonths(5)->startOfMonth())
+                ->where('payment_date', '>=', $startDate)
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get()
                 ->keyBy('month');
 
-            $expensePerMonth = collect(); // Cleaners don't have expenses
-        } else {
-            $revenuePerMonth = Order::select(
-                    DB::raw("DATE_FORMAT(tanggal_jadwal, '%Y-%m') as month"),
-                    DB::raw('SUM(grand_total) as total')
+            $revenueLegacy = \App\Models\OrderAssignment::where('user_id', $user->id)
+                ->where('status_gaji', 'sudah_dibayar')
+                ->whereDoesntHave('payments')
+                ->where('updated_at', '>=', $startDate)
+                ->select(
+                    DB::raw("DATE_FORMAT(updated_at, '%Y-%m') as month"),
+                    DB::raw('SUM(gaji) as total')
                 )
-                ->where('status_bayar', 'paid')
-                ->where('tanggal_jadwal', '>=', now()->subMonths(5)->startOfMonth())
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get()
                 ->keyBy('month');
+
+            $allKeys = $revenuePayments->keys()->merge($revenueLegacy->keys())->unique();
+            $revenuePerMonth = collect();
+            foreach ($allKeys as $k) {
+                $sum = (float) ($revenuePayments[$k]->total ?? 0) + (float) ($revenueLegacy[$k]->total ?? 0);
+                $revenuePerMonth[$k] = (object) ['total' => $sum];
+            }
+
+            $expensePerMonth = collect(); // Cleaners don't have expenses
+        } else {
+            // Uang masuk riil dari OrderPayment (DP, Cicilan, Pelunasan berdasarkan tanggal pembayaran)
+            $revenuePayments = \App\Models\OrderPayment::select(
+                    DB::raw("DATE_FORMAT(payment_date, '%Y-%m') as month"),
+                    DB::raw('SUM(amount) as total')
+                )
+                ->where('payment_date', '>=', $startDate)
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month');
+
+            // Order lunas terdahulu yang belum tercatat di tabel order_payments
+            $revenueLegacy = Order::whereDoesntHave('payments')
+                ->where('status_bayar', 'paid')
+                ->where(function($q) use ($startDate) {
+                    $q->where('tanggal_order', '>=', $startDate)
+                      ->orWhere('created_at', '>=', $startDate);
+                })
+                ->select(
+                    DB::raw("DATE_FORMAT(COALESCE(tanggal_order, created_at), '%Y-%m') as month"),
+                    DB::raw('SUM(grand_total) as total')
+                )
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month');
+
+            $allKeys = $revenuePayments->keys()->merge($revenueLegacy->keys())->unique();
+            $revenuePerMonth = collect();
+            foreach ($allKeys as $k) {
+                $sum = (float) ($revenuePayments[$k]->total ?? 0) + (float) ($revenueLegacy[$k]->total ?? 0);
+                $revenuePerMonth[$k] = (object) ['total' => $sum];
+            }
 
             $expensePerMonth = \App\Models\Expense::select(
                     DB::raw("DATE_FORMAT(tanggal, '%Y-%m') as month"),
                     DB::raw('SUM(jumlah) as total')
                 )
-                ->where('tanggal', '>=', now()->subMonths(5)->startOfMonth())
+                ->where('tanggal', '>=', $startDate)
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get()
@@ -109,7 +164,7 @@ class DashboardController extends Controller
         $expenseData = [];
         
         for ($i = 5; $i >= 0; $i--) {
-            $date = now()->subMonths($i);
+            $date = now()->startOfMonth()->subMonths($i);
             $key = $date->format('Y-m');
             $months[] = $date->translatedFormat('F Y');
             
