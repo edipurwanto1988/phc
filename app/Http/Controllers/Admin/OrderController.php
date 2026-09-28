@@ -579,9 +579,7 @@ class OrderController extends Controller
         $status = $request->input('status', 'lunas');
 
         // Hitung sisa yang harus dibayar berdasarkan pembayaran yang lunas
-        $totalPaidLunas = $order->payments()->where(function($q) {
-            $q->where('status', 'lunas')->orWhereNull('status');
-        })->sum('amount');
+        $totalPaidLunas = $order->payments()->lunas()->sum('amount');
         $sisa = $order->grand_total - $totalPaidLunas;
 
         // Down Payment harus lebih kecil dari grand total (tidak boleh sama / lunas)
@@ -608,9 +606,7 @@ class OrderController extends Controller
         ]);
         
         // Auto update status_bayar berdasarkan pembayaran yang LUNAS
-        $newTotalPaidLunas = $order->payments()->where(function($q) {
-            $q->where('status', 'lunas')->orWhereNull('status');
-        })->sum('amount');
+        $newTotalPaidLunas = $order->payments()->lunas()->sum('amount');
 
         if ($newTotalPaidLunas >= $order->grand_total || ($request->type === 'pelunasan' && $status === 'lunas')) {
             $order->update(['status_bayar' => 'paid']);
@@ -638,9 +634,8 @@ class OrderController extends Controller
 
         $totalPaidLunasOthers = $order->payments()
             ->where('id', '!=', $payment->id)
-            ->where(function($q) {
-                $q->where('status', 'lunas')->orWhereNull('status');
-            })->sum('amount');
+            ->lunas()
+            ->sum('amount');
         $sisa = $order->grand_total - $totalPaidLunasOthers;
 
         if ($request->type === 'down_payment' && (float) $request->amount >= $order->grand_total) {
@@ -664,9 +659,7 @@ class OrderController extends Controller
         ]);
 
         // Auto update status_bayar order berdasarkan pembayaran yang LUNAS
-        $newTotalPaidLunas = $order->payments()->where(function($q) {
-            $q->where('status', 'lunas')->orWhereNull('status');
-        })->sum('amount');
+        $newTotalPaidLunas = $order->payments()->lunas()->sum('amount');
 
         if ($newTotalPaidLunas >= $order->grand_total || ($request->type === 'pelunasan' && $status === 'lunas')) {
             $order->update(['status_bayar' => 'paid']);
@@ -685,9 +678,7 @@ class OrderController extends Controller
         $payment->delete();
 
         // Update status_bayar order berdasarkan sisa pembayaran lunas
-        $newTotalPaidLunas = $order->payments()->where(function($q) {
-            $q->where('status', 'lunas')->orWhereNull('status');
-        })->sum('amount');
+        $newTotalPaidLunas = $order->payments()->lunas()->sum('amount');
 
         if ($newTotalPaidLunas >= $order->grand_total) {
             $order->update(['status_bayar' => 'paid']);

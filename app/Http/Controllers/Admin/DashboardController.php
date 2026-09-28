@@ -48,9 +48,7 @@ class DashboardController extends Controller
             ];
         } else {
             // Real cash inflow: OrderPayment (DP, cicilan, pelunasan) yang berstatus LUNAS + paid orders without separate order_payments
-            $realPaymentsTotal = (float) \App\Models\OrderPayment::where(function($q) {
-                $q->where('status', 'lunas')->orWhereNull('status');
-            })->sum('amount');
+            $realPaymentsTotal = (float) \App\Models\OrderPayment::lunas()->sum('amount');
             $legacyPaidTotal = (float) Order::whereDoesntHave('payments')->where('status_bayar', 'paid')->sum('grand_total');
 
             $stats = [
@@ -117,13 +115,11 @@ class DashboardController extends Controller
             $expensePerMonth = collect(); // Cleaners don't have expenses
         } else {
             // Uang masuk riil dari OrderPayment yang berstatus LUNAS (DP, Cicilan, Pelunasan berdasarkan tanggal pembayaran)
-            $revenuePayments = \App\Models\OrderPayment::select(
+            $revenuePayments = \App\Models\OrderPayment::lunas()
+                ->select(
                     DB::raw("DATE_FORMAT(payment_date, '%Y-%m') as month"),
                     DB::raw('SUM(amount) as total')
                 )
-                ->where(function($q) {
-                    $q->where('status', 'lunas')->orWhereNull('status');
-                })
                 ->where('payment_date', '>=', $startDate)
                 ->groupBy('month')
                 ->orderBy('month')
