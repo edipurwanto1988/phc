@@ -126,6 +126,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/orders/{order}/profit', [AdminOrderController::class, 'profit'])->name('admin.orders.profit');
         Route::get('/orders/{order}/download-invoice', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.download-invoice');
         Route::get('/orders/payments/{payment}/download-invoice', [AdminOrderController::class, 'downloadPaymentInvoice'])->name('admin.orders.payments.download-invoice');
+        Route::get('/orders/payments/{payment}/download-invoicev2', [AdminOrderController::class, 'downloadPaymentInvoicev2'])->name('admin.orders.payments.download-invoicev2');
         Route::post('/orders/{order}/assign', [AdminOrderController::class, 'assignCleaner'])->name('admin.orders.assign');
         Route::post('/orders/assignments/{assignment}/gaji', [AdminOrderController::class, 'updateGaji'])->name('admin.orders.update-gaji');
         Route::post('/orders/assignments/{assignment}/photos', [AdminOrderController::class, 'uploadPhotos'])->name('admin.orders.upload-photos');

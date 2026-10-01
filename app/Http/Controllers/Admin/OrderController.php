@@ -769,6 +769,24 @@ class OrderController extends Controller
         return $pdf->download('Nota-' . $order->order_number . '-' . $typeLabel . '-' . $payment->id . '.pdf');
     }
 
+    public function downloadPaymentInvoicev2(\App\Models\OrderPayment $payment)
+    {
+        $payment->load(['order.customer', 'order.items.service', 'order.payments']);
+        $order = $payment->order;
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.payment-invoicev2', compact('payment', 'order'));
+        
+        $pdf->setPaper('a5', 'portrait');
+        
+        $typeLabel = match($payment->type) {
+            'down_payment' => 'DP',
+            'pelunasan' => 'Pelunasan',
+            default => 'Cicilan',
+        };
+        
+        return $pdf->stream('Nota-V2-' . $order->order_number . '-' . $typeLabel . '-' . $payment->id . '.pdf');
+    }
+
     public function profit(Order $order)
     {
         $order->load(['customer', 'assignments.cleaner', 'expenses']);

@@ -257,6 +257,9 @@
                                         <a href="{{ route('admin.orders.payments.download-invoice', $payment) }}" class="text-blue-500 hover:text-blue-700 p-2 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors" title="Download Nota Pembayaran">
                                             <i class="ri-download-2-line"></i>
                                         </a>
+                                        <a target="_blank" href="{{ route('admin.orders.payments.download-invoicev2', $payment) }}" class="text-green-500 hover:text-green-700 p-2 bg-green-50 hover:bg-green-100 rounded-md transition-colors flex items-center gap-1 text-xs font-bold" title="Preview Nota V2 (Dengan TTD & Stempel)">
+                                            <i class="ri-file-search-line"></i> V2
+                                        </a>
                                         <form action="{{ route('admin.orders.payments.destroy', $payment) }}" method="POST" onsubmit="return confirm('Hapus data pembayaran ini?')">
                                             @csrf
                                             @method('DELETE')
