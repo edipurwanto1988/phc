@@ -315,7 +315,7 @@
             <td style="padding: 8px 0; font-size: 11px; vertical-align: top;">:</td>
             <td style="padding: 8px 10px; font-size: 11px; vertical-align: top;">
                 @php
-                    $paymentDesc = "Pembayaran {$typeLabel} untuk layanan {$categoryName} tanggal " . \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d F Y') . " di alamat {$order->alamat_pengerjaan}.";
+                    $paymentDesc = !empty($payment->notes) ? $payment->notes : "Pembayaran {$typeLabel} untuk layanan {$categoryName} tanggal " . \Carbon\Carbon::parse($order->tanggal_jadwal)->translatedFormat('d F Y') . " di alamat {$order->alamat_pengerjaan}.";
                     $descLines = explode("\n", wordwrap($paymentDesc, 65, "\n"));
                 @endphp
                 @foreach($descLines as $line)
