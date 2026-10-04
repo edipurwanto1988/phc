@@ -17,10 +17,17 @@
                 @endfor
             </select>
         </div>
-        <div class="text-right">
-            <span class="text-xs text-gray-400 font-bold block uppercase">Arus Kas Saat Ini</span>
-            <span class="text-sm text-gray-600 block">Total Uang Masuk: <b class="text-emerald-600">Rp {{ number_format($cashIn, 0, ',', '.') }}</b></span>
-            <span class="text-sm text-gray-600 block">Total Uang Keluar: <b class="text-red-500">Rp {{ number_format($cashOut, 0, ',', '.') }}</b></span>
+        <div class="text-right flex flex-col md:flex-row items-end md:items-center gap-4">
+            <div class="text-right">
+                <span class="text-xs text-gray-400 font-bold block uppercase">Arus Kas Saat Ini</span>
+                <span class="text-sm text-gray-600 block">Total Uang Masuk: <b class="text-emerald-600">Rp {{ number_format($cashIn, 0, ',', '.') }}</b></span>
+                <span class="text-sm text-gray-600 block">Total Uang Keluar: <b class="text-red-500">Rp {{ number_format($cashOut, 0, ',', '.') }}</b></span>
+            </div>
+            @if(auth()->user()->role && in_array(auth()->user()->role->name, ['Super Admin', 'Admin']))
+            <a href="{{ route('admin.exports.index') }}" class="btn bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-sm text-sm whitespace-nowrap">
+                <i class="ri-file-excel-2-line text-lg"></i> Download Laporan
+            </a>
+            @endif
         </div>
     </form>
 </div>

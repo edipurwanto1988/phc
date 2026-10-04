@@ -201,6 +201,13 @@
                   </div>
                   @endhasperm
 
+                  <!-- Download Data -->
+                  @if(auth()->user()->role && in_array(auth()->user()->role->name, ['Super Admin', 'Admin']))
+                  <a href="{{ route('admin.exports.index') }}" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/exports*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
+                      <i class="ri-download-cloud-2-line text-xl"></i><span>Download Data</span>
+                  </a>
+                  @endif
+
                 <!-- Settings -->
                 @if(auth()->user()->role && auth()->user()->role->name === 'Super Admin')
                 <a href="/admin/menu" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/menu*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">

@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\HalamanController as AdminHalamanController;
 use App\Http\Controllers\Admin\OrderProgressController as AdminOrderProgressController;
 use App\Http\Controllers\Admin\LokerController as AdminLokerController;
 use App\Http\Controllers\Admin\PeriodeLokerController as AdminPeriodeLokerController;
+use App\Http\Controllers\Admin\ExportController as AdminExportController;
 
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
@@ -121,6 +122,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('/settings/gdrive/disconnect', [AdminSettingController::class, 'disconnectGDrive'])->name('admin.settings.gdrive-disconnect');
         Route::get('/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
         Route::get('/reports/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
+        
+        // Data Exports
+        Route::get('/exports', [AdminExportController::class, 'index'])->name('admin.exports.index');
+        Route::get('/exports/customers', [AdminExportController::class, 'customers'])->name('admin.exports.customers');
+        Route::get('/exports/orders', [AdminExportController::class, 'orders'])->name('admin.exports.orders');
+        Route::get('/exports/financials', [AdminExportController::class, 'financials'])->name('admin.exports.financials');
         
         // Extra Assignment Route for orders
         Route::get('/orders/{order}/profit', [AdminOrderController::class, 'profit'])->name('admin.orders.profit');

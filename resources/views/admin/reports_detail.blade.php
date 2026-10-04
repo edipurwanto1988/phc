@@ -24,6 +24,11 @@
             <a href="{{ route('admin.reports.detail') }}" class="btn border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-3 rounded-lg text-sm transition-all" title="Reset Filter">
                 <i class="ri-refresh-line"></i>
             </a>
+            @if(auth()->user()->role && in_array(auth()->user()->role->name, ['Super Admin', 'Admin']))
+            <a href="{{ route('admin.exports.index') }}" class="btn bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-sm text-sm whitespace-nowrap">
+                <i class="ri-file-excel-2-line text-lg"></i> Download
+            </a>
+            @endif
         </div>
     </form>
 </div>
