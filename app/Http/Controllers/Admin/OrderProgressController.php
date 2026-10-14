@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderProgressRoom;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class OrderProgressController extends Controller
@@ -142,6 +143,58 @@ class OrderProgressController extends Controller
         }
 
         return back()->with('success', "Nama lantai berhasil diubah menjadi \"{$displayTitle}\".");
+    }
+
+    public function destroyLantai(Request $request, Order $order)
+    {
+        $request->validate([
+            'old_lantai' => 'nullable|string|max:100',
+            'password' => 'required|string',
+        ]);
+
+        if (!$request->user()->password || !Hash::check($request->password, $request->user()->password)) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Password login yang Anda masukkan salah.',
+                ], 422);
+            }
+
+            return back()->with('error', 'Password login yang Anda masukkan salah.');
+        }
+
+        $oldLantai = $request->old_lantai;
+        $query = $order->progressRooms();
+        if ($oldLantai === null || $oldLantai === '' || $oldLantai === 'Tanpa Lantai') {
+            $query->where(function ($q) {
+                $q->whereNull('lantai')->orWhere('lantai', '');
+            });
+        } else {
+            $query->where('lantai', $oldLantai);
+        }
+
+        $rooms = $query->get();
+        $count = $rooms->count();
+
+        foreach ($rooms as $room) {
+            foreach ($room->buktiPhotos as $bukti) {
+                if ($bukti->path && !str_starts_with($bukti->path, 'http') && file_exists(public_path($bukti->path))) {
+                    @unlink(public_path($bukti->path));
+                }
+            }
+            $room->delete();
+        }
+
+        $displayTitle = $oldLantai && $oldLantai !== 'Tanpa Lantai' ? $oldLantai : 'Tanpa Lantai';
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Kelompok \"{$displayTitle}\" ({$count} ruangan) berhasil dihapus.",
+            ]);
+        }
+
+        return back()->with('success', "Kelompok \"{$displayTitle}\" ({$count} ruangan) berhasil dihapus.");
     }
 
     public function updateRoom(Request $request, Order $order, OrderProgressRoom $room)
@@ -304,12 +357,40 @@ class OrderProgressController extends Controller
         }
     }
 
-    public function destroyRoom(Order $order, OrderProgressRoom $room)
+    public function destroyRoom(Request $request, Order $order, OrderProgressRoom $room)
     {
         abort_unless($room->order_id === $order->id, 404);
+
+        if ($request->filled('password')) {
+            if (!$request->user()->password || !Hash::check($request->password, $request->user()->password)) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Password login yang Anda masukkan salah.',
+                    ], 422);
+                }
+
+                return back()->with('error', 'Password login yang Anda masukkan salah.');
+            }
+        }
+
+        foreach ($room->buktiPhotos as $bukti) {
+            if ($bukti->path && !str_starts_with($bukti->path, 'http') && file_exists(public_path($bukti->path))) {
+                @unlink(public_path($bukti->path));
+            }
+        }
+
+        $roomName = $room->ruangan;
         $room->delete();
 
-        return back()->with('success', 'Ruangan berhasil dihapus dari progress.');
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Ruangan \"{$roomName}\" berhasil dihapus dari progress.",
+            ]);
+        }
+
+        return back()->with('success', "Ruangan \"{$roomName}\" berhasil dihapus dari progress.");
     }
 
     public function generateLink(Order $order)

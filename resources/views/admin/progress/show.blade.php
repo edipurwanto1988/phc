@@ -97,6 +97,34 @@
                 oldLantaiVal: {{ json_encode($rooms->first()?->lantai ?? '') }},
                 newLantai: {{ json_encode($lantai === 'Tanpa Lantai' ? '' : $lantai) }},
                 savingLantai: false,
+                openDeleteModal: false,
+                deleteType: 'lantai',
+                deleteRoomId: null,
+                deleteTargetName: '',
+                deletePassword: '',
+                deleteError: '',
+                showPassword: false,
+                deleting: false,
+                confirmDeleteLantai() {
+                    this.deleteType = 'lantai';
+                    this.deleteTargetName = this.lantaiName;
+                    this.deleteRoomId = null;
+                    this.deletePassword = '';
+                    this.deleteError = '';
+                    this.showPassword = false;
+                    this.openDeleteModal = true;
+                    this.$nextTick(() => this.$refs.deletePasswordInput?.focus());
+                },
+                confirmDeleteRoom(roomId, roomName) {
+                    this.deleteType = 'room';
+                    this.deleteTargetName = roomName;
+                    this.deleteRoomId = roomId;
+                    this.deletePassword = '';
+                    this.deleteError = '';
+                    this.showPassword = false;
+                    this.openDeleteModal = true;
+                    this.$nextTick(() => this.$refs.deletePasswordInput?.focus());
+                },
                 async saveLantai() {
                     const trimmed = (this.newLantai || '').trim();
                     if (trimmed === this.lantaiName) {
@@ -128,6 +156,41 @@
                         alert('Terjadi kesalahan saat menyimpan nama lantai.');
                         this.savingLantai = false;
                     }
+                },
+                async executeDelete() {
+                    if (!this.deletePassword) return;
+                    this.deleting = true;
+                    this.deleteError = '';
+
+                    const url = this.deleteType === 'lantai'
+                        ? '{{ route('admin.progress.lantai.destroy', $order) }}'
+                        : '{{ url('admin/progress/' . $order->id . '/rooms') }}/' + this.deleteRoomId;
+
+                    const payload = this.deleteType === 'lantai'
+                        ? { old_lantai: this.oldLantaiVal, password: this.deletePassword }
+                        : { password: this.deletePassword };
+
+                    try {
+                        const res = await fetch(url, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            this.deleteError = data.message || 'Password salah atau gagal menghapus.';
+                            this.deleting = false;
+                        }
+                    } catch (e) {
+                        this.deleteError = 'Terjadi kesalahan sistem saat memproses penghapusan.';
+                        this.deleting = false;
+                    }
                 }
              }">
             <div class="flex items-center justify-between gap-2 pb-2 border-b border-gray-100 mb-4 cursor-pointer select-none" @click="open = !open">
@@ -142,6 +205,11 @@
                                 class="p-1 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                                 title="Edit nama lantai / kelompok">
                             <i class="ri-edit-line text-sm"></i>
+                        </button>
+                        <button type="button" @click.stop="confirmDeleteLantai()"
+                                class="p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Hapus seluruh lantai / kelompok ini">
+                            <i class="ri-delete-bin-line text-sm"></i>
                         </button>
                     </div>
 
@@ -270,14 +338,13 @@
                                         <option value="selesai">Selesai</option>
                                     </select>
 
-                                    {{-- Hapus (hanya tampil jika belum diproses) --}}
-                                    <form method="POST" action="{{ route('admin.progress.rooms.destroy', [$order, $room]) }}" onsubmit="return confirm('Hapus ruangan ini dari progress?')" class="shrink-0" x-show="status === 'belum'">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-1.5 rounded-lg text-red-500 bg-red-50 hover:bg-red-100 transition-colors" title="Hapus Ruangan">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
-                                    </form>
+                                    {{-- Hapus Ruangan (dengan popup password) --}}
+                                    <button type="button"
+                                            @click="confirmDeleteRoom({{ $room->id }}, {{ json_encode($room->ruangan) }})"
+                                            class="p-1.5 rounded-lg text-red-500 bg-red-50 hover:bg-red-100 transition-colors shrink-0"
+                                            title="Hapus Ruangan">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -366,6 +433,79 @@
                     </div>
                 </div>
                 @endforeach
+            </div>
+
+            {{-- Modal Konfirmasi Hapus dengan Password --}}
+            <div x-show="openDeleteModal" x-cloak
+                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+                 @click.self="if (!deleting) { openDeleteModal = false; deletePassword = ''; deleteError = ''; }"
+                 @keydown.escape.window="if (!deleting) { openDeleteModal = false; deletePassword = ''; deleteError = ''; }">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" @click.stop>
+                    <div class="p-6">
+                        <div class="flex items-center gap-3 text-red-600 mb-3">
+                            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                                <i class="ri-alert-line text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-base font-bold text-gray-800" x-text="deleteType === 'lantai' ? 'Hapus Kelompok / Lantai' : 'Hapus Ruangan'"></h4>
+                                <p class="text-xs text-gray-500">Konfirmasi persetujuan keamanan dengan password login</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-50 border border-red-200 rounded-xl p-3.5 mb-4 text-xs text-red-700 leading-relaxed">
+                            <p class="font-semibold mb-1">Perhatian:</p>
+                            <template x-if="deleteType === 'lantai'">
+                                <span>Kelompok <strong x-text="'&quot;' + deleteTargetName + '&quot;'"></strong> beserta seluruh <strong>{{ $rooms->count() }} ruangan</strong> dan bukti foto pekerjaan di dalamnya akan dihapus secara permanen.</span>
+                            </template>
+                            <template x-if="deleteType === 'room'">
+                                <span>Ruangan <strong x-text="'&quot;' + deleteTargetName + '&quot;'"></strong> beserta seluruh catatan dan bukti foto pekerjaan di dalamnya akan dihapus secara permanen.</span>
+                            </template>
+                            <p class="mt-1 text-red-600 font-medium">Tindakan ini tidak dapat dibatalkan.</p>
+                        </div>
+
+                        <form @submit.prevent="executeDelete()" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1.5">
+                                    Password Login Anda <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input :type="showPassword ? 'text' : 'password'"
+                                           x-ref="deletePasswordInput"
+                                           x-model="deletePassword"
+                                           placeholder="Masukkan password login Anda..."
+                                           required
+                                           class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    <button type="button" @click="showPassword = !showPassword"
+                                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-base">
+                                        <i :class="showPassword ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                                    </button>
+                                </div>
+                                <p x-show="deleteError" x-cloak class="text-xs text-red-600 font-semibold mt-1.5 flex items-center gap-1">
+                                    <i class="ri-error-warning-line"></i> <span x-text="deleteError"></span>
+                                </p>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                                <button type="button"
+                                        @click="openDeleteModal = false; deletePassword = ''; deleteError = '';"
+                                        :disabled="deleting"
+                                        class="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                    Batal
+                                </button>
+                                <button type="submit"
+                                        :disabled="deleting || !deletePassword"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded-lg transition-colors shadow-sm shadow-red-200">
+                                    <span x-show="!deleting" class="flex items-center gap-1">
+                                        <i class="ri-delete-bin-line"></i> Ya, Hapus Sekarang
+                                    </span>
+                                    <span x-show="deleting" x-cloak class="flex items-center gap-1">
+                                        <i class="ri-loader-4-line animate-spin"></i> Memproses...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
         @empty
