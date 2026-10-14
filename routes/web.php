@@ -161,6 +161,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::get('/progress/{order}', [AdminOrderProgressController::class, 'show'])->name('admin.progress.show');
         Route::post('/progress/{order}/rooms', [AdminOrderProgressController::class, 'storeRoom'])->name('admin.progress.rooms.store');
         Route::post('/progress/{order}/rooms/import', [AdminOrderProgressController::class, 'importRooms'])->name('admin.progress.rooms.import');
+        Route::put('/progress/{order}/lantai', [AdminOrderProgressController::class, 'updateLantai'])->name('admin.progress.lantai.update');
         Route::put('/progress/{order}/rooms/{room}', [AdminOrderProgressController::class, 'updateRoom'])->name('admin.progress.rooms.update');
         Route::delete('/progress/{order}/rooms/{room}', [AdminOrderProgressController::class, 'destroyRoom'])->name('admin.progress.rooms.destroy');
         Route::post('/progress/{order}/rooms/{room}/bukti', [AdminOrderProgressController::class, 'uploadBukti'])->name('admin.progress.rooms.bukti.upload');

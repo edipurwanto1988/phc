@@ -89,12 +89,81 @@
 
         <!-- Daftar Ruangan per Lantai -->
         @forelse($grouped as $lantai => $rooms)
-        <div class="card p-6 bg-white border border-gray-200 rounded-xl" x-data="{ open: false }">
+        <div class="card p-6 bg-white border border-gray-200 rounded-xl"
+             x-data="{
+                open: false,
+                editingLantai: false,
+                lantaiName: {{ json_encode($lantai) }},
+                oldLantaiVal: {{ json_encode($rooms->first()?->lantai ?? '') }},
+                newLantai: {{ json_encode($lantai === 'Tanpa Lantai' ? '' : $lantai) }},
+                savingLantai: false,
+                async saveLantai() {
+                    const trimmed = (this.newLantai || '').trim();
+                    if (trimmed === this.lantaiName) {
+                        this.editingLantai = false;
+                        return;
+                    }
+                    this.savingLantai = true;
+                    try {
+                        const res = await fetch('{{ route('admin.progress.lantai.update', $order) }}', {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                old_lantai: this.oldLantaiVal,
+                                new_lantai: trimmed
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Gagal mengubah nama lantai.');
+                            this.savingLantai = false;
+                        }
+                    } catch (e) {
+                        alert('Terjadi kesalahan saat menyimpan nama lantai.');
+                        this.savingLantai = false;
+                    }
+                }
+             }">
             <div class="flex items-center justify-between gap-2 pb-2 border-b border-gray-100 mb-4 cursor-pointer select-none" @click="open = !open">
-                <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
-                    <i class="ri-building-2-line text-blue-600"></i> {{ $lantai }}
-                    <span class="ml-1 text-xs font-semibold text-gray-400">({{ $rooms->where('status', 'selesai')->count() }}/{{ $rooms->count() }} selesai{{ $rooms->sum('luas') ? ' · ' . rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') . ' m²' : '' }})</span>
-                </h3>
+                <div class="flex items-center gap-2 flex-1 min-w-0">
+                    <i class="ri-building-2-line text-blue-600 text-lg shrink-0"></i>
+
+                    <!-- View Lantai -->
+                    <div x-show="!editingLantai" class="flex items-center gap-2 flex-wrap min-w-0">
+                        <h3 class="text-base font-bold text-gray-800" x-text="lantaiName">{{ $lantai }}</h3>
+                        <span class="text-xs font-semibold text-gray-400">({{ $rooms->where('status', 'selesai')->count() }}/{{ $rooms->count() }} selesai{{ $rooms->sum('luas') ? ' · ' . rtrim(rtrim(number_format($rooms->sum('luas'), 2, ',', '.'), '0'), ',') . ' m²' : '' }})</span>
+                        <button type="button" @click.stop="editingLantai = true; $nextTick(() => $refs.lantaiInput.focus())"
+                                class="p-1 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                title="Edit nama lantai / kelompok">
+                            <i class="ri-edit-line text-sm"></i>
+                        </button>
+                    </div>
+
+                    <!-- Edit Lantai Inline -->
+                    <div x-show="editingLantai" x-cloak class="flex items-center gap-1.5 flex-wrap" @click.stop>
+                        <input type="text" x-ref="lantaiInput" x-model="newLantai"
+                               @keydown.enter.prevent="saveLantai()"
+                               @keydown.escape.prevent="editingLantai = false; newLantai = (lantaiName === 'Tanpa Lantai' ? '' : lantaiName)"
+                               class="px-2.5 py-1 text-sm font-semibold rounded-lg border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                               placeholder="Nama lantai / kelompok">
+                        <button type="button" @click.stop="saveLantai()" :disabled="savingLantai"
+                                class="px-2.5 py-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg flex items-center gap-1">
+                            <span x-show="!savingLantai">Simpan</span>
+                            <span x-show="savingLantai" x-cloak><i class="ri-loader-4-line animate-spin"></i></span>
+                        </button>
+                        <button type="button" @click.stop="editingLantai = false; newLantai = (lantaiName === 'Tanpa Lantai' ? '' : lantaiName)" :disabled="savingLantai"
+                                class="px-2 py-1 text-xs font-semibold text-gray-500 hover:bg-gray-100 rounded-lg">
+                            Batal
+                        </button>
+                    </div>
+                </div>
+
                 <button type="button" class="shrink-0 p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors" title="Minimize / Expand">
                     <i class="ri-arrow-up-s-line transition-transform" :class="open ? '' : 'rotate-180'"></i>
                 </button>
@@ -108,6 +177,10 @@
                         status: '{{ $room->status }}',
                         catatan: {{ json_encode($room->catatan ?? '') }},
                         masalah: {{ json_encode($room->masalah ?? '') }},
+                        ruangan: {{ json_encode($room->ruangan) }},
+                        luas: {{ json_encode($room->luas) }},
+                        lantai: {{ json_encode($room->lantai ?? '') }},
+                        editingRuangan: false,
                         editingCatatan: false,
                         editingMasalah: false,
                         saving: false,
@@ -119,7 +192,15 @@
                                 const res = await fetch('{{ route('admin.progress.rooms.update', [$order, $room]) }}', {
                                     method: 'PUT',
                                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                                    body: JSON.stringify({ status: this.status, catatan: this.catatan, masalah: this.masalah, ...extra })
+                                    body: JSON.stringify({
+                                        status: this.status,
+                                        catatan: this.catatan,
+                                        masalah: this.masalah,
+                                        ruangan: this.ruangan,
+                                        luas: this.luas,
+                                        lantai: this.lantai,
+                                        ...extra
+                                    })
                                 });
                                 await res.json();
                                 this.saved = true;
@@ -152,11 +233,28 @@
                         <div class="flex-1 min-w-0 space-y-3">
                             {{-- Nama ruangan + status + aksi --}}
                             <div class="flex items-center justify-between gap-3">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-semibold text-gray-800" :class="status === 'selesai' ? 'line-through text-gray-500' : ''">{{ $room->ruangan }}</span>
-                                    @if($room->luas)
-                                    <span class="shrink-0 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-gray-100 text-gray-500">{{ rtrim(rtrim(number_format($room->luas, 2, ',', '.'), '0'), ',') }} m²</span>
-                                    @endif
+                                <div class="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                                    <div x-show="!editingRuangan" class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-semibold text-gray-800" :class="status === 'selesai' ? 'line-through text-gray-500' : ''" x-text="ruangan">{{ $room->ruangan }}</span>
+                                        <template x-if="luas">
+                                            <span class="shrink-0 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-gray-100 text-gray-500" x-text="luas + ' m²'">{{ rtrim(rtrim(number_format($room->luas, 2, ',', '.'), '0'), ',') }} m²</span>
+                                        </template>
+                                        <button type="button" @click="editingRuangan = true" class="p-1 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="Edit nama & luas ruangan">
+                                            <i class="ri-edit-line text-xs"></i>
+                                        </button>
+                                    </div>
+
+                                    <div x-show="editingRuangan" x-cloak class="flex items-center gap-1.5 flex-wrap">
+                                        <input type="text" x-model="ruangan" class="px-2 py-1 text-xs border border-blue-400 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Nama ruangan">
+                                        <input type="number" step="0.01" min="0" x-model="luas" class="w-20 px-2 py-1 text-xs border border-blue-400 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Luas m²">
+                                        <input type="text" x-model="lantai" list="lantai-list" class="w-28 px-2 py-1 text-xs border border-blue-400 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Lantai">
+                                        <button type="button" @click="save().then(() => { editingRuangan = false; window.location.reload(); })" class="px-2 py-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg">
+                                            Simpan
+                                        </button>
+                                        <button type="button" @click="editingRuangan = false" class="px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded-lg">
+                                            Batal
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="shrink-0 flex items-center gap-2">
                                     <span class="text-[11px] text-green-600 font-bold flex items-center gap-1" x-show="saved"><i class="ri-checkbox-circle-line"></i> Tersimpan</span>

@@ -109,6 +109,41 @@ class OrderProgressController extends Controller
         return back()->with('success', "Berhasil mengimport {$imported} ruangan secara massal.");
     }
 
+    public function updateLantai(Request $request, Order $order)
+    {
+        $request->validate([
+            'old_lantai' => 'nullable|string|max:100',
+            'new_lantai' => 'nullable|string|max:100',
+        ]);
+
+        $oldLantai = $request->old_lantai;
+        $newLantai = trim((string) $request->new_lantai);
+        $newLantai = ($newLantai === '' || $newLantai === 'Tanpa Lantai') ? null : $newLantai;
+
+        $query = $order->progressRooms();
+        if ($oldLantai === null || $oldLantai === '' || $oldLantai === 'Tanpa Lantai') {
+            $query->where(function ($q) {
+                $q->whereNull('lantai')->orWhere('lantai', '');
+            });
+        } else {
+            $query->where('lantai', $oldLantai);
+        }
+
+        $affected = $query->update(['lantai' => $newLantai]);
+
+        $displayTitle = $newLantai ?? 'Tanpa Lantai';
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Nama lantai berhasil diubah menjadi \"{$displayTitle}\".",
+                'affected' => $affected,
+            ]);
+        }
+
+        return back()->with('success', "Nama lantai berhasil diubah menjadi \"{$displayTitle}\".");
+    }
+
     public function updateRoom(Request $request, Order $order, OrderProgressRoom $room)
     {
         abort_unless($room->order_id === $order->id, 404);
