@@ -13,6 +13,7 @@ class OrderAttendanceController extends Controller
 {
     public function index(Order $order)
     {
+        $this->authorizeOrderAccess($order);
         $order->load(['customer', 'assignments.cleaner', 'schedules.attendances']);
         
         $user = Auth::user();
@@ -27,6 +28,9 @@ class OrderAttendanceController extends Controller
 
     public function storeSchedule(Request $request, Order $order)
     {
+        $this->authorizeOrderAccess($order);
+        abort_unless($this->isPicOrAdmin($order), 403);
+
         $request->validate([
             'tanggal' => 'required|date',
             'cleaners' => 'required|array',
@@ -51,6 +55,10 @@ class OrderAttendanceController extends Controller
 
     public function destroySchedule(Order $order, OrderSchedule $schedule)
     {
+        $this->authorizeOrderAccess($order);
+        abort_unless($schedule->order_id === $order->id, 404);
+        abort_unless($this->isPicOrAdmin($order), 403);
+
         if ($schedule->attendances()->where('status', 'approved')->exists()) {
             return back()->with('error', 'Jadwal tidak dapat dihapus karena sudah ada absensi yang disetujui.');
         }
@@ -61,6 +69,9 @@ class OrderAttendanceController extends Controller
 
     public function storeAttendance(Request $request, Order $order, OrderSchedule $schedule)
     {
+        $this->authorizeOrderAccess($order);
+        abort_unless($schedule->order_id === $order->id, 404);
+
         $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
@@ -96,6 +107,9 @@ class OrderAttendanceController extends Controller
 
     public function updateStatus(Request $request, Order $order, OrderAttendance $attendance)
     {
+        $this->authorizeOrderAccess($order);
+        abort_unless($attendance->schedule && $attendance->schedule->order_id === $order->id, 404);
+
         $request->validate([
             'status' => 'required|in:approved,rejected'
         ]);
@@ -113,5 +127,15 @@ class OrderAttendanceController extends Controller
 
         $statusText = $request->status == 'approved' ? 'disetujui' : 'ditolak';
         return back()->with('success', "Absensi berhasil $statusText.");
+    }
+
+    private function isPicOrAdmin(Order $order): bool
+    {
+        $user = Auth::user();
+        $pic = $order->assignments()->first();
+
+        return $user->hasPermission('manage_orders')
+            || $user->hasPermission('create_orders')
+            || ($pic && $pic->user_id == $user->id);
     }
 }

@@ -14,6 +14,8 @@ class ExpenseController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorizeExpenseView();
+
         $query = Expense::with('user');
         $user = \Auth::user();
 
@@ -197,6 +199,8 @@ class ExpenseController extends Controller
      */
     public function show(Expense $expense)
     {
+        $this->authorizeExpenseView($expense);
+
         $expense->load(['user', 'orderAssignments.order.customer', 'orderAssignments.payments']);
         return view('admin.expenses.show', compact('expense'));
     }
@@ -291,6 +295,8 @@ class ExpenseController extends Controller
 
     public function downloadSlip(Expense $expense)
     {
+        $this->authorizeExpenseView($expense);
+
         if (!$expense->is_gaji) {
             return redirect()->back()->withErrors(['error' => 'Dokumen ini bukan merupakan slip pembayaran gaji.']);
         }
@@ -302,5 +308,25 @@ class ExpenseController extends Controller
         $pdf->setPaper('a5', 'landscape');
         
         return $pdf->download('Slip-Gaji-' . $expense->user->name . '-' . $expense->tanggal->format('Ymd') . '.pdf');
+    }
+
+    /**
+     * Cleaner hanya boleh melihat slip gajinya sendiri; role lain butuh permission keuangan.
+     */
+    private function authorizeExpenseView(?Expense $expense = null): void
+    {
+        $user = \Auth::user();
+
+        if ($user->role && $user->role->name === 'Cleaner') {
+            abort_if($expense && !($expense->user_id === $user->id && $expense->is_gaji), 404);
+            return;
+        }
+
+        abort_unless(
+            $user->hasPermission('view_reports')
+                || $user->hasPermission('view_expenses')
+                || $user->hasPermission('manage_expenses'),
+            403
+        );
     }
 }

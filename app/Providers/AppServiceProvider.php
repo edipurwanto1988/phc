@@ -25,6 +25,16 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(120)->by('admin:'.$userKey);
         });
 
+        // Brute-force protection untuk form login
+        RateLimiter::for('login', function (Request $request) {
+            $email = strtolower((string) $request->input('email'));
+
+            return [
+                Limit::perMinute(5)->by('login:'.$email.'|'.$request->ip()),
+                Limit::perMinute(20)->by('login-ip:'.$request->ip()),
+            ];
+        });
+
         Blade::if('role', function ($role) {
             $user = Auth::user();
             return $user && $user->role && $user->role->name === $role;

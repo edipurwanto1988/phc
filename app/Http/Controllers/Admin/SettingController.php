@@ -90,7 +90,7 @@ class SettingController extends Controller
         try {
             $file = $request->file('test_image');
             $tempPath = $file->getRealPath();
-            $filename = 'test_gdrive_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = 'test_gdrive_' . time() . '.' . $file->extension();
 
             $result = $driveService->uploadFile($tempPath, $filename);
 

@@ -13,6 +13,7 @@ class OrderProgressController extends Controller
 {
     public function show(Order $order)
     {
+        $this->authorizeOrderAccess($order);
         $order->load(['customer', 'progressRooms']);
 
         return view('admin.progress.show', compact('order'));
@@ -20,6 +21,7 @@ class OrderProgressController extends Controller
 
     public function storeRoom(Request $request, Order $order)
     {
+        $this->authorizeOrderAccess($order);
         $request->validate([
             'lantai' => 'nullable|string|max:100',
             'ruangan' => 'required|string|max:200',
@@ -45,6 +47,7 @@ class OrderProgressController extends Controller
 
     public function importRooms(Request $request, Order $order)
     {
+        $this->authorizeOrderAccess($order);
         $request->validate([
             'json' => 'required_without:file|nullable|string',
             'file' => 'nullable|file|mimes:json,txt|max:2048',
@@ -112,6 +115,7 @@ class OrderProgressController extends Controller
 
     public function updateLantai(Request $request, Order $order)
     {
+        $this->authorizeOrderAccess($order);
         $request->validate([
             'old_lantai' => 'nullable|string|max:100',
             'new_lantai' => 'nullable|string|max:100',
@@ -147,6 +151,7 @@ class OrderProgressController extends Controller
 
     public function destroyLantai(Request $request, Order $order)
     {
+        $this->authorizeOrderAccess($order);
         $request->validate([
             'old_lantai' => 'nullable|string|max:100',
             'password' => 'required|string',
@@ -199,6 +204,7 @@ class OrderProgressController extends Controller
 
     public function updateRoom(Request $request, Order $order, OrderProgressRoom $room)
     {
+        $this->authorizeOrderAccess($order);
         abort_unless($room->order_id === $order->id, 404);
 
         $request->validate([
@@ -225,6 +231,7 @@ class OrderProgressController extends Controller
 
     public function uploadBukti(Request $request, Order $order, OrderProgressRoom $room)
     {
+        $this->authorizeOrderAccess($order);
         abort_unless($room->order_id === $order->id, 404);
 
         $request->validate([
@@ -236,7 +243,7 @@ class OrderProgressController extends Controller
         $uploaded = [];
 
         foreach ($request->file('bukti') as $file) {
-            $filename = 'progress_' . $room->id . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = 'progress_' . $room->id . '_' . time() . '_' . uniqid() . '.' . $file->extension();
 
             if ($gdriveConnected) {
                 try {
@@ -278,6 +285,7 @@ class OrderProgressController extends Controller
 
     public function deleteBukti(Order $order, OrderProgressRoom $room, \App\Models\OrderProgressBukti $bukti)
     {
+        $this->authorizeOrderAccess($order);
         abort_unless($room->order_id === $order->id, 404);
         abort_unless($bukti->order_progress_room_id === $room->id, 404);
 
@@ -309,56 +317,18 @@ class OrderProgressController extends Controller
 
     public function viewBukti(Order $order, OrderProgressRoom $room, \App\Models\OrderProgressBukti $bukti)
     {
+        $this->authorizeOrderAccess($order);
         abort_unless($room->order_id === $order->id, 404);
         abort_unless($bukti->order_progress_room_id === $room->id, 404);
 
         $photoUrl = $bukti->path;
-        if (!$photoUrl) {
-            return abort(404);
-        }
 
-        if (!str_starts_with($photoUrl, 'http')) {
-            return response()->file(public_path($photoUrl));
-        }
-
-        try {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $photoUrl);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
-
-            $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true';
-            if ($gdriveConnected) {
-                $tokenJson = \App\Models\Setting::get('gdrive_access_token');
-                if ($tokenJson) {
-                    $accessToken = json_decode($tokenJson, true);
-                    if (isset($accessToken['access_token'])) {
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                            'Authorization: Bearer ' . $accessToken['access_token']
-                        ]);
-                    }
-                }
-            }
-
-            $imageData = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-            curl_close($ch);
-
-            if ($httpCode === 200 && $imageData) {
-                return response($imageData)->header('Content-Type', $contentType ?: 'image/jpeg');
-            }
-
-            return abort(404, 'Gagal mengambil gambar dari Google Drive.');
-        } catch (\Exception $e) {
-            \Log::error("Progress Bukti Proxy error: " . $e->getMessage());
-            return abort(500);
-        }
+        return \App\Services\ImageProxy::respond($photoUrl);
     }
 
     public function destroyRoom(Request $request, Order $order, OrderProgressRoom $room)
     {
+        $this->authorizeOrderAccess($order);
         abort_unless($room->order_id === $order->id, 404);
 
         if ($request->filled('password')) {
@@ -395,6 +365,7 @@ class OrderProgressController extends Controller
 
     public function generateLink(Order $order)
     {
+        $this->authorizeOrderAccess($order);
         if (!$order->progress_token) {
             $order->update(['progress_token' => Str::random(32)]);
         }

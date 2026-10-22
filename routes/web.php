@@ -52,8 +52,8 @@ Route::get('/halaman/{slug}', [PublicHalamanController::class, 'show'])->name('p
 
 // Loker (lowongan kerja / lamaran)
 Route::get('/loker', [PublicLokerController::class, 'index'])->name('public.loker.index');
-Route::get('/loker/check-wa', [PublicLokerController::class, 'checkWa'])->name('public.loker.check-wa');
-Route::post('/loker', [PublicLokerController::class, 'submit'])->name('public.loker.submit');
+Route::get('/loker/check-wa', [PublicLokerController::class, 'checkWa'])->middleware('throttle:20,1')->name('public.loker.check-wa');
+Route::post('/loker', [PublicLokerController::class, 'submit'])->middleware('throttle:5,1')->name('public.loker.submit');
 
 // Progress pekerjaan (link publik untuk client)
 Route::get('/progress/{token}', [PublicOrderProgressController::class, 'show'])->name('public.progress.show');
@@ -64,7 +64,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 
 // Auth Guest
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:login');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Google Socialite Login
@@ -93,49 +93,96 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Only allow Admin/Staff/Super Admin to access the admin panel
     Route::middleware(['role:Super Admin,Admin,Staff,Cleaner'])->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-        
-        // CRUD Routes
-        Route::resource('/customers', AdminCustomerController::class)->names('admin.customers');
-        Route::resource('/orders', AdminOrderController::class)->names('admin.orders');
-        Route::resource('/expenses', \App\Http\Controllers\Admin\ExpenseController::class)->names('admin.expenses');
+
+        // ---- Khusus Super Admin: user, role, menu, pengaturan ----
+        Route::middleware(['role:Super Admin'])->group(function () {
+            Route::resource('/users', AdminUserController::class)->names('admin.users');
+            Route::get('/users/{user}/foto/view', [AdminUserController::class, 'viewFoto'])->name('admin.users.foto.view');
+            Route::delete('/users/{user}/foto', [AdminUserController::class, 'deleteFoto'])->name('admin.users.foto.destroy');
+            Route::resource('/roles', AdminRoleController::class)->names('admin.roles');
+            Route::post('/menu/reorder', [AdminMenuController::class, 'reorder'])->name('admin.menu.reorder');
+            Route::resource('/menu', AdminMenuController::class)->names('admin.menu');
+            Route::get('/settings', [AdminSettingController::class, 'index'])->name('admin.settings.index');
+            Route::post('/settings', [AdminSettingController::class, 'update'])->name('admin.settings.update');
+            Route::get('/settings/gdrive/auth', [AdminSettingController::class, 'redirectToGoogleDrive'])->name('admin.settings.gdrive-auth');
+            Route::get('/settings/gdrive/callback', [AdminSettingController::class, 'handleGoogleDriveCallback'])->name('admin.settings.gdrive-callback');
+            Route::post('/settings/gdrive/test-upload', [AdminSettingController::class, 'testGDriveUpload'])->name('admin.settings.gdrive-test');
+            Route::post('/settings/gdrive/disconnect', [AdminSettingController::class, 'disconnectGDrive'])->name('admin.settings.gdrive-disconnect');
+        });
+
+        // ---- Super Admin & Admin: export data ----
+        Route::middleware(['role:Super Admin,Admin'])->group(function () {
+            Route::get('/exports', [AdminExportController::class, 'index'])->name('admin.exports.index');
+            Route::get('/exports/customers', [AdminExportController::class, 'customers'])->name('admin.exports.customers');
+            Route::get('/exports/orders', [AdminExportController::class, 'orders'])->name('admin.exports.orders');
+            Route::get('/exports/financials', [AdminExportController::class, 'financials'])->name('admin.exports.financials');
+        });
+
+        Route::middleware(['permission:manage_customers'])->group(function () {
+            Route::resource('/customers', AdminCustomerController::class)->names('admin.customers');
+        });
+
+        Route::middleware(['permission:manage_services'])->group(function () {
+            Route::post('/services/reorder', [AdminServiceController::class, 'reorder'])->name('admin.services.reorder');
+            Route::resource('/services', AdminServiceController::class)->names('admin.services');
+            Route::resource('/service-categories', AdminServiceCategoryController::class)->names('admin.service-categories');
+            Route::resource('/testimonials', AdminTestimonialController::class)->names('admin.testimonials');
+            Route::resource('/loker', AdminLokerController::class)->names('admin.loker');
+            Route::get('/loker/{loker}/ktp/view', [AdminLokerController::class, 'viewKtp'])->name('admin.loker.ktp.view');
+            Route::resource('/periode-loker', AdminPeriodeLokerController::class)->names('admin.periode-loker');
+        });
+
+        Route::middleware(['permission:manage_blog'])->group(function () {
+            Route::resource('/posts', AdminPostController::class)->names('admin.posts');
+            Route::resource('/halaman', AdminHalamanController::class)->names('admin.halaman');
+        });
+
+        Route::middleware(['permission:view_reports'])->group(function () {
+            Route::get('/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
+            Route::get('/reports/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
+        });
+
+        // ---- Pengeluaran: lihat (Cleaner hanya gaji sendiri, dicek di controller), kelola butuh manage_expenses ----
+        Route::middleware(['permission:manage_expenses'])->group(function () {
+            Route::resource('/expenses', \App\Http\Controllers\Admin\ExpenseController::class)
+                ->only(['create', 'store', 'edit', 'update', 'destroy'])->names('admin.expenses');
+        });
+        Route::resource('/expenses', \App\Http\Controllers\Admin\ExpenseController::class)
+            ->only(['index', 'show'])->names('admin.expenses');
         Route::get('/expenses/{expense}/download-slip', [\App\Http\Controllers\Admin\ExpenseController::class, 'downloadSlip'])->name('admin.expenses.download-slip');
-        Route::post('/services/reorder', [AdminServiceController::class, 'reorder'])->name('admin.services.reorder');
-        Route::resource('/services', AdminServiceController::class)->names('admin.services');
-        Route::resource('/service-categories', AdminServiceCategoryController::class)->names('admin.service-categories');
-        Route::resource('/users', AdminUserController::class)->names('admin.users');
-        Route::get('/users/{user}/foto/view', [AdminUserController::class, 'viewFoto'])->name('admin.users.foto.view');
-        Route::delete('/users/{user}/foto', [AdminUserController::class, 'deleteFoto'])->name('admin.users.foto.destroy');
-        Route::resource('/roles', AdminRoleController::class)->names('admin.roles');
-        Route::resource('/posts', AdminPostController::class)->names('admin.posts');
-        Route::resource('/testimonials', AdminTestimonialController::class)->names('admin.testimonials');
-        Route::resource('/loker', AdminLokerController::class)->names('admin.loker');
-        Route::get('/loker/{loker}/ktp/view', [AdminLokerController::class, 'viewKtp'])->name('admin.loker.ktp.view');
-        Route::resource('/periode-loker', AdminPeriodeLokerController::class)->names('admin.periode-loker');
-        Route::resource('/halaman', AdminHalamanController::class)->names('admin.halaman');
-        Route::post('/menu/reorder', [AdminMenuController::class, 'reorder'])->name('admin.menu.reorder');
-        Route::resource('/menu', AdminMenuController::class)->names('admin.menu');
-        Route::get('/settings', [AdminSettingController::class, 'index'])->name('admin.settings.index');
-        Route::post('/settings', [AdminSettingController::class, 'update'])->name('admin.settings.update');
-        Route::get('/settings/gdrive/auth', [AdminSettingController::class, 'redirectToGoogleDrive'])->name('admin.settings.gdrive-auth');
-        Route::get('/settings/gdrive/callback', [AdminSettingController::class, 'handleGoogleDriveCallback'])->name('admin.settings.gdrive-callback');
-        Route::post('/settings/gdrive/test-upload', [AdminSettingController::class, 'testGDriveUpload'])->name('admin.settings.gdrive-test');
-        Route::post('/settings/gdrive/disconnect', [AdminSettingController::class, 'disconnectGDrive'])->name('admin.settings.gdrive-disconnect');
-        Route::get('/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
-        Route::get('/reports/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
-        
-        // Data Exports
-        Route::get('/exports', [AdminExportController::class, 'index'])->name('admin.exports.index');
-        Route::get('/exports/customers', [AdminExportController::class, 'customers'])->name('admin.exports.customers');
-        Route::get('/exports/orders', [AdminExportController::class, 'orders'])->name('admin.exports.orders');
-        Route::get('/exports/financials', [AdminExportController::class, 'financials'])->name('admin.exports.financials');
-        
-        // Extra Assignment Route for orders
-        Route::get('/orders/{order}/profit', [AdminOrderController::class, 'profit'])->name('admin.orders.profit');
-        Route::get('/orders/{order}/download-invoice', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.download-invoice');
-        Route::get('/orders/payments/{payment}/download-invoice', [AdminOrderController::class, 'downloadPaymentInvoice'])->name('admin.orders.payments.download-invoice');
-        Route::get('/orders/payments/{payment}/download-invoicev2', [AdminOrderController::class, 'downloadPaymentInvoicev2'])->name('admin.orders.payments.download-invoicev2');
-        Route::post('/orders/{order}/assign', [AdminOrderController::class, 'assignCleaner'])->name('admin.orders.assign');
-        Route::post('/orders/assignments/{assignment}/gaji', [AdminOrderController::class, 'updateGaji'])->name('admin.orders.update-gaji');
+
+        // ---- Orders ----
+        // create/store didaftarkan sebelum show agar /orders/create tidak tertangkap sebagai {order}
+        Route::middleware(['permission:manage_orders,create_orders'])->group(function () {
+            Route::resource('/orders', AdminOrderController::class)->only(['create', 'store'])->names('admin.orders');
+        });
+        Route::middleware(['permission:manage_orders,edit_orders'])->group(function () {
+            Route::resource('/orders', AdminOrderController::class)->only(['edit', 'update'])->names('admin.orders');
+            Route::get('/orders/{order}/download-invoice', [AdminOrderController::class, 'downloadInvoice'])->name('admin.orders.download-invoice');
+            Route::get('/orders/payments/{payment}/download-invoice', [AdminOrderController::class, 'downloadPaymentInvoice'])->name('admin.orders.payments.download-invoice');
+            Route::get('/orders/payments/{payment}/download-invoicev2', [AdminOrderController::class, 'downloadPaymentInvoicev2'])->name('admin.orders.payments.download-invoicev2');
+            Route::post('/orders/{order}/assign', [AdminOrderController::class, 'assignCleaner'])->name('admin.orders.assign');
+            Route::post('/orders/assignments/{assignment}/gaji', [AdminOrderController::class, 'updateGaji'])->name('admin.orders.update-gaji');
+            Route::delete('/orders/assignments/{assignment}', [AdminOrderController::class, 'deleteAssignment'])->name('admin.orders.delete-assignment');
+            Route::post('/orders/{order}/assignments/reorder', [AdminOrderController::class, 'reorderAssignments'])->name('admin.orders.assignments-reorder');
+            Route::post('/orders/{order}/payments', [AdminOrderController::class, 'storePayment'])->name('admin.orders.payments.store');
+            Route::put('/orders/payments/{payment}', [AdminOrderController::class, 'updatePayment'])->name('admin.orders.payments.update');
+            Route::delete('/orders/payments/{payment}', [AdminOrderController::class, 'destroyPayment'])->name('admin.orders.payments.destroy');
+            Route::post('/orders/{order}/catatan', [AdminOrderController::class, 'updateCatatan'])->name('admin.orders.catatan');
+        });
+        Route::middleware(['permission:manage_orders,delete_orders'])->group(function () {
+            Route::resource('/orders', AdminOrderController::class)->only(['destroy'])->names('admin.orders');
+        });
+        Route::middleware(['permission:manage_orders,view_reports'])->group(function () {
+            Route::get('/orders/{order}/profit', [AdminOrderController::class, 'profit'])->name('admin.orders.profit');
+        });
+        Route::middleware(['permission:manage_orders,edit_orders,update_order_status'])->group(function () {
+            Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.status');
+        });
+
+        // Bisa diakses semua role admin; Cleaner dibatasi ke order yang ditugaskan (dicek di controller)
+        Route::resource('/orders', AdminOrderController::class)->only(['index', 'show'])->names('admin.orders');
+        Route::post('/orders/{order}/coordinates', [AdminOrderController::class, 'updateCoordinates'])->name('admin.orders.coordinates');
         Route::post('/orders/assignments/{assignment}/photos', [AdminOrderController::class, 'uploadPhotos'])->name('admin.orders.upload-photos');
         Route::get('/orders/assignments/{assignment}/photos/{type}/view', [AdminOrderController::class, 'viewDrivePhoto'])->name('admin.orders.view-drive-photo');
         Route::delete('/orders/assignments/{assignment}/photos/{type}', [AdminOrderController::class, 'deletePhoto'])->name('admin.orders.delete-photo');
@@ -148,14 +195,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             Route::post('/schedules/{schedule}/attend', [\App\Http\Controllers\Admin\OrderAttendanceController::class, 'storeAttendance'])->name('admin.orders.absensi.storeAttendance');
             Route::patch('/attendances/{attendance}', [\App\Http\Controllers\Admin\OrderAttendanceController::class, 'updateStatus'])->name('admin.orders.absensi.updateStatus');
         });
-        Route::delete('/orders/assignments/{assignment}', [AdminOrderController::class, 'deleteAssignment'])->name('admin.orders.delete-assignment');
-        Route::post('/orders/{order}/assignments/reorder', [AdminOrderController::class, 'reorderAssignments'])->name('admin.orders.assignments-reorder');
-        Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.status');
-        Route::post('/orders/{order}/payments', [AdminOrderController::class, 'storePayment'])->name('admin.orders.payments.store');
-        Route::put('/orders/payments/{payment}', [AdminOrderController::class, 'updatePayment'])->name('admin.orders.payments.update');
-        Route::delete('/orders/payments/{payment}', [AdminOrderController::class, 'destroyPayment'])->name('admin.orders.payments.destroy');
-        Route::post('/orders/{order}/coordinates', [AdminOrderController::class, 'updateCoordinates'])->name('admin.orders.coordinates');
-        Route::post('/orders/{order}/catatan', [AdminOrderController::class, 'updateCatatan'])->name('admin.orders.catatan');
 
         // Progress Pekerjaan (lantai & ruangan) — halaman khusus
         Route::get('/progress/{order}', [AdminOrderProgressController::class, 'show'])->name('admin.progress.show');

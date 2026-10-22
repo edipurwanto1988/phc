@@ -121,7 +121,7 @@ class LokerController extends Controller
     protected function uploadKtp($file, string $noWa, array &$data)
     {
         $safeNoWa = preg_replace('/[^0-9]/', '', $noWa);
-        $filename = 'ktp_' . $safeNoWa . '.' . $file->getClientOriginalExtension();
+        $filename = 'ktp_' . $safeNoWa . '.' . $file->extension();
 
         $gdriveConnected = Setting::get('gdrive_connected') === 'true';
         if ($gdriveConnected) {

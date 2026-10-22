@@ -8,7 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class Permission
 {
-    public function handle(Request $request, Closure $next, string $permission)
+    /**
+     * Lolos jika user memiliki SALAH SATU permission yang diberikan.
+     * Contoh: ->middleware('permission:manage_orders,edit_orders')
+     */
+    public function handle(Request $request, Closure $next, string ...$permissions)
     {
         if (!Auth::check()) {
             if ($request->is('admin') || $request->is('admin/*')) {
@@ -20,13 +24,16 @@ class Permission
 
         $user = Auth::user();
 
-        if (!$user->hasPermission($permission)) {
-            if ($request->expectsJson()) {
-                return response()->json(['error' => 'Unauthorized'], 403);
+        foreach ($permissions as $permission) {
+            if ($user->hasPermission($permission)) {
+                return $next($request);
             }
-            return abort(403, 'Unauthorized');
         }
 
-        return $next($request);
+        if ($request->expectsJson()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        return abort(403, 'Unauthorized');
     }
 }

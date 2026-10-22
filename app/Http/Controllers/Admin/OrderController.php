@@ -193,6 +193,8 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
+        $this->authorizeOrderAccess($order);
+
         $order->load(['customer', 'items.service', 'assignments' => function($q) {
             $q->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
         }, 'assignments.cleaner', 'assignments.payments', 'creator', 'progressRooms']);
@@ -347,6 +349,8 @@ class OrderController extends Controller
 
     public function uploadPhotos(Request $request, OrderAssignment $assignment)
     {
+        $this->authorizeAssignmentPhotoChange($assignment);
+
         $request->validate([
             'foto_sebelum' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'foto_sesudah' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
@@ -360,7 +364,7 @@ class OrderController extends Controller
                 @unlink(public_path($assignment->foto_sebelum));
             }
             $file = $request->file('foto_sebelum');
-            $filename = 'before_' . $assignment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = 'before_' . $assignment->id . '_' . time() . '.' . $file->extension();
             
             if ($gdriveConnected) {
                 try {
@@ -384,7 +388,7 @@ class OrderController extends Controller
                 @unlink(public_path($assignment->foto_sesudah));
             }
             $file = $request->file('foto_sesudah');
-            $filename = 'after_' . $assignment->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = 'after_' . $assignment->id . '_' . time() . '.' . $file->extension();
 
             if ($gdriveConnected) {
                 try {
@@ -420,6 +424,8 @@ class OrderController extends Controller
 
     public function deletePhoto(OrderAssignment $assignment, string $type)
     {
+        $this->authorizeAssignmentPhotoChange($assignment);
+
         if (!in_array($type, ['foto_sebelum', 'foto_sesudah'])) {
             return abort(400);
         }
@@ -436,57 +442,15 @@ class OrderController extends Controller
 
     public function viewDrivePhoto(OrderAssignment $assignment, string $type)
     {
+        $this->authorizeOrderAccess($assignment->order);
+
         if (!in_array($type, ['foto_sebelum', 'foto_sesudah'])) {
             return abort(400);
         }
 
         $photoUrl = $assignment->{$type};
-        if (!$photoUrl) {
-            return abort(404);
-        }
 
-        // If it's a local file, redirect directly or serve it
-        if (!str_starts_with($photoUrl, 'http')) {
-            return response()->file(public_path($photoUrl));
-        }
-
-        try {
-            // Serve the Google Drive image via Laravel backend (Proxy)
-            // By requesting it server-side, we completely bypass CORS / OpaqueResponseBlocking
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $photoUrl);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
-            
-            // If Google Drive requires auth, we could attach OAuth token here
-            $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true';
-            if ($gdriveConnected) {
-                $tokenJson = \App\Models\Setting::get('gdrive_access_token');
-                if ($tokenJson) {
-                    $accessToken = json_decode($tokenJson, true);
-                    if (isset($accessToken['access_token'])) {
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                            'Authorization: Bearer ' . $accessToken['access_token']
-                        ]);
-                    }
-                }
-            }
-
-            $imageData = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-            curl_close($ch);
-
-            if ($httpCode === 200 && $imageData) {
-                return response($imageData)->header('Content-Type', $contentType ?: 'image/jpeg');
-            }
-
-            return abort(404, 'Gagal mengambil gambar dari Google Drive.');
-        } catch (\Exception $e) {
-            \Log::error("Image Proxy error: " . $e->getMessage());
-            return abort(500);
-        }
+        return \App\Services\ImageProxy::respond($photoUrl);
     }
 
     public function reorderAssignments(Request $request, Order $order)
@@ -524,6 +488,8 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
+        $this->authorizeOrderAccess($order);
+
         $request->validate([
             'status' => 'nullable|in:pending,confirmed,in_progress,completed,cancelled',
             'status_bayar' => 'nullable|in:unpaid,partial,paid',
@@ -547,6 +513,8 @@ class OrderController extends Controller
         }
 
         if ($request->filled('status_bayar')) {
+            // Status pembayaran hanya boleh diubah oleh pengelola order
+            abort_unless($this->canManageOrder(), 403);
             $order->status_bayar = $request->status_bayar;
         }
 
@@ -693,6 +661,8 @@ class OrderController extends Controller
 
     public function updateCoordinates(Request $request, Order $order)
     {
+        $this->authorizeOrderAccess($order);
+
         $request->validate([
             'latitude'  => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -800,5 +770,20 @@ class OrderController extends Controller
         return view('admin.orders.profit', compact(
             'order', 'uangMasuk', 'uangGaji', 'uangOperasional', 'uangKeluar', 'profitFinal'
         ));
+    }
+
+    private function canManageOrder(): bool
+    {
+        $user = Auth::user();
+
+        return $user->hasPermission('manage_orders') || $user->hasPermission('edit_orders');
+    }
+
+    /**
+     * Foto pekerjaan hanya boleh diubah oleh cleaner pemilik tugas atau pengelola order.
+     */
+    private function authorizeAssignmentPhotoChange(OrderAssignment $assignment): void
+    {
+        abort_unless($assignment->user_id === Auth::id() || $this->canManageOrder(), 403);
     }
 }

@@ -32,7 +32,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
             'role_id' => 'required|exists:roles,id',
             'status' => 'required|in:active,inactive',
             'jenis' => 'nullable|in:Tetap,Mitra',
@@ -73,7 +73,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:6',
+            'password' => 'nullable|string|min:8',
             'role_id' => 'required|exists:roles,id',
             'status' => 'required|in:active,inactive',
             'jenis' => 'nullable|in:Tetap,Mitra',
@@ -110,7 +110,7 @@ class UserController extends Controller
             }
 
             $file = $request->file('foto');
-            $filename = 'user_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = 'user_' . $user->id . '_' . time() . '.' . $file->extension();
 
             $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true';
             if ($gdriveConnected) {
@@ -169,48 +169,8 @@ class UserController extends Controller
     public function viewFoto(User $user)
     {
         $photoUrl = $user->foto;
-        if (!$photoUrl) {
-            return abort(404);
-        }
 
-        if (!str_starts_with($photoUrl, 'http')) {
-            return response()->file(public_path($photoUrl));
-        }
-
-        try {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $photoUrl);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
-
-            $gdriveConnected = \App\Models\Setting::get('gdrive_connected') === 'true';
-            if ($gdriveConnected) {
-                $tokenJson = \App\Models\Setting::get('gdrive_access_token');
-                if ($tokenJson) {
-                    $accessToken = json_decode($tokenJson, true);
-                    if (isset($accessToken['access_token'])) {
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                            'Authorization: Bearer ' . $accessToken['access_token']
-                        ]);
-                    }
-                }
-            }
-
-            $imageData = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-            curl_close($ch);
-
-            if ($httpCode === 200 && $imageData) {
-                return response($imageData)->header('Content-Type', $contentType ?: 'image/jpeg');
-            }
-
-            return abort(404, 'Gagal mengambil gambar.');
-        } catch (\Exception $e) {
-            \Log::error("User foto proxy error: " . $e->getMessage());
-            return abort(500);
-        }
+        return \App\Services\ImageProxy::respond($photoUrl);
     }
 
     public function destroy(User $user)

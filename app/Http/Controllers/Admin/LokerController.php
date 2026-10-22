@@ -123,52 +123,7 @@ class LokerController extends Controller
 
     public function viewKtp(Loker $loker)
     {
-        $ktp = $loker->ktp;
-        if (!$ktp) {
-            return abort(404);
-        }
-
-        // Jika tersimpan lokal
-        if (!str_starts_with($ktp, 'http') && file_exists(public_path($ktp))) {
-            return response()->file(public_path($ktp));
-        }
-
-        // Jika tersimpan di Google Drive (proxy agar tetap terlihat walau link dibatasi)
-        if (str_starts_with($ktp, 'http')) {
-            try {
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $ktp);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
-
-                $gdriveConnected = Setting::get('gdrive_connected') === 'true';
-                if ($gdriveConnected) {
-                    $tokenJson = Setting::get('gdrive_access_token');
-                    if ($tokenJson) {
-                        $accessToken = json_decode($tokenJson, true);
-                        if (isset($accessToken['access_token'])) {
-                            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                                'Authorization: Bearer ' . $accessToken['access_token']
-                            ]);
-                        }
-                    }
-                }
-
-                $data = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-                curl_close($ch);
-
-                if ($httpCode === 200 && $data) {
-                    return response($data)->header('Content-Type', $contentType ?: 'image/jpeg');
-                }
-            } catch (\Exception $e) {
-                \Log::error("Loker KTP proxy error: " . $e->getMessage());
-            }
-        }
-
-        return abort(404, 'Gagal mengambil gambar KTP.');
+        return \App\Services\ImageProxy::respond($loker->ktp);
     }
 
     /**
@@ -177,7 +132,7 @@ class LokerController extends Controller
     protected function uploadKtp($file, string $noWa, array &$data)
     {
         $safeNoWa = preg_replace('/[^0-9]/', '', $noWa);
-        $filename = 'ktp_' . $safeNoWa . '.' . $file->getClientOriginalExtension();
+        $filename = 'ktp_' . $safeNoWa . '.' . $file->extension();
 
         $gdriveConnected = Setting::get('gdrive_connected') === 'true';
         if ($gdriveConnected) {

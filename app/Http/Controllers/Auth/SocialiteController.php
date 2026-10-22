@@ -30,6 +30,12 @@ class SocialiteController extends Controller
                 $existingUser = User::where('email', $googleUser->email)->first();
 
                 if ($existingUser) {
+                    // Akun staf/admin tidak boleh otomatis ditautkan lewat kecocokan email;
+                    // mereka harus login dengan password.
+                    if ($existingUser->role_id != 5) {
+                        return redirect()->route('login')->withErrors(['email' => 'Akun ini harus login menggunakan email dan password.']);
+                    }
+
                     $user = $existingUser;
                     $user->google_id = $googleUser->id;
                     $user->save();
@@ -77,7 +83,8 @@ class SocialiteController extends Controller
             return redirect()->intended('/admin');
 
         } catch (\Exception $e) {
-            return redirect()->route('login')->withErrors(['email' => 'Login dengan Google gagal. ' . $e->getMessage()]);
+            \Log::warning('Google login gagal: ' . $e->getMessage());
+            return redirect()->route('login')->withErrors(['email' => 'Login dengan Google gagal. Silakan coba lagi.']);
         }
     }
 
