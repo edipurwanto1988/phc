@@ -23,18 +23,14 @@
                     <div class="relative" x-data="{
                         open: false,
                         search: '',
-                        customers: [
-                            @foreach($customers as $customer)
-                            {
-                                id: '{{ $customer->id }}',
-                                nama: '{{ addslashes($customer->nama) }}',
-                                no_wa: '{{ $customer->no_wa }}',
-                                alamat: '{{ addslashes($customer->alamat) }}',
-                                lat: '{{ $customer->latitude }}',
-                                lng: '{{ $customer->longitude }}'
-                            },
-                            @endforeach
-                        ],
+                        customers: {{ Js::from($customers->map(fn ($customer) => [
+                            'id' => (string) $customer->id,
+                            'nama' => (string) $customer->nama,
+                            'no_wa' => (string) $customer->no_wa,
+                            'alamat' => (string) $customer->alamat,
+                            'lat' => (string) $customer->latitude,
+                            'lng' => (string) $customer->longitude,
+                        ])->values()) }},
                         get filteredCustomers() {
                             if (this.search === '') return this.customers;
                             return this.customers.filter(c => {
