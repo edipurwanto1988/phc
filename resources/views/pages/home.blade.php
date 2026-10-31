@@ -292,7 +292,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 @forelse($testimonials as $testimonial)
                 <div class="card-soft lift-card p-7 flex flex-col justify-between relative overflow-hidden" data-reveal data-reveal-delay="{{ $loop->index % 3 }}">
-                    <i class="ri-double-quotes-l absolute -top-2 right-5 text-7xl text-primary/[0.06] pointer-events-none"></i>
+                    <i class="ri-double-quotes-l absolute -top-1 right-4 text-4xl md:-top-2 md:right-5 md:text-7xl text-primary/[0.06] pointer-events-none"></i>
                     <div>
                         <div class="flex gap-0.5 mb-4 text-accent">
                             @for($i = 1; $i <= 5; $i++)
