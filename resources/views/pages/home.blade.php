@@ -55,26 +55,26 @@
                     </div>
 
                     <!-- Trust row -->
-                    <div class="mt-10 flex flex-wrap items-center justify-center md:justify-start gap-x-8 gap-y-4">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-full bg-white border border-border/70 shadow-sm flex items-center justify-center text-accent"><i class="ri-star-fill"></i></span>
-                            <div class="text-left leading-tight">
+                    <div class="mt-10 grid grid-cols-3 gap-2 md:flex md:items-center md:gap-x-8">
+                        <div class="flex flex-col items-center text-center gap-2 md:flex-row md:text-left md:gap-2.5">
+                            <span class="w-10 h-10 md:w-9 md:h-9 rounded-full bg-white border border-border/70 shadow-sm flex items-center justify-center text-accent shrink-0"><i class="ri-star-fill"></i></span>
+                            <div class="leading-tight">
                                 <p class="text-sm font-bold text-text-primary">Rating 4.9</p>
-                                <p class="text-xs text-text-secondary">Ulasan pelanggan</p>
+                                <p class="text-[11px] md:text-xs text-text-secondary">Ulasan pelanggan</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-full bg-white border border-border/70 shadow-sm flex items-center justify-center text-secondary"><i class="ri-home-smile-line"></i></span>
-                            <div class="text-left leading-tight">
+                        <div class="flex flex-col items-center text-center gap-2 md:flex-row md:text-left md:gap-2.5">
+                            <span class="w-10 h-10 md:w-9 md:h-9 rounded-full bg-white border border-border/70 shadow-sm flex items-center justify-center text-secondary shrink-0"><i class="ri-home-smile-line"></i></span>
+                            <div class="leading-tight">
                                 <p class="text-sm font-bold text-text-primary">500+ Rumah</p>
-                                <p class="text-xs text-text-secondary">Sudah kami bersihkan</p>
+                                <p class="text-[11px] md:text-xs text-text-secondary">Sudah dibersihkan</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-full bg-white border border-border/70 shadow-sm flex items-center justify-center text-green-600"><i class="ri-shield-check-line"></i></span>
-                            <div class="text-left leading-tight">
+                        <div class="flex flex-col items-center text-center gap-2 md:flex-row md:text-left md:gap-2.5">
+                            <span class="w-10 h-10 md:w-9 md:h-9 rounded-full bg-white border border-border/70 shadow-sm flex items-center justify-center text-green-600 shrink-0"><i class="ri-shield-check-line"></i></span>
+                            <div class="leading-tight">
                                 <p class="text-sm font-bold text-text-primary">Bergaransi</p>
-                                <p class="text-xs text-text-secondary">Tidak puas, kerjakan ulang</p>
+                                <p class="text-[11px] md:text-xs text-text-secondary">Jaminan kepuasan</p>
                             </div>
                         </div>
                     </div>
