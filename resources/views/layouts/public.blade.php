@@ -58,13 +58,14 @@
             visibility: hidden;
             transform: translateY(10px);
             transition: all 0.2s ease;
-            min-width: 12rem;
+            min-width: 13rem;
             width: max-content;
         }
         .nav-dropdown-menu a {
             white-space: nowrap;
         }
-        .nav-dropdown:hover .nav-dropdown-menu {
+        .nav-dropdown:hover .nav-dropdown-menu,
+        .nav-dropdown:focus-within .nav-dropdown-menu {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
@@ -119,23 +120,12 @@
         /* Active nav link */
         .nav-link {
             position: relative;
-            transition: color 0.15s ease;
+            transition: color 0.15s ease, background-color 0.15s ease;
+            border-radius: 9999px;
         }
         .nav-link:hover {
-            color: #1A73E8;
-        }
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #1A73E8;
-            transition: width 0.2s ease;
-        }
-        .nav-link:hover::after {
-            width: 100%;
+            color: #1b456f;
+            background: rgba(27, 69, 111, 0.06);
         }
     </style>
 </head>
@@ -154,30 +144,30 @@
     <!-- ============================================= -->
     <!-- NAVBAR                                        -->
     <!-- ============================================= -->
-    <nav class="bg-white border-b border-border sticky top-0 z-50">
+    <nav class="nav-glass border-b border-border/70 sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex items-center justify-between h-[72px]">
                 <!-- Logo -->
-                <a href="/" class="flex items-center">
+                <a href="/" class="flex items-center shrink-0">
                     <img src="{{ asset('header.png') }}" alt="{{ $siteName }}" class="h-10 w-auto object-contain">
                 </a>
 
                 <!-- Desktop Navigation Group (Rata Kanan) -->
-                <div class="hidden md:flex items-center gap-8 ml-auto">
+                <div class="hidden md:flex items-center gap-6 ml-auto">
                     <!-- Desktop Nav Links -->
-                    <div class="flex items-center gap-8">
+                    <div class="flex items-center gap-1">
                         @forelse($headerMenus as $hMenu)
                             @if($hMenu->children && $hMenu->children->count() > 0)
                                 <div class="relative nav-dropdown">
-                                    <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5 py-4">
+                                    <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5 px-3.5 py-2">
                                         @if($hMenu->icon)<i class="{{ $hMenu->icon }} text-base"></i>@endif
                                         {{ $hMenu->nama }}
-                                        <i class="ri-arrow-down-s-line"></i>
+                                        <i class="ri-arrow-down-s-line text-base"></i>
                                     </a>
-                                    <div class="absolute left-0 top-full -mt-2 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden nav-dropdown-menu">
-                                        <div class="py-1">
+                                    <div class="absolute left-0 top-full pt-2 z-50 nav-dropdown-menu">
+                                        <div class="bg-white border border-border/70 rounded-2xl shadow-[0_18px_45px_rgba(15,23,42,0.12)] overflow-hidden p-1.5">
                                             @foreach($hMenu->children as $child)
-                                                <a href="{{ $child->url }}" target="{{ $child->target }}" class="block px-4 py-2.5 text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                                                <a href="{{ $child->url }}" target="{{ $child->target }}" class="block px-3.5 py-2.5 rounded-xl text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
                                                     @if($child->icon)<i class="{{ $child->icon }} mr-1"></i>@endif
                                                     {{ $child->nama }}
                                                 </a>
@@ -186,54 +176,58 @@
                                     </div>
                                 </div>
                             @else
-                                <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5 py-4">
+                                <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="nav-link text-sm text-text-secondary font-medium flex items-center gap-1.5 px-3.5 py-2">
                                     @if($hMenu->icon)<i class="{{ $hMenu->icon }} text-base"></i>@endif
                                     {{ $hMenu->nama }}
                                 </a>
                             @endif
                         @empty
-                            <a href="/#layanan" class="nav-link text-sm text-text-secondary font-medium">Layanan</a>
-                            <a href="/#tentang" class="nav-link text-sm text-text-secondary font-medium">Tentang</a>
-                            <a href="/blog" class="nav-link text-sm text-text-secondary font-medium">Blog</a>
-                            <a href="/loker" class="nav-link text-sm text-text-secondary font-medium">Loker</a>
-                            <a href="/#kontak" class="nav-link text-sm text-text-secondary font-medium">Kontak</a>
+                            <a href="/#layanan" class="nav-link text-sm text-text-secondary font-medium px-3.5 py-2">Layanan</a>
+                            <a href="/#tentang" class="nav-link text-sm text-text-secondary font-medium px-3.5 py-2">Tentang</a>
+                            <a href="/blog" class="nav-link text-sm text-text-secondary font-medium px-3.5 py-2">Blog</a>
+                            <a href="/loker" class="nav-link text-sm text-text-secondary font-medium px-3.5 py-2">Loker</a>
+                            <a href="/#kontak" class="nav-link text-sm text-text-secondary font-medium px-3.5 py-2">Kontak</a>
                         @endforelse
                     </div>
 
                     <!-- Auth Buttons -->
                     @auth
-                    <div class="flex items-center gap-3 pl-4 border-l border-border">
+                    <div class="flex items-center gap-2 pl-4 border-l border-border/70">
                         @if(auth()->user()->role_id == 5)
-                            <a href="/customer/dashboard" class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-dark px-4 py-2 border border-primary rounded-lg transition-all">
+                            <a href="/customer/dashboard" class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:bg-primary hover:text-white px-4 py-2 border border-primary/40 rounded-full transition-all">
                                 <i class="ri-user-line"></i> Dashboard
                             </a>
                         @else
-                            <a href="/admin" class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-dark px-4 py-2 border border-primary rounded-lg transition-all">
+                            <a href="/admin" class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:bg-primary hover:text-white px-4 py-2 border border-primary/40 rounded-full transition-all">
                                 <i class="ri-dashboard-line"></i> Admin Panel
                             </a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="text-sm font-medium text-red-500 hover:text-red-750 px-3 py-2">Logout</button>
+                            <button type="submit" class="text-sm font-medium text-red-500 hover:text-red-700 px-3 py-2">Logout</button>
                         </form>
                     </div>
+                    @else
+                    <a href="https://wa.me/{{ $whatsapp }}?text=Halo%20PHC,%20saya%20ingin%20pesan%20jasa%20cleaning" target="_blank" class="btn-pill btn-pill-primary !py-2.5 !px-5">
+                        <i class="ri-whatsapp-line text-base"></i> Pesan Sekarang
+                    </a>
                     @endauth
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button onclick="toggleMenu()" class="md:hidden p-2 rounded-lg hover:bg-surface transition-colors" aria-label="Toggle menu">
+                <button onclick="toggleMenu()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface transition-colors" aria-label="Toggle menu">
                     <i class="ri-menu-line text-2xl text-text-secondary" id="menu-icon"></i>
                 </button>
             </div>
         </div>
 
         <!-- Mobile Menu -->
-        <div class="mobile-menu md:hidden border-t border-border" id="mobile-menu">
-            <div class="px-4 py-3 space-y-1 bg-white">
+        <div class="mobile-menu md:hidden border-t border-border/70 bg-white" id="mobile-menu">
+            <div class="px-4 py-3 space-y-1">
                 @forelse($headerMenus as $hMenu)
                     @if($hMenu->children && $hMenu->children->count() > 0)
                         <div class="space-y-1">
-                            <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="flex items-center justify-between px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                            <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-text-primary hover:bg-surface hover:text-primary transition-colors">
                                 <span class="flex items-center">
                                     @if($hMenu->icon)<i class="{{ $hMenu->icon }} mr-1.5"></i>@endif
                                     {{ $hMenu->nama }}
@@ -242,7 +236,7 @@
                             </a>
                             <div class="pl-4 space-y-1 pb-1">
                                 @foreach($hMenu->children as $child)
-                                    <a href="{{ $child->url }}" target="{{ $child->target }}" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                                    <a href="{{ $child->url }}" target="{{ $child->target }}" class="block px-3 py-2 rounded-xl text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
                                         @if($child->icon)<i class="{{ $child->icon }} mr-1.5"></i>@endif
                                         {{ $child->nama }}
                                     </a>
@@ -250,33 +244,37 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">
+                        <a href="{{ $hMenu->url }}" target="{{ $hMenu->target }}" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-text-primary hover:bg-surface hover:text-primary transition-colors">
                             @if($hMenu->icon)<i class="{{ $hMenu->icon }} mr-1.5"></i>@endif
                             {{ $hMenu->nama }}
                         </a>
                     @endif
                 @empty
-                    <a href="/#layanan" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">Layanan</a>
-                    <a href="/#tentang" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">Tentang</a>
-                    <a href="/blog" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">Blog</a>
-                    <a href="/#kontak" class="block px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-primary transition-colors">Kontak</a>
+                    <a href="/#layanan" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-text-primary hover:bg-surface hover:text-primary transition-colors">Layanan</a>
+                    <a href="/#tentang" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-text-primary hover:bg-surface hover:text-primary transition-colors">Tentang</a>
+                    <a href="/blog" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-text-primary hover:bg-surface hover:text-primary transition-colors">Blog</a>
+                    <a href="/#kontak" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-text-primary hover:bg-surface hover:text-primary transition-colors">Kontak</a>
                 @endforelse
-                
-                <div class="pt-2 border-t border-border">
+
+                <div class="pt-3 mt-2 border-t border-border/70 space-y-2">
                     @auth
                         @if(auth()->user()->role_id == 5)
-                            <a href="/customer/dashboard" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-primary hover:bg-surface">
+                            <a href="/customer/dashboard" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-primary hover:bg-surface">
                                 <i class="ri-user-line"></i> Dashboard
                             </a>
                         @else
-                            <a href="/admin" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-primary hover:bg-surface">
+                            <a href="/admin" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-primary hover:bg-surface">
                                 <i class="ri-dashboard-line"></i> Admin Panel
                             </a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}" class="block">
                             @csrf
-                            <button type="submit" class="w-full text-left px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-50">Logout</button>
+                            <button type="submit" class="w-full text-left px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50">Logout</button>
                         </form>
+                    @else
+                        <a href="https://wa.me/{{ $whatsapp }}?text=Halo%20PHC,%20saya%20ingin%20pesan%20jasa%20cleaning" target="_blank" class="btn-pill btn-pill-primary w-full">
+                            <i class="ri-whatsapp-line text-base"></i> Pesan via WhatsApp
+                        </a>
                     @endauth
                 </div>
             </div>
@@ -289,23 +287,26 @@
     <!-- ============================================= -->
     <!-- FOOTER                                        -->
     <!-- ============================================= -->
-    <footer class="bg-surface border-t border-border">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-16">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+    <footer class="bg-white border-t border-border/70">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-8 md:pt-16">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8 mb-12">
                 <!-- Branding -->
-                <div class="space-y-4">
-                    <a href="/" class="flex items-center">
+                <div class="md:col-span-5 space-y-5">
+                    <a href="/" class="inline-flex items-center">
                         <img src="{{ asset('header.png') }}" alt="{{ $siteName }}" class="h-10 w-auto object-contain">
                     </a>
-                    <p class="text-sm text-text-secondary leading-relaxed">
+                    <p class="text-sm text-text-secondary leading-relaxed max-w-sm">
                         Layanan kebersihan rumah dan kantor profesional terbaik di Pekanbaru. Hubungi kami sekarang untuk solusi kebersihan Anda.
                     </p>
+                    <a href="https://wa.me/{{ $whatsapp }}?text=Halo%20PHC,%20saya%20ingin%20pesan%20jasa%20cleaning" target="_blank" class="btn-pill btn-pill-wa !py-2.5 !px-5">
+                        <i class="ri-whatsapp-line text-base"></i> Chat WhatsApp
+                    </a>
                 </div>
 
                 <!-- Links -->
-                <div>
-                    <h4 class="text-sm font-semibold text-text-primary mb-4">Navigasi</h4>
-                    <ul class="space-y-2.5 text-sm">
+                <div class="md:col-span-2">
+                    <h4 class="text-xs font-semibold uppercase tracking-[0.18em] text-text-primary mb-5">Navigasi</h4>
+                    <ul class="space-y-3 text-sm">
                         @forelse($footerMenus as $fMenu)
                             <li>
                                 <a href="{{ $fMenu->url }}" target="{{ $fMenu->target }}" class="text-text-secondary hover:text-primary transition-colors">
@@ -323,36 +324,36 @@
                     </ul>
                 </div>
 
-                <!-- Social links -->
-                <div>
-                    <h4 class="text-sm font-semibold text-text-primary mb-4">Hubungi Kami</h4>
-                    <ul class="space-y-2.5 text-sm text-text-secondary">
-                        <li class="flex items-start gap-2">
-                            <i class="ri-map-pin-line text-lg text-primary shrink-0"></i>
-                            <span>{{ $address }}</span>
+                <!-- Contact -->
+                <div class="md:col-span-3">
+                    <h4 class="text-xs font-semibold uppercase tracking-[0.18em] text-text-primary mb-5">Hubungi Kami</h4>
+                    <ul class="space-y-3.5 text-sm text-text-secondary">
+                        <li class="flex items-start gap-3">
+                            <span class="w-8 h-8 rounded-full bg-surface border border-border/70 flex items-center justify-center text-primary shrink-0"><i class="ri-map-pin-line"></i></span>
+                            <span class="leading-relaxed pt-1">{{ $address }}</span>
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i class="ri-phone-line text-lg text-primary shrink-0"></i>
+                        <li class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-surface border border-border/70 flex items-center justify-center text-primary shrink-0"><i class="ri-phone-line"></i></span>
                             <span>{{ $phone }}</span>
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i class="ri-mail-line text-lg text-primary shrink-0"></i>
-                            <span>{{ $email }}</span>
+                        <li class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-surface border border-border/70 flex items-center justify-center text-primary shrink-0"><i class="ri-mail-line"></i></span>
+                            <span class="break-all">{{ $email }}</span>
                         </li>
                     </ul>
                 </div>
 
                 <!-- Socials -->
-                <div>
-                    <h4 class="text-sm font-semibold text-text-primary mb-4">Ikuti Kami</h4>
-                    <div class="flex gap-3">
-                        <a href="https://instagram.com/{{ ltrim($instagram, '@') }}" target="_blank" class="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors text-text-secondary" title="Instagram">
+                <div class="md:col-span-2">
+                    <h4 class="text-xs font-semibold uppercase tracking-[0.18em] text-text-primary mb-5">Ikuti Kami</h4>
+                    <div class="flex gap-2.5">
+                        <a href="https://instagram.com/{{ ltrim($instagram, '@') }}" target="_blank" class="w-10 h-10 rounded-full border border-border/80 bg-white flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors text-text-secondary" title="Instagram">
                             <i class="ri-instagram-line text-lg"></i>
                         </a>
-                        <a href="https://facebook.com/{{ $facebook }}" target="_blank" class="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors text-text-secondary" title="Facebook">
+                        <a href="https://facebook.com/{{ $facebook }}" target="_blank" class="w-10 h-10 rounded-full border border-border/80 bg-white flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors text-text-secondary" title="Facebook">
                             <i class="ri-facebook-box-line text-lg"></i>
                         </a>
-                        <a href="https://tiktok.com/{{ $tiktok }}" target="_blank" class="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors text-text-secondary" title="TikTok">
+                        <a href="https://tiktok.com/{{ $tiktok }}" target="_blank" class="w-10 h-10 rounded-full border border-border/80 bg-white flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors text-text-secondary" title="TikTok">
                             <i class="ri-tiktok-line text-lg"></i>
                         </a>
                     </div>
@@ -360,9 +361,9 @@
             </div>
 
             <!-- Credits -->
-            <div class="pt-8 border-t border-border text-center md:flex md:justify-between md:text-left">
+            <div class="pt-6 border-t border-border/70 flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
                 <p class="text-xs text-text-secondary">&copy; {{ date('Y') }} {{ $siteName }}. Hak Cipta Dilindungi.</p>
-                <p class="text-xs text-text-secondary mt-2 md:mt-0">Design inspired by Team IT PHC.</p>
+                <p class="text-xs text-text-secondary">Design inspired by Team IT PHC.</p>
             </div>
         </div>
     </footer>
@@ -378,7 +379,7 @@
             const menu = document.getElementById('mobile-menu');
             const icon = document.getElementById('menu-icon');
             menu.classList.toggle('active');
-            
+
             if (menu.classList.contains('active')) {
                 icon.classList.remove('ri-menu-line');
                 icon.classList.add('ri-close-line');
@@ -387,7 +388,26 @@
                 icon.classList.add('ri-menu-line');
             }
         }
+
+        (function () {
+            const items = document.querySelectorAll('[data-reveal]');
+            if (!items.length) return;
+            if (!('IntersectionObserver' in window)) return;
+
+            items.forEach(function (el) { el.classList.add('section-reveal'); });
+
+            const observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                });
+            }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+
+            items.forEach(function (el) { observer.observe(el); });
+        })();
     </script>
     @yield('scripts')
+    @stack('scripts')
 </body>
 </html>

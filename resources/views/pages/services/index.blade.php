@@ -4,53 +4,69 @@
 @section('meta_description', 'Daftar lengkap layanan kebersihan Pekanbaru Home Cleaning. Dari general cleaning, deep cleaning, cuci AC, cuci sofa, poles lantai hingga fumigasi.')
 
 @section('content')
-<div class="bg-surface py-12 border-b border-border">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-text-primary tracking-tight">Daftar Lengkap Layanan Jasa</h1>
-        <p class="mt-3 text-text-secondary max-w-xl mx-auto text-sm leading-relaxed">Pilih layanan kebersihan profesional terbaik yang sesuai dengan kebutuhan rumah, apartemen, kos-kosan, atau kantor Anda.</p>
+@php
+    $whatsapp = \App\Models\Setting::get('whatsapp', '6281234567890');
+@endphp
+
+<div class="page-hero">
+    <div class="absolute inset-0 bg-dots mask-fade-b pointer-events-none"></div>
+    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-12 md:pt-14 md:pb-16">
+        <nav class="crumbs mb-6">
+            <a href="/">Home</a>
+            <i class="ri-arrow-right-s-line"></i>
+            <span class="text-text-primary font-semibold">Layanan</span>
+        </nav>
+        <div class="max-w-2xl">
+            <span class="eyebrow">Layanan Kami</span>
+            <h1 class="section-title">Daftar Lengkap Layanan Jasa</h1>
+            <p class="section-lead">Pilih layanan kebersihan profesional terbaik yang sesuai dengan kebutuhan rumah, apartemen, kos-kosan, atau kantor Anda.</p>
+        </div>
     </div>
 </div>
 
-<div class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
-    <div class="space-y-16">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-14 md:py-20">
+    <div class="space-y-16 md:space-y-20">
         @foreach($categories as $category)
-        <div class="space-y-6">
+        <div data-reveal>
             <!-- Category Title & Header -->
-            <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                    <i class="{{ $category->icon ?? 'ri-sparkling-line' }} text-xl"></i>
+            <div class="flex items-center gap-4 mb-7">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-primary flex items-center justify-center shrink-0">
+                    <i class="{{ $category->icon ?? 'ri-sparkling-line' }} text-2xl"></i>
                 </div>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-850">{{ $category->nama }}</h2>
-                    <p class="text-xs text-text-secondary mt-0.5">{{ $category->deskripsi }}</p>
+                <div class="min-w-0">
+                    <h2 class="text-xl md:text-2xl font-bold text-text-primary tracking-tight">{{ $category->nama }}</h2>
+                    <p class="text-sm text-text-secondary mt-0.5">{{ $category->deskripsi }}</p>
                 </div>
             </div>
 
             <!-- Services Grid inside Category -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 @forelse($category->services as $service)
-                <div class="card-hover bg-white rounded-lg border border-border p-6 flex flex-col justify-between shadow-sm">
-                    <a href="/layanan/{{ $service->slug }}" class="block group">
+                <div class="card-soft lift-card overflow-hidden flex flex-col justify-between group">
+                    <a href="/layanan/{{ $service->slug }}" class="block">
                         @if($service->gambar)
-                        <div class="w-full h-40 rounded-lg overflow-hidden mb-4 border border-border">
+                        <div class="aspect-[16/10] overflow-hidden img-zoom border-b border-border/60 bg-surface">
                             <img src="{{ asset('storage/' . $service->gambar) }}" alt="{{ $service->nama }}" class="w-full h-full object-cover">
                         </div>
                         @endif
-                        <h3 class="text-base font-bold text-text-primary group-hover:text-primary transition-colors">{{ $service->nama }}</h3>
-                        <p class="mt-2 text-xs text-text-secondary leading-relaxed leading-normal">{{ \Illuminate\Support\Str::words(strip_tags($service->deskripsi_singkat ?? $service->deskripsi), 50, '...') }}</p>
+                        <div class="p-6 pb-0">
+                            <h3 class="text-lg font-semibold text-text-primary group-hover:text-primary transition-colors leading-snug">{{ $service->nama }}</h3>
+                            <p class="mt-2 text-sm text-text-secondary leading-relaxed">{{ \Illuminate\Support\Str::words(strip_tags($service->deskripsi_singkat ?? $service->deskripsi), 50, '...') }}</p>
+                        </div>
                     </a>
-                    <div class="mt-6 pt-4 border-t border-gray-150 flex items-center justify-between">
-                        <div>
+                    <div class="p-6 pt-5 mt-5 border-t border-border/60 flex items-center justify-between gap-3">
+                        <div class="leading-tight">
+                            <span class="text-xs text-text-secondary block">Mulai dari</span>
                             <span class="text-lg font-bold text-primary">Rp {{ number_format($service->harga, 0, ',', '.') }}</span>
                             <span class="text-xs text-text-secondary">/ {{ $service->satuan }}</span>
                         </div>
-                        <a href="https://wa.me/{{ \App\Models\Setting::get('whatsapp', '6281234567890') }}?text=Halo%20PHC,%20saya%20tertarik%20dengan%20layanan%20*{{ $service->nama }}*" target="_blank" class="inline-flex items-center gap-1 bg-primary hover:bg-primary-dark text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors shadow-sm">
-                            Pesan <i class="ri-whatsapp-line"></i>
+                        <a href="https://wa.me/{{ $whatsapp }}?text=Halo%20PHC,%20saya%20tertarik%20dengan%20layanan%20*{{ $service->nama }}*" target="_blank" class="btn-pill btn-pill-primary !px-4 !py-2 text-xs shrink-0">
+                            Pesan <i class="ri-whatsapp-line text-base"></i>
                         </a>
                     </div>
                 </div>
                 @empty
-                <div class="col-span-3 text-center py-6 text-sm text-gray-400 font-medium">Belum ada layanan tersedia pada kategori ini.</div>
+                <div class="col-span-3 text-center py-6 text-sm text-text-secondary font-medium">Belum ada layanan tersedia pada kategori ini.</div>
                 @endforelse
             </div>
         </div>

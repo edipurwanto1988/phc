@@ -213,4 +213,161 @@ body.admin-layout {
     .animate-bounce-slow {
         animation: none;
     }
+    .float-slow,
+    .float-slower {
+        animation: none;
+    }
 }
+
+/* ============================================================
+   Public (front) design language
+   ============================================================ */
+
+/* Eyebrow label above section titles */
+.eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-secondary;
+}
+
+.eyebrow::before {
+    content: '';
+    @apply inline-block w-6 h-px bg-accent;
+}
+
+.eyebrow-center::before {
+    display: none;
+}
+
+.section-title {
+    @apply mt-3 text-3xl md:text-4xl font-bold tracking-tight text-text-primary leading-[1.15];
+}
+
+.section-lead {
+    @apply mt-4 text-base md:text-lg text-text-secondary leading-relaxed;
+}
+
+/* Soft card */
+.card-soft {
+    @apply bg-white rounded-2xl border border-border/70;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.03);
+}
+
+/* Buttons */
+.btn-pill {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold text-sm px-6 py-3 transition-all duration-200;
+}
+
+.btn-pill-primary {
+    @apply bg-primary text-white hover:bg-primary-dark;
+    box-shadow: 0 10px 24px -10px rgba(27, 69, 111, 0.55);
+}
+
+.btn-pill-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px -10px rgba(27, 69, 111, 0.6);
+}
+
+.btn-pill-outline {
+    @apply bg-white text-text-primary border border-border hover:border-primary/40 hover:bg-surface;
+}
+
+.btn-pill-wa {
+    @apply bg-[#25D366] text-white hover:bg-[#1fb257];
+    box-shadow: 0 10px 24px -10px rgba(37, 211, 102, 0.6);
+}
+
+.btn-pill-wa:hover {
+    transform: translateY(-1px);
+}
+
+/* Pill badge */
+.pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-white px-3 py-1 text-xs font-medium text-text-secondary;
+}
+
+/* Subtle dotted background for hero / CTA */
+.bg-dots {
+    background-image: radial-gradient(rgba(27, 69, 111, 0.10) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+.bg-dots-light {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+/* Hero radial wash */
+.hero-wash {
+    background:
+        radial-gradient(60% 60% at 85% 10%, rgba(0, 88, 190, 0.08) 0%, rgba(0, 88, 190, 0) 70%),
+        radial-gradient(45% 45% at 10% 90%, rgba(243, 175, 61, 0.10) 0%, rgba(243, 175, 61, 0) 70%),
+        #ffffff;
+}
+
+/* Soft fade mask for dotted hero */
+.mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+}
+
+/* Image zoom on hover inside a card */
+.img-zoom img {
+    transition: transform .6s cubic-bezier(.2,.8,.2,1);
+}
+
+.img-zoom:hover img {
+    transform: scale(1.05);
+}
+
+/* Floating decorations */
+@keyframes float-y {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.float-slow {
+    animation: float-y 5s ease-in-out infinite;
+}
+
+.float-slower {
+    animation: float-y 7s ease-in-out infinite;
+}
+
+/* Stepper connector (desktop) */
+@media (min-width: 768px) {
+    .stepper-line::before {
+        content: '';
+        position: absolute;
+        top: 28px;
+        left: calc(16.666% + 28px);
+        right: calc(16.666% + 28px);
+        height: 2px;
+        background: linear-gradient(90deg, #DADCE0 0%, rgba(27, 69, 111, 0.35) 50%, #DADCE0 100%);
+    }
+}
+
+/* Breadcrumb */
+.crumbs {
+    @apply flex flex-wrap items-center gap-1.5 text-xs font-medium text-text-secondary;
+}
+
+.crumbs a {
+    @apply hover:text-primary transition-colors;
+}
+
+.crumbs i {
+    @apply text-border;
+}
+
+/* Page hero for inner pages */
+.page-hero {
+    @apply relative overflow-hidden border-b border-border/70;
+    background:
+        radial-gradient(50% 80% at 50% 0%, rgba(0, 88, 190, 0.07) 0%, rgba(0, 88, 190, 0) 70%),
+        #ffffff;
+}
+
+/* Reveal stagger helper */
+[data-reveal-delay="1"] { transition-delay: .08s; }
+[data-reveal-delay="2"] { transition-delay: .16s; }
+[data-reveal-delay="3"] { transition-delay: .24s; }
+[data-reveal-delay="4"] { transition-delay: .32s; }

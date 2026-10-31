@@ -5,28 +5,31 @@
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
     <!-- Breadcrumb -->
-    <nav class="flex text-xs text-gray-500 mb-6 font-medium">
-        <a href="/" class="hover:text-primary transition-colors">Home</a>
-        <span class="mx-2 text-gray-300">/</span>
-        <span class="text-gray-700 font-bold">Progress Pekerjaan</span>
+    <nav class="crumbs mb-6">
+        <a href="/">Home</a>
+        <i class="ri-arrow-right-s-line"></i>
+        <span class="text-text-primary font-semibold">Progress Pekerjaan</span>
     </nav>
 
-    <div class="bg-white border border-border rounded-2xl shadow-sm overflow-hidden" x-data="{ tab: 'progress' }">
+    <div class="card-soft !rounded-3xl overflow-hidden" x-data="{ tab: 'progress' }">
         <!-- Header -->
-        <div class="bg-primary text-white px-6 md:px-10 py-8">
-            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/70">
-                <i class="ri-file-list-3-line"></i> Laporan Progress Pekerjaan
+        <div class="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary text-white px-6 md:px-10 py-8 md:py-10">
+            <div class="absolute inset-0 bg-dots-light pointer-events-none"></div>
+            <div class="relative">
+                <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
+                    <i class="ri-file-list-3-line"></i> Laporan Progress Pekerjaan
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold mt-2 tracking-tight">
+                    {{ $order->order_number }}
+                </h1>
+                <p class="text-sm text-blue-100 mt-1">
+                    {{ $order->customer->nama }} — {{ $order->alamat_pengerjaan }}
+                </p>
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold mt-2 tracking-tight">
-                {{ $order->order_number }}
-            </h1>
-            <p class="text-sm text-white/80 mt-1">
-                {{ $order->customer->nama }} — {{ $order->alamat_pengerjaan }}
-            </p>
         </div>
 
         <!-- Tabs -->
-        <div class="flex border-b border-border bg-gray-50">
+        <div class="flex border-b border-border/70 bg-surface">
             <button type="button" @click="tab = 'progress'"
                 class="flex-1 py-3.5 px-4 text-sm font-semibold transition-colors border-b-2"
                 :class="tab === 'progress' ? 'text-primary border-primary bg-white' : 'text-gray-500 border-transparent hover:text-gray-700'">
@@ -267,7 +270,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="px-6 md:px-10 py-5 bg-gray-50 border-t border-border text-center text-xs text-gray-500">
+        <div class="px-6 md:px-10 py-5 bg-surface border-t border-border/70 text-center text-xs text-text-secondary">
             Terakhir diperbarui: {{ $order->updated_at->translatedFormat('d F Y, H:i') }} WIB
         </div>
     </div>
