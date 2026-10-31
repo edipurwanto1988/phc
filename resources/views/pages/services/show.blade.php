@@ -21,14 +21,15 @@
             <span class="text-text-primary font-semibold truncate max-w-[14rem] sm:max-w-none">{{ $service->nama }}</span>
         </nav>
 
-        <div class="flex items-start gap-4">
-            <div class="w-14 h-14 bg-blue-50 text-primary rounded-2xl flex items-center justify-center shrink-0">
-                <i class="{{ $service->category->icon ?? 'ri-sparkling-line' }} text-2xl"></i>
-            </div>
-            <div class="min-w-0">
-                <span class="pill text-primary border-primary/20 bg-primary/5 uppercase tracking-wider !text-[11px]">{{ $service->category->nama }}</span>
-                <h1 class="text-3xl md:text-4xl font-bold text-text-primary leading-tight tracking-tight mt-3">{{ $service->nama }}</h1>
-            </div>
+        <div class="max-w-3xl">
+            <a href="/layanan" class="pill text-primary border-primary/20 bg-primary/5 uppercase tracking-wider !text-[11px] hover:bg-primary/10 transition-colors">
+                <i class="{{ $service->category->icon ?? 'ri-sparkling-line' }} text-sm"></i>
+                {{ $service->category->nama }}
+            </a>
+            <h1 class="text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-text-primary leading-[1.15] tracking-tight mt-4">{{ $service->nama }}</h1>
+            @if($service->deskripsi_singkat)
+            <p class="section-lead">{{ strip_tags($service->deskripsi_singkat) }}</p>
+            @endif
         </div>
     </div>
 </div>
