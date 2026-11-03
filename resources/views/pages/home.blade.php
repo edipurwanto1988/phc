@@ -27,9 +27,9 @@
                     </span>
 
                     <h1 class="mt-6 text-4xl sm:text-5xl lg:text-[3.6rem] font-bold text-text-primary leading-[1.08] tracking-tight">
-                        Rumah Bersih,
+                        Bersih,
                         <span class="relative inline-block text-primary">
-                            Hati Tenang
+                            Sepenuh Hati
                             <svg class="absolute -bottom-2 left-0 w-full h-3 text-accent" viewBox="0 0 200 12" fill="none" preserveAspectRatio="none" aria-hidden="true">
                                 <path d="M2 9C40 3 120 1 198 7" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
                             </svg>
