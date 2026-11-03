@@ -202,8 +202,8 @@
             <div class="mb-6" x-show="selectedCleaner !== ''">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Order & Masukkan Nominal Pembayaran (Cash Bon / Pelunasan)</label>
                 
-                <div class="border border-gray-200 rounded-lg overflow-hidden bg-white">
-                    <table class="w-full text-left border-collapse text-xs">
+                <div class="border border-gray-200 rounded-lg overflow-x-auto bg-white">
+                    <table class="w-full min-w-[760px] text-left border-collapse text-xs">
                         <thead>
                             <tr class="bg-gray-100 border-b border-gray-200 font-bold text-gray-700">
                                 <th class="p-3 w-10 text-center">
