@@ -72,6 +72,7 @@
                                 <option value="{{ $service->id }}" data-harga="{{ $service->harga }}" data-satuan="{{ $service->satuan }}">{{ !empty($service->nama_invoice) ? $service->nama_invoice : $service->nama }} (Rp {{ number_format($service->harga, 0, ',', '.') }} / {{ $service->satuan }})</option>
                                 @endforeach
                             </select>
+                            <input type="text" :name="'items['+index+'][catatan]'" x-model="item.catatan" maxlength="255" placeholder="Keterangan (opsional), contoh: Anti rayap (dalam gedung)" class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
                         </div>
 
                         <!-- Qty -->
@@ -180,12 +181,13 @@ function orderForm() {
                 service_id: '{{ $item->service_id }}', 
                 qty: {{ $item->qty }}, 
                 harga: {{ (int)$item->harga_satuan }}, 
-                satuan: '{{ $item->satuan }}' 
+                satuan: '{{ $item->satuan }}',
+                catatan: @js($item->catatan ?? '')
             },
             @endforeach
         ],
         addItem() {
-            this.items.push({ service_id: '', qty: 1, harga: 0, satuan: '' });
+            this.items.push({ service_id: '', qty: 1, harga: 0, satuan: '', catatan: '' });
         },
         removeItem(index) {
             if (this.items.length > 1) {

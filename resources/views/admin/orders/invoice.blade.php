@@ -337,7 +337,12 @@
         <tbody>
             @foreach($order->items as $index => $item)
             <tr>
-                <td>{{ !empty($item->service->nama_invoice) ? $item->service->nama_invoice : $item->service->nama }}</td>
+                <td>
+                    {{ !empty($item->service->nama_invoice) ? $item->service->nama_invoice : $item->service->nama }}
+                    @if($item->catatan)
+                    <div style="font-size: 11px; color: #6b7280; font-style: italic;">{{ $item->catatan }}</div>
+                    @endif
+                </td>
                 <td class="text-right">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
                 <td class="text-center">{{ $item->qty }}</td>
                 <td class="text-right">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
