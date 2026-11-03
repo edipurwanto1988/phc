@@ -438,17 +438,43 @@
                 <i class="ri-user-star-line text-blue-600"></i> Cleaner & Informasi Gaji
             </h3>            
             @if(auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders'))
-            <p class="text-xs text-gray-500 mb-4 italic"><i class="ri-drag-drop-line"></i> Seret (drag & drop) untuk mengurutkan. Cleaner teratas otomatis menjadi **PIC**.</p>
+            <p class="text-xs text-gray-500 mb-4 italic"><i class="ri-user-star-line"></i> Klik "Jadikan PIC" pada cleaner yang ingin dijadikan PIC, lalu konfirmasi.</p>
             @endif
             
             <div id="cleaners-sortable" class="space-y-4 mb-6">
                 @forelse($order->assignments as $index => $assignment)
-                <div class="p-4 border border-gray-250 rounded-xl bg-gray-50 space-y-3 relative {{ (auth()->user()->hasPermission('manage_orders') || auth()->user()->hasPermission('edit_orders')) ? 'cursor-grab active:cursor-grabbing' : '' }}" data-id="{{ $assignment->id }}" x-data="{
+                <div class="p-4 border border-gray-250 rounded-xl bg-gray-50 space-y-3 relative" data-id="{{ $assignment->id }}" x-data="{
                     gaji: '{{ (int)$assignment->gaji }}',
                     statusGaji: '{{ $assignment->status_gaji }}',
                     saving: false,
                     saved: false,
                     error: false,
+                    async jadikanPic() {
+                        if (!confirm('Jadikan cleaner ini sebagai PIC order ini?')) return;
+                        const ids = [{{ $assignment->id }}];
+                        document.querySelectorAll('#cleaners-sortable [data-id]').forEach(el => {
+                            const id = Number(el.getAttribute('data-id'));
+                            if (id !== {{ $assignment->id }}) ids.push(id);
+                        });
+                        try {
+                            const response = await fetch('{{ route('admin.orders.assignments-reorder', $order) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({ ids: ids })
+                            });
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                alert('Gagal mengubah PIC.');
+                            }
+                        } catch (err) {
+                            alert('Terjadi kesalahan koneksi.');
+                        }
+                    },
                     async submitGaji() {
                         this.saving = true;
                         this.saved = false;
@@ -497,7 +523,11 @@
                                     <i class="ri-delete-bin-line text-sm"></i>
                                 </button>
                             </form>
-                            <span class="text-gray-400 cursor-move p-1 flex items-center justify-center" title="Geser untuk Urutkan"><i class="ri-drag-move-2-line text-base"></i></span>
+                            @if($index !== 0)
+                            <button type="button" @click="jadikanPic()" class="text-[10px] font-bold text-blue-600 hover:text-blue-800 px-2 py-1 rounded flex items-center gap-1" title="Jadikan PIC">
+                                <i class="ri-user-star-line text-sm"></i> Jadikan PIC
+                            </button>
+                            @endif
                         </div>
                         @endif
                     </div>
@@ -771,43 +801,6 @@
 @section('scripts')
 <script>
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    const el = document.getElementById('cleaners-sortable');
-    if (el) {
-        Sortable.create(el, {
-            animation: 150,
-            ghostClass: 'bg-blue-50',
-            onEnd: async function () {
-                let ids = [];
-                el.querySelectorAll('[data-id]').forEach(item => {
-                    ids.push(item.getAttribute('data-id'));
-                });
-
-                try {
-                    let response = await fetch('{{ route('admin.orders.assignments-reorder', $order) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ ids: ids })
-                    });
-                    
-                    if (response.ok) {
-                        // Reload the page smoothly or update the DOM to show the new PIC tag
-                        window.location.reload();
-                    } else {
-                        alert('Gagal mengurutkan cleaner.');
-                    }
-                } catch (err) {
-                    alert('Terjadi kesalahan koneksi.');
-                }
-            }
-        });
-    }
-});
 
 function autoFillPelunasan(select) {
     const amountInput = document.getElementById('payment_amount');
