@@ -141,36 +141,49 @@
                 </div>
                 @endif
 
-                <!-- Blog/Posts -->
-                @hasperm('manage_blog')
-                <a href="/admin/posts" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/posts*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
-                    <i class="ri-article-line text-xl"></i><span>Blog / Tips</span>
-                </a>
-                <a href="/admin/halaman" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/halaman*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
-                    <i class="ri-pages-line text-xl"></i><span>Laman Statis</span>
-                </a>
-                @endhasperm
-
-                <!-- Testimonials -->
-                @hasperm('manage_services')
-                <a href="/admin/testimonials" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/testimonials*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
-                    <i class="ri-chat-voice-line text-xl"></i><span>Testimoni</span>
-                </a>
-                @endhasperm
-
-                <!-- Loker (Pelamar) -->
-                @hasperm('manage_services')
-                <a href="/admin/loker" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/loker*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
-                    <i class="ri-briefcase-line text-xl"></i><span>Loker (Pelamar)</span>
-                </a>
-                @endhasperm
-
-                <!-- Periode Loker -->
-                @hasperm('manage_services')
-                <a href="/admin/periode-loker" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/periode-loker*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
-                    <i class="ri-calendar-line text-xl"></i><span>Periode Loker</span>
-                </a>
-                @endhasperm
+                <!-- Master (Blog, Laman Statis, Testimoni, Loker, Periode Loker) -->
+                @if(auth()->user()->hasPermission('manage_services') || auth()->user()->hasPermission('manage_blog'))
+                @php
+                    $masterActive = request()->is('admin/testimonials*') || request()->is('admin/loker*') || request()->is('admin/periode-loker*') || request()->is('admin/formasi*') || request()->is('admin/posts*') || request()->is('admin/halaman*') || request()->is('admin/menu*');
+                @endphp
+                <div x-data="{ open: {{ $masterActive ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg {{ $masterActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
+                        <span class="flex items-center gap-3">
+                            <i class="ri-database-2-line text-xl"></i><span>Master</span>
+                        </span>
+                        <i class="ri-arrow-down-s-line text-lg transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="open" x-cloak class="mt-1 space-y-1 pl-4">
+                        @hasperm('manage_blog')
+                        <a href="/admin/posts" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/posts*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' }}">
+                            <i class="ri-article-line text-sm"></i><span>Blog / Tips</span>
+                        </a>
+                        <a href="/admin/halaman" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/halaman*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' }}">
+                            <i class="ri-pages-line text-sm"></i><span>Laman Statis</span>
+                        </a>
+                        @endhasperm
+                        @hasperm('manage_services')
+                        <a href="/admin/testimonials" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/testimonials*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' }}">
+                            <i class="ri-chat-voice-line text-sm"></i><span>Testimoni</span>
+                        </a>
+                        <a href="/admin/loker" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/loker*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' }}">
+                            <i class="ri-briefcase-line text-sm"></i><span>Loker (Pelamar)</span>
+                        </a>
+                        <a href="/admin/periode-loker" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/periode-loker*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' }}">
+                            <i class="ri-calendar-line text-sm"></i><span>Periode Loker</span>
+                        </a>
+                        <a href="/admin/formasi" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/formasi*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' }}">
+                            <i class="ri-user-star-line text-sm"></i><span>Formasi</span>
+                        </a>
+                        @endhasperm
+                        @if(auth()->user()->role && auth()->user()->role->name === 'Super Admin')
+                        <a href="/admin/menu" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/menu*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' }}">
+                            <i class="ri-menu-line text-sm"></i><span>Menu Publik</span>
+                        </a>
+                        @endif
+                    </div>
+                </div>
+                @endif
 
                   <!-- Financial Reports -->
                   @if(auth()->user()->hasPermission('view_reports') || auth()->user()->role->name === 'Cleaner')
@@ -210,9 +223,6 @@
 
                 <!-- Settings -->
                 @if(auth()->user()->role && auth()->user()->role->name === 'Super Admin')
-                <a href="/admin/menu" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/menu*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
-                    <i class="ri-menu-line text-xl"></i><span>Menu Publik</span>
-                </a>
                 <a href="/admin/settings" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2.5 rounded-lg {{ request()->is('admin/settings*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
                     <i class="ri-settings-3-line text-xl"></i><span>Pengaturan Web</span>
                 </a>

@@ -43,6 +43,13 @@
         @endif
     </div>
 
+    <!-- Gambar Periode -->
+    @if($periodeAktif && $periodeAktif->gambar)
+    <div class="mb-8 rounded-2xl overflow-hidden border border-border bg-white shadow-sm">
+        <img src="{{ asset('storage/' . $periodeAktif->gambar) }}" alt="{{ $periodeAktif->nama }}" class="w-full h-auto max-h-96 object-cover" loading="lazy">
+    </div>
+    @endif
+
     <!-- Flash Messages -->
     @if(session('success'))
     <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl flex items-center gap-2">
@@ -124,6 +131,29 @@
                 <label for="ktp" class="block text-sm font-semibold text-text-primary mb-1.5">Upload KTP</label>
                 <input type="file" name="ktp" id="ktp" accept="image/*" class="w-full text-sm text-text-secondary file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/15 file:transition-colors">
             </div>
+
+            @if($periodeAktif->syarats->isNotEmpty())
+            <div class="mb-6">
+                <h3 class="text-sm font-semibold text-text-primary mb-1">Berkas Persyaratan</h3>
+                <p class="text-xs text-text-secondary mb-4">Format PDF, JPG, PNG, atau WEBP. Maksimal 5 MB per berkas.</p>
+                <div class="space-y-4">
+                    @foreach($periodeAktif->syarats as $syarat)
+                    <div>
+                        <label for="berkas_{{ $syarat->id }}" class="block text-sm font-semibold text-text-primary mb-1.5">
+                            {{ $syarat->nama }}
+                            @if($syarat->wajib)
+                                <span class="text-red-500">*</span>
+                                <span class="text-xs font-normal text-red-600">(wajib)</span>
+                            @else
+                                <span class="text-xs font-normal text-text-secondary">(opsional)</span>
+                            @endif
+                        </label>
+                        <input type="file" name="berkas[{{ $syarat->id }}]" id="berkas_{{ $syarat->id }}" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" {{ $syarat->wajib ? 'required' : '' }} class="w-full text-sm text-text-secondary file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/15 file:transition-colors">
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
 
             <div class="mb-6">
                 <label for="captcha_answer" class="block text-sm font-semibold text-text-primary mb-1.5">Captcha <span class="text-red-500">*</span></label>

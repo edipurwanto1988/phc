@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\HalamanController as AdminHalamanController;
 use App\Http\Controllers\Admin\OrderProgressController as AdminOrderProgressController;
 use App\Http\Controllers\Admin\LokerController as AdminLokerController;
 use App\Http\Controllers\Admin\PeriodeLokerController as AdminPeriodeLokerController;
+use App\Http\Controllers\Admin\FormasiController as AdminFormasiController;
 use App\Http\Controllers\Admin\ExportController as AdminExportController;
 
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
@@ -129,7 +130,9 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             Route::resource('/testimonials', AdminTestimonialController::class)->names('admin.testimonials');
             Route::resource('/loker', AdminLokerController::class)->names('admin.loker');
             Route::get('/loker/{loker}/ktp/view', [AdminLokerController::class, 'viewKtp'])->name('admin.loker.ktp.view');
+            Route::get('/loker/{loker}/berkas/{berkas}', [AdminLokerController::class, 'viewBerkas'])->name('admin.loker.berkas.view');
             Route::resource('/periode-loker', AdminPeriodeLokerController::class)->names('admin.periode-loker');
+            Route::resource('/formasi', AdminFormasiController::class)->names('admin.formasi');
         });
 
         Route::middleware(['permission:manage_blog'])->group(function () {

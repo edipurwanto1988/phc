@@ -17,6 +17,10 @@
                 <dd class="text-sm text-gray-800">{{ $loker->periode ? $loker->periode->nama . ' (' . $loker->periode->status . ')' : '-' }}</dd>
             </div>
             <div class="flex border-b border-gray-100 pb-2">
+                <dt class="w-40 shrink-0 text-sm font-semibold text-gray-600">Formasi</dt>
+                <dd class="text-sm text-gray-800">{{ $loker->formasi ? $loker->formasi->nama : '-' }}</dd>
+            </div>
+            <div class="flex border-b border-gray-100 pb-2">
                 <dt class="w-40 shrink-0 text-sm font-semibold text-gray-600">Nama</dt>
                 <dd class="text-sm text-gray-800 font-medium">{{ $loker->nama }}</dd>
             </div>
@@ -79,6 +83,25 @@
         @else
         <div class="text-center py-10 text-sm text-gray-400">Belum ada KTP diunggah.</div>
         @endif
+    </div>
+
+    <!-- Berkas Syarat -->
+    @php($berkasList = $loker->load('berkas.syarat')->berkas)
+    <div class="card bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-800 text-lg mb-4">Berkas Syarat</h3>
+        @forelse($berkasList as $berkas)
+        <div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+            <div>
+                <p class="text-sm font-semibold text-gray-800">{{ $berkas->syarat?->nama ?? 'Berkas (syarat dihapus)' }}</p>
+                <p class="text-xs text-gray-400">{{ $berkas->created_at->translatedFormat('d M Y H:i') }}</p>
+            </div>
+            <a href="{{ route('admin.loker.berkas.view', [$loker, $berkas]) }}" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                <i class="ri-eye-line"></i> Lihat
+            </a>
+        </div>
+        @empty
+        <div class="text-center py-10 text-sm text-gray-400">Belum ada berkas syarat diunggah.</div>
+        @endforelse
     </div>
 </div>
 @endsection

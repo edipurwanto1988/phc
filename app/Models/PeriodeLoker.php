@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
@@ -15,6 +16,7 @@ class PeriodeLoker extends Model
         'tanggal_mulai',
         'tanggal_selesai',
         'status',
+        'gambar',
     ];
 
     protected $casts = [
@@ -25,6 +27,16 @@ class PeriodeLoker extends Model
     public function lokeres(): HasMany
     {
         return $this->hasMany(Loker::class, 'periode_id');
+    }
+
+    public function formasis(): BelongsToMany
+    {
+        return $this->belongsToMany(Formasi::class, 'periode_formasi', 'periode_id', 'formasi_id');
+    }
+
+    public function syarats(): HasMany
+    {
+        return $this->hasMany(PeriodeSyarat::class, 'periode_id')->orderBy('urutan')->orderBy('id');
     }
 
     /**

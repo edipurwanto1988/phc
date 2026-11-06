@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Formasi;
 use App\Models\Loker;
 use App\Models\PeriodeLoker;
 use App\Models\Setting;
@@ -39,13 +40,15 @@ class LokerController extends Controller
     public function create()
     {
         $periodes = PeriodeLoker::orderBy('created_at', 'desc')->get();
-        return view('admin.loker.create', compact('periodes'));
+        $formasis = Formasi::orderBy('nama')->get();
+        return view('admin.loker.create', compact('periodes', 'formasis'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'periode_id' => 'nullable|exists:periode_lokeres,id',
+            'formasi_id' => 'nullable|exists:formasis,id',
             'nama' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'alamat' => 'required|string',
@@ -58,7 +61,7 @@ class LokerController extends Controller
         ]);
 
         $data = $request->only([
-            'periode_id', 'nama', 'email', 'alamat', 'jenis_kelamin',
+            'periode_id', 'formasi_id', 'nama', 'email', 'alamat', 'jenis_kelamin',
             'pengalaman', 'keahlian_khusus', 'cerita', 'no_wa',
         ]);
 
@@ -80,13 +83,15 @@ class LokerController extends Controller
     public function edit(Loker $loker)
     {
         $periodes = PeriodeLoker::orderBy('created_at', 'desc')->get();
-        return view('admin.loker.edit', compact('loker', 'periodes'));
+        $formasis = Formasi::orderBy('nama')->get();
+        return view('admin.loker.edit', compact('loker', 'periodes', 'formasis'));
     }
 
     public function update(Request $request, Loker $loker)
     {
         $request->validate([
             'periode_id' => 'nullable|exists:periode_lokeres,id',
+            'formasi_id' => 'nullable|exists:formasis,id',
             'nama' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'alamat' => 'required|string',
@@ -100,7 +105,7 @@ class LokerController extends Controller
         ]);
 
         $data = $request->only([
-            'periode_id', 'nama', 'email', 'alamat', 'jenis_kelamin',
+            'periode_id', 'formasi_id', 'nama', 'email', 'alamat', 'jenis_kelamin',
             'pengalaman', 'keahlian_khusus', 'cerita', 'no_wa', 'rating',
         ]);
 
@@ -124,6 +129,17 @@ class LokerController extends Controller
     public function viewKtp(Loker $loker)
     {
         return \App\Services\ImageProxy::respond($loker->ktp);
+    }
+
+    /**
+     * Tampilkan berkas syarat pelamar (disk privat). Berkas harus milik loker ini.
+     */
+    public function viewBerkas(Loker $loker, \App\Models\LokerBerkas $berkas)
+    {
+        abort_unless($berkas->loker_id === $loker->id, 404);
+
+        return \Illuminate\Support\Facades\Storage::disk('local')
+            ->response($berkas->path, null, ['X-Content-Type-Options' => 'nosniff']);
     }
 
     /**

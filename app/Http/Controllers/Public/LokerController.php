@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Loker;
+use App\Models\LokerBerkas;
 use App\Models\PeriodeLoker;
 use App\Models\Setting;
 use App\Services\GoogleDriveService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class LokerController extends Controller
 {
@@ -76,6 +79,9 @@ class LokerController extends Controller
                 ->with('error', 'Maaf, loker saat ini belum tersedia. Silakan cek kembali nanti.');
         }
 
+        // Validasi berkas sesuai syarat periode (wajib / opsional)
+        $request->validate($this->berkasRules($periodeAktif), [], $this->berkasAttributes($periodeAktif));
+
         $noWa = preg_replace('/[^0-9]/', '', $request->no_wa);
 
         // Cek duplikat: no WA sudah pernah terdaftar
@@ -101,7 +107,33 @@ class LokerController extends Controller
             $this->uploadKtp($request->file('ktp'), $request->no_wa, $data);
         }
 
-        Loker::create($data);
+        $storedBerkas = [];
+
+        try {
+            DB::transaction(function () use ($data, $periodeAktif, $request, &$storedBerkas) {
+                $loker = Loker::create($data);
+
+                foreach ($periodeAktif->syarats as $syarat) {
+                    $file = $request->file("berkas.{$syarat->id}");
+                    if (!$file) {
+                        continue;
+                    }
+
+                    // Disimpan di disk privat (bukan folder publik); nama file di-hash oleh Laravel
+                    $path = $file->store('loker-berkas/' . $loker->id, 'local');
+                    $storedBerkas[] = $path;
+
+                    LokerBerkas::create([
+                        'loker_id' => $loker->id,
+                        'periode_syarat_id' => $syarat->id,
+                        'path' => $path,
+                    ]);
+                }
+            });
+        } catch (\Throwable $e) {
+            Storage::disk('local')->delete($storedBerkas);
+            throw $e;
+        }
 
         session()->forget('loker_captcha_answer');
 
@@ -116,6 +148,34 @@ class LokerController extends Controller
             ->first();
 
         return response()->json(['exists' => (bool)$existing]);
+    }
+
+    /**
+     * Aturan validasi berkas untuk tiap syarat periode.
+     * Wajib → required; opsional → nullable. Tipe dan ukuran sama untuk semua.
+     */
+    protected function berkasRules(PeriodeLoker $periode): array
+    {
+        $rules = [];
+        foreach ($periode->syarats as $syarat) {
+            $rules["berkas.{$syarat->id}"] = [
+                $syarat->wajib ? 'required' : 'nullable',
+                'file',
+                'mimes:pdf,jpg,jpeg,png,webp',
+                'mimetypes:application/pdf,image/jpeg,image/png,image/webp',
+                'max:5120',
+            ];
+        }
+        return $rules;
+    }
+
+    protected function berkasAttributes(PeriodeLoker $periode): array
+    {
+        $attributes = [];
+        foreach ($periode->syarats as $syarat) {
+            $attributes["berkas.{$syarat->id}"] = $syarat->nama;
+        }
+        return $attributes;
     }
 
     protected function uploadKtp($file, string $noWa, array &$data)
