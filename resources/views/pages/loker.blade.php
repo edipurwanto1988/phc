@@ -128,8 +128,8 @@
             </div>
 
             <div class="mb-6">
-                <label for="ktp" class="block text-sm font-semibold text-text-primary mb-1.5">Upload KTP</label>
-                <input type="file" name="ktp" id="ktp" accept="image/*" class="w-full text-sm text-text-secondary file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/15 file:transition-colors">
+                <label for="ktp" class="block text-sm font-semibold text-text-primary mb-1.5">Upload KTP <span class="text-red-500">*</span></label>
+                <input type="file" name="ktp" id="ktp" accept="image/jpeg,image/png,image/webp" required class="w-full text-sm text-text-secondary file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/15 file:transition-colors">
             </div>
 
             @if($periodeAktif->syarats->isNotEmpty())

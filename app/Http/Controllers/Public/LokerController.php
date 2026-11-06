@@ -56,7 +56,7 @@ class LokerController extends Controller
             'keahlian_khusus' => 'nullable|string',
             'cerita' => 'nullable|string',
             'no_wa' => 'required|string|max:20',
-            'ktp' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'ktp' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
             'captcha_answer' => 'required|string',
         ]);
 
