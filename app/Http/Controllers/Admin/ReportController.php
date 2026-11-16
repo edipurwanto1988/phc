@@ -199,4 +199,46 @@ class ReportController extends Controller
             'endDate'
         ));
     }
+
+    /**
+     * Laporan penggajian cleaner: assignment yang punya pembayaran gaji
+     * pada rentang tanggal yang dipilih.
+     */
+    public function penggajian(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+
+        $rows = \App\Models\OrderAssignment::with(['order.customer', 'cleaner', 'payments'])
+            ->whereHas('payments', fn ($q) => $q->whereBetween('payment_date', [$startDate, $endDate]))
+            ->get()
+            ->map(function ($assignment) use ($startDate, $endDate) {
+                $pembayaranPeriode = $assignment->payments->filter(function ($p) use ($startDate, $endDate) {
+                    $tgl = $p->payment_date->format('Y-m-d');
+                    return $tgl >= $startDate && $tgl <= $endDate;
+                });
+
+                return [
+                    'order_number' => $assignment->order->order_number ?? '-',
+                    'customer' => $assignment->order->customer->nama ?? '-',
+                    'cleaner' => $assignment->cleaner->name ?? '-',
+                    'tanggal_penggajian' => $pembayaranPeriode->max('payment_date'),
+                    'gaji' => (float) $assignment->gaji,
+                    'sudah_dibayar' => $assignment->totalPaid(),
+                ];
+            })
+            ->sortBy('tanggal_penggajian')
+            ->values();
+
+        $totalGaji = $rows->sum('gaji');
+        $totalDibayar = $rows->sum('sudah_dibayar');
+
+        return view('admin.reports_penggajian', compact(
+            'rows',
+            'totalGaji',
+            'totalDibayar',
+            'startDate',
+            'endDate'
+        ));
+    }
 }
