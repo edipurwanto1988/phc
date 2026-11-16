@@ -171,18 +171,16 @@
             return Number(value || 0).toLocaleString('id-ID');
         },
 
-        init() {
-            if (this.selectedCleaner) {
-                this.updateCleaner();
-                const preselect = @json($preselectAssignments);
-                if (preselect.length) {
-                    this.selectedAssignments = this.assignments
-                        .map(a => a.id)
-                        .filter(id => preselect.includes(id));
-                }
+        applyPreselect(ids) {
+            if (!this.selectedCleaner) return;
+            this.updateCleaner();
+            const list = ids ? ids.split(',') : [];
+            if (list.length) {
+                this.selectedAssignments = this.assignments.map(a => a.id).filter(id => list.includes(id));
             }
         }
-    }">
+    }"
+        x-init="applyPreselect('{{ implode(',', $preselectAssignments) }}')">
         <form method="POST" action="{{ route('admin.expenses.store') }}">
             @csrf
             <input type="hidden" name="tab_type" value="gaji">
