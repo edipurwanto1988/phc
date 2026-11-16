@@ -57,10 +57,9 @@ class ExpenseController extends Controller
             $q->whereIn('name', ['Cleaner', 'Staff', 'Admin']);
         })->where('status', 'active')->orderBy('name')->get();
 
-        // Get assignments that still have outstanding salary, grouped by user
-        // (status belum_dibayar OR cicilan), each with its paid/remaining totals.
+        // Assignment dengan sisa gaji > 0, dihitung dari pembayaran (bukan kolom status_gaji
+        // yang bisa tidak sinkron), dikelompokkan per cleaner.
         $unpaidAssignments = \App\Models\OrderAssignment::with(['order', 'cleaner', 'payments'])
-            ->whereIn('status_gaji', ['belum_dibayar', 'cicilan'])
             ->where('gaji', '>', 0)
             ->get()
             ->filter(function ($assignment) {
