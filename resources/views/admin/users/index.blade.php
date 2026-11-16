@@ -27,7 +27,11 @@
             <tbody>
                 @forelse($users as $user)
                 <tr class="border-b border-gray-100 hover:bg-gray-50">
-                    <td class="py-3 px-4 font-medium">{{ $user->name }}</td>
+                    <td class="py-3 px-4 font-medium">
+                        <a href="{{ route('admin.users.show', $user) }}" target="_blank" rel="noopener" class="text-primary hover:underline">
+                            {{ $user->name }}
+                        </a>
+                    </td>
                     <td class="py-3 px-4">{{ $user->username }}</td>
                     <td class="py-3 px-4">{{ $user->email }}</td>
                     <td class="py-3 px-4">

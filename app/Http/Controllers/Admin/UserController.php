@@ -20,6 +20,23 @@ class UserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
+    public function show(User $user)
+    {
+        $user->load('role');
+
+        $assignments = $user->assignments()
+            ->with(['order.customer', 'payments.creator'])
+            ->get()
+            ->sortByDesc(fn ($a) => $a->order->tanggal_jadwal)
+            ->values();
+
+        $totalGaji = (float) $assignments->sum('gaji');
+        $totalDibayar = (float) $assignments->sum(fn ($a) => $a->totalPaid());
+        $totalKurang = max(0, $totalGaji - $totalDibayar);
+
+        return view('admin.users.show', compact('user', 'assignments', 'totalGaji', 'totalDibayar', 'totalKurang'));
+    }
+
     public function create()
     {
         $roles = Role::all();
