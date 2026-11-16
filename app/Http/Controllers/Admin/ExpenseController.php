@@ -69,7 +69,10 @@ class ExpenseController extends Controller
 
         $orders = \App\Models\Order::with('customer')->orderBy('created_at', 'desc')->get();
 
-        return view('admin.expenses.create', compact('users', 'cleaners', 'unpaidAssignments', 'orders'));
+        $preselectCleaner = (int) $request->query('cleaner_id', 0);
+        $preselectAssignments = array_map('strval', array_map('intval', array_filter((array) $request->query('assignment_id', []))));
+
+        return view('admin.expenses.create', compact('users', 'cleaners', 'unpaidAssignments', 'orders', 'preselectCleaner', 'preselectAssignments'));
     }
 
     /**

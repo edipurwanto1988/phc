@@ -102,7 +102,7 @@
                             <td class="py-2 px-4 text-right text-gray-700">Rp {{ number_format($job['dibayar'], 0, ',', '.') }}</td>
                             <td class="py-2 px-4 text-right font-bold text-red-600">Rp {{ number_format($job['kurang'], 0, ',', '.') }}</td>
                             <td class="py-2 px-4 text-center">
-                                <a href="{{ route('admin.expenses.create') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-md">
+                                <a href="{{ route('admin.expenses.create', ['tab' => 'gaji', 'cleaner_id' => $job['cleaner_id'], 'assignment_id' => $job['assignment_id']]) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-md">
                                     <i class="ri-money-dollar-circle-line"></i> Bayar
                                 </a>
                             </td>

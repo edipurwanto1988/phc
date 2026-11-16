@@ -82,6 +82,7 @@ class OrderController extends Controller
                 return [
                     'cleaner' => $assignment->cleaner->name ?? '-',
                     'cleaner_id' => $assignment->user_id,
+                    'assignment_id' => $assignment->id,
                     'order_id' => $assignment->order_id,
                     'order_number' => $assignment->order->order_number,
                     'customer' => $assignment->order->customer->nama ?? '-',

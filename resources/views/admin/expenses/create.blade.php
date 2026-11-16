@@ -6,7 +6,7 @@
 @endsection
 
 @section('content')
-<div class="card p-6 bg-white rounded-xl shadow-sm border border-gray-200" x-data="{ tab: 'operasional' }">
+<div class="card p-6 bg-white rounded-xl shadow-sm border border-gray-200" x-data="{ tab: '{{ $preselectCleaner ? 'gaji' : 'operasional' }}' }">
     
     <!-- Tab Headers -->
     <div class="flex border-b border-gray-200 mb-6">
@@ -98,7 +98,7 @@
 
     <!-- TAB 2: GAJI CLEANER -->
     <div x-show="tab === 'gaji'" x-cloak x-data="{
-        selectedCleaner: '',
+        selectedCleaner: '{{ $preselectCleaner }}',
         assignments: [],
         selectedAssignments: [],
         amountInputs: {},
@@ -169,6 +169,18 @@
 
         formatRupiah(value) {
             return Number(value || 0).toLocaleString('id-ID');
+        },
+
+        init() {
+            if (this.selectedCleaner) {
+                this.updateCleaner();
+                const preselect = @json($preselectAssignments);
+                if (preselect.length) {
+                    this.selectedAssignments = this.assignments
+                        .map(a => a.id)
+                        .filter(id => preselect.includes(id));
+                }
+            }
         }
     }">
         <form method="POST" action="{{ route('admin.expenses.store') }}">
