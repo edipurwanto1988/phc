@@ -66,11 +66,14 @@
                         <p>Diterima: <span class="font-medium text-green-700">Rp {{ number_format($dibayar, 0, ',', '.') }}</span></p>
                         <p>Sisa:
                             @if($sisa > 0)
-                                <span class="font-medium text-red-600">Rp {{ number_format($sisa, 0, ',', '.') }}</span>
+                                <span class="font-medium {{ $assignment->order->status === 'completed' ? 'text-red-600' : 'text-gray-500' }}">Rp {{ number_format($sisa, 0, ',', '.') }}</span>
                             @else
                                 <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">Lunas</span>
                             @endif
                         </p>
+                        @if($sisa > 0 && $assignment->order->status !== 'completed')
+                            <p class="text-xs text-gray-500">Order belum completed, belum masuk peringatan</p>
+                        @endif
                     </div>
                 </div>
 

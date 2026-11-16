@@ -45,7 +45,11 @@ class UserController extends Controller
 
         $totalGaji = (float) $assignments->sum('gaji');
         $totalDibayar = (float) $assignments->sum(fn ($a) => $a->totalPaid());
-        $totalKurang = max(0, $totalGaji - $totalDibayar);
+
+        // Sama dengan peringatan di halaman order: sisa gaji hanya dihitung untuk order completed
+        $totalKurang = (float) $assignments
+            ->filter(fn ($a) => $a->order->status === 'completed')
+            ->sum(fn ($a) => $a->remaining());
 
         return view('admin.users.show', compact('user', 'assignments', 'totalGaji', 'totalDibayar', 'totalKurang'));
     }
