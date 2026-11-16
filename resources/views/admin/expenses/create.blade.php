@@ -181,7 +181,7 @@
         }
     }"
         x-init="applyPreselect('{{ implode(',', $preselectAssignments) }}')">
-        <form method="POST" action="{{ route('admin.expenses.store') }}">
+        <form method="POST" action="{{ route('admin.expenses.store') }}" onsubmit="this.querySelector('[type=submit]').disabled = true;">
             @csrf
             <input type="hidden" name="tab_type" value="gaji">
 

@@ -129,6 +129,19 @@ class ExpenseController extends Controller
                     throw new \Exception('Tidak ada nominal pembayaran yang valid (semua 0).');
                 }
 
+                $duplikat = Expense::where('is_gaji', true)
+                    ->where('user_id', $cleaner->id)
+                    ->whereDate('tanggal', $request->tanggal)
+                    ->where('jumlah', $totalPaidNow)
+                    ->first();
+                if ($duplikat) {
+                    throw new \Exception(
+                        "Pembayaran gaji {$cleaner->name} sebesar Rp " . number_format($totalPaidNow, 0, ',', '.')
+                        . " pada tanggal {$request->tanggal} sudah tercatat (ID #{$duplikat->id}). "
+                        . "Hapus catatan lama terlebih dahulu jika ini bukan duplikat."
+                    );
+                }
+
                 // Create the salary expense record for this installment batch
                 $expense = Expense::create([
                     'tanggal' => $request->tanggal,
