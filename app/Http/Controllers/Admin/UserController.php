@@ -11,13 +11,26 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = trim((string) $request->query('search', ''));
+
         $users = User::with('role')
             ->withCount(['createdOrders', 'assignments'])
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $like = '%' . $search . '%';
+                    $q->where('name', 'like', $like)
+                        ->orWhere('username', 'like', $like)
+                        ->orWhere('email', 'like', $like)
+                        ->orWhere('phc_id', 'like', $like);
+                });
+            })
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
-        return view('admin.users.index', compact('users'));
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.users.index', compact('users', 'search'));
     }
 
     public function show(User $user)

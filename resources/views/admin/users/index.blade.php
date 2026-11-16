@@ -6,8 +6,17 @@
 @endsection
 @section('content')
 <div class="card">
-    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-        <div></div>
+    <div class="p-6 border-b border-gray-200 flex justify-between items-center gap-4">
+        <form method="GET" action="{{ route('admin.users.index') }}" class="flex items-center gap-2 flex-1 max-w-md">
+            <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama, username, email, atau PHC ID..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="btn btn-primary">
+                <i class="ri-search-line"></i>
+            </button>
+            @if($search !== '')
+            <a href="{{ route('admin.users.index') }}" class="btn">Reset</a>
+            @endif
+        </form>
         <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
             <i class="ri-add-line mr-2"></i>Tambah
         </a>
@@ -66,7 +75,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="py-8 text-center text-gray-500">Belum ada user</td>
+                    <td colspan="6" class="py-8 text-center text-gray-500">{{ $search !== '' ? 'Tidak ada user yang cocok dengan "' . $search . '"' : 'Belum ada user' }}</td>
                 </tr>
                 @endforelse
             </tbody>
