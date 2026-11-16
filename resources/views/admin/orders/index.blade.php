@@ -46,6 +46,77 @@
     </form>
 </div>
 
+@php
+    $kurangOrderIds = $gajiKurang->flatMap(fn ($c) => $c['jobs']->pluck('order_id'))->unique()->all();
+@endphp
+
+@if($gajiKurang->isNotEmpty())
+<!-- Warning: Gaji cleaner belum lunas -->
+<details class="group mb-6 bg-amber-50 border border-amber-300 rounded-xl overflow-hidden">
+    <summary class="cursor-pointer list-none px-6 py-4 flex items-center justify-between gap-4 hover:bg-amber-100 transition-colors">
+        <div class="flex items-center gap-3 text-amber-800">
+            <i class="ri-alert-line text-2xl"></i>
+            <div>
+                <div class="font-bold text-sm">
+                    Peringatan: {{ $gajiKurang->count() }} cleaner masih punya gaji kurang dibayar
+                    ({{ $gajiKurang->sum(fn ($c) => $c['jobs']->count()) }} pekerjaan, order sudah completed)
+                </div>
+                <div class="text-xs mt-0.5">
+                    Total kekurangan: <span class="font-bold">Rp {{ number_format($gajiKurang->sum('total_kurang'), 0, ',', '.') }}</span>
+                </div>
+            </div>
+        </div>
+        <span class="text-xs font-semibold text-amber-700 underline whitespace-nowrap group-open:hidden">Klik untuk lihat daftar</span>
+        <span class="text-xs font-semibold text-amber-700 underline whitespace-nowrap hidden group-open:inline">Sembunyikan</span>
+    </summary>
+
+    <div class="px-6 pb-6 pt-2 space-y-4 bg-white">
+        @foreach($gajiKurang as $cleaner)
+        <div class="border border-gray-200 rounded-lg overflow-hidden">
+            <div class="flex justify-between items-center px-4 py-3 bg-gray-50">
+                <div class="font-bold text-gray-800">{{ $cleaner['cleaner'] }}</div>
+                <div class="text-sm font-bold text-red-600">Kurang: Rp {{ number_format($cleaner['total_kurang'], 0, ',', '.') }}</div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200 text-xs text-gray-500 uppercase">
+                            <th class="py-2 px-4">No. Order</th>
+                            <th class="py-2 px-4">Customer</th>
+                            <th class="py-2 px-4">Tanggal Pekerjaan</th>
+                            <th class="py-2 px-4 text-right">Gaji</th>
+                            <th class="py-2 px-4 text-right">Sudah Dibayar</th>
+                            <th class="py-2 px-4 text-right">Kurang</th>
+                            <th class="py-2 px-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($cleaner['jobs'] as $job)
+                        <tr class="border-b border-gray-100">
+                            <td class="py-2 px-4 font-semibold text-blue-600">
+                                <a href="{{ route('admin.orders.show', $job['order_id']) }}" class="hover:underline">{{ $job['order_number'] }}</a>
+                            </td>
+                            <td class="py-2 px-4 text-gray-700">{{ $job['customer'] }}</td>
+                            <td class="py-2 px-4 text-gray-700">{{ $job['tanggal']->translatedFormat('d M Y') }}</td>
+                            <td class="py-2 px-4 text-right text-gray-700">Rp {{ number_format($job['gaji'], 0, ',', '.') }}</td>
+                            <td class="py-2 px-4 text-right text-gray-700">Rp {{ number_format($job['dibayar'], 0, ',', '.') }}</td>
+                            <td class="py-2 px-4 text-right font-bold text-red-600">Rp {{ number_format($job['kurang'], 0, ',', '.') }}</td>
+                            <td class="py-2 px-4 text-center">
+                                <a href="{{ route('admin.expenses.create') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-md">
+                                    <i class="ri-money-dollar-circle-line"></i> Bayar
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</details>
+@endif
+
 <!-- Orders Table -->
 <div class="card">
     <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-white rounded-t-xl">
@@ -115,6 +186,11 @@
                             @else bg-red-100 text-red-700 @endif">
                             {{ ucfirst(str_replace('_', ' ', $order->status)) }}
                         </span>
+                        @if(in_array($order->id, $kurangOrderIds))
+                        <div class="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-300" title="Ada gaji cleaner yang belum lunas">
+                            <i class="ri-alert-line"></i> Gaji kurang
+                        </div>
+                        @endif
                     </td>
                     @if(auth()->user()->role->name !== 'Cleaner')
                     <td class="py-4 px-3 text-center">

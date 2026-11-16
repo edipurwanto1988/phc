@@ -55,7 +55,51 @@ class OrderController extends Controller
 
         $orders = $query->orderBy('tanggal_jadwal', 'desc')->paginate(10)->withQueryString();
 
-        return view('admin.orders.index', compact('orders'));
+        // Warning: gaji cleaner yang belum lunas pada order completed (hanya untuk role yang boleh lihat keuangan)
+        $gajiKurang = collect();
+        if ($user->role && $user->role->name !== 'Cleaner'
+            && ($user->hasPermission('view_expenses') || $user->hasPermission('manage_expenses') || $user->hasPermission('view_reports'))) {
+            $gajiKurang = $this->getUnderpaidCleanerSalaries();
+        }
+
+        return view('admin.orders.index', compact('orders', 'gajiKurang'));
+    }
+
+    /**
+     * Gaji cleaner yang masih kurang dibayar pada order berstatus completed,
+     * dikelompokkan per cleaner.
+     */
+    private function getUnderpaidCleanerSalaries(): \Illuminate\Support\Collection
+    {
+        return \App\Models\OrderAssignment::with(['order.customer', 'cleaner', 'payments'])
+            ->where('gaji', '>', 0)
+            ->whereHas('order', fn ($q) => $q->where('status', 'completed'))
+            ->get()
+            ->map(function ($assignment) {
+                $gaji = (float) $assignment->gaji;
+                $dibayar = $assignment->totalPaid();
+
+                return [
+                    'cleaner' => $assignment->cleaner->name ?? '-',
+                    'cleaner_id' => $assignment->user_id,
+                    'order_id' => $assignment->order_id,
+                    'order_number' => $assignment->order->order_number,
+                    'customer' => $assignment->order->customer->nama ?? '-',
+                    'tanggal' => $assignment->order->tanggal_jadwal,
+                    'gaji' => $gaji,
+                    'dibayar' => $dibayar,
+                    'kurang' => max(0, $gaji - $dibayar),
+                ];
+            })
+            ->filter(fn ($row) => $row['kurang'] > 0)
+            ->groupBy('cleaner_id')
+            ->map(fn ($rows) => [
+                'cleaner' => $rows->first()['cleaner'],
+                'total_kurang' => $rows->sum('kurang'),
+                'jobs' => $rows->sortBy('tanggal')->values(),
+            ])
+            ->sortBy('cleaner')
+            ->values();
     }
 
     public function create()
