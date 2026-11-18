@@ -144,7 +144,7 @@
                 <!-- Master (Blog, Laman Statis, Testimoni, Loker, Periode Loker) -->
                 @if(auth()->user()->hasPermission('manage_services') || auth()->user()->hasPermission('manage_blog'))
                 @php
-                    $masterActive = request()->is('admin/testimonials*') || request()->is('admin/loker*') || request()->is('admin/periode-loker*') || request()->is('admin/formasi*') || request()->is('admin/posts*') || request()->is('admin/halaman*') || request()->is('admin/menu*');
+                    $masterActive = request()->is('admin/testimonials*') || request()->is('admin/loker*') || request()->is('admin/periode-loker*') || request()->is('admin/formasi*') || request()->is('admin/master-alat*') || request()->is('admin/posts*') || request()->is('admin/halaman*') || request()->is('admin/menu*');
                 @endphp
                 <div x-data="{ open: {{ $masterActive ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg {{ $masterActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
@@ -174,6 +174,9 @@
                         </a>
                         <a href="/admin/formasi" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/formasi*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' }}">
                             <i class="ri-user-star-line text-sm"></i><span>Formasi</span>
+                        </a>
+                        <a href="/admin/master-alat" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/master-alat*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100' }}">
+                            <i class="ri-tools-line text-sm"></i><span>Master Alat</span>
                         </a>
                         @endhasperm
                         @if(auth()->user()->role && auth()->user()->role->name === 'Super Admin')

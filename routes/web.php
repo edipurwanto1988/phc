@@ -127,6 +127,14 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             Route::post('/services/reorder', [AdminServiceController::class, 'reorder'])->name('admin.services.reorder');
             Route::resource('/services', AdminServiceController::class)->names('admin.services');
             Route::resource('/service-categories', AdminServiceCategoryController::class)->names('admin.service-categories');
+
+            // Master Alat: data aset alat, pembelian (pengeluaran), dan riwayat kerusakan/perbaikan
+            Route::resource('/master-alat', \App\Http\Controllers\Admin\AssetController::class)
+                ->parameters(['master-alat' => 'masterAlat'])
+                ->names('admin.master-alat');
+            Route::post('/master-alat/kategori', [\App\Http\Controllers\Admin\AssetController::class, 'storeCategory'])->name('admin.master-alat.kategori.store');
+            Route::post('/master-alat/{masterAlat}/perbaikan', [\App\Http\Controllers\Admin\AssetController::class, 'storeMaintenance'])->name('admin.master-alat.perbaikan.store');
+            Route::delete('/master-alat/perbaikan/{maintenance}', [\App\Http\Controllers\Admin\AssetController::class, 'destroyMaintenance'])->name('admin.master-alat.perbaikan.destroy');
             Route::resource('/testimonials', AdminTestimonialController::class)->names('admin.testimonials');
             Route::resource('/loker', AdminLokerController::class)->names('admin.loker');
             Route::get('/loker/{loker}/ktp/view', [AdminLokerController::class, 'viewKtp'])->name('admin.loker.ktp.view');

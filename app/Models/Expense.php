@@ -37,4 +37,16 @@ class Expense extends Model
     {
         return $this->belongsTo(Order::class, 'order_id');
     }
+
+    // Alat yang dibeli dari pengeluaran ini
+    public function assets()
+    {
+        return $this->hasMany(Asset::class, 'expense_id');
+    }
+
+    // Riwayat perbaikan alat yang biayanya tercatat di pengeluaran ini
+    public function assetMaintenances()
+    {
+        return $this->hasMany(AssetMaintenance::class, 'expense_id');
+    }
 }
