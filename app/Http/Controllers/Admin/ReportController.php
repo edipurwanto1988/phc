@@ -201,6 +201,63 @@ class ReportController extends Controller
     }
 
     /**
+     * Laporan keuntungan per jasa: akumulasi profit per order (sama dengan halaman
+     * admin/orders/{order}/profit) untuk order yang dijadwalkan pada rentang tanggal.
+     * Masuk = grand_total, Keluar = gaji cleaner + pengeluaran yang terkait order.
+     */
+    public function keuntungan(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $serviceId = $request->input('service_id');
+
+        $services = \App\Models\Service::orderBy('nama')->get(['id', 'nama']);
+        $selectedService = $serviceId ? $services->firstWhere('id', (int) $serviceId) : null;
+
+        $rows = Order::with(['customer', 'assignments', 'expenses'])
+            ->whereBetween(DB::raw('DATE(tanggal_jadwal)'), [$startDate, $endDate])
+            ->where('status', '!=', 'cancelled')
+            ->when($selectedService, fn ($q) => $q->whereHas('items', fn ($i) => $i->where('service_id', $selectedService->id)))
+            ->orderBy('tanggal_jadwal')
+            ->get()
+            ->map(function ($order) {
+                $masuk = (float) $order->grand_total;
+                $gaji = (float) $order->assignments->sum('gaji');
+                $operasional = (float) $order->expenses->sum('jumlah');
+
+                return [
+                    'order' => $order,
+                    'masuk' => $masuk,
+                    'gaji' => $gaji,
+                    'operasional' => $operasional,
+                    'keluar' => $gaji + $operasional,
+                    'laba' => $masuk - $gaji - $operasional,
+                ];
+            });
+
+        $totalMasuk = $rows->sum('masuk');
+        $totalGaji = $rows->sum('gaji');
+        $totalOperasional = $rows->sum('operasional');
+        $totalKeluar = $totalGaji + $totalOperasional;
+        $laba = $totalMasuk - $totalKeluar;
+        $margin = $totalMasuk > 0 ? $laba / $totalMasuk * 100 : null;
+
+        return view('admin.reports_keuntungan', compact(
+            'services',
+            'selectedService',
+            'startDate',
+            'endDate',
+            'rows',
+            'totalMasuk',
+            'totalGaji',
+            'totalOperasional',
+            'totalKeluar',
+            'laba',
+            'margin'
+        ));
+    }
+
+    /**
      * Laporan penggajian cleaner: assignment yang punya pembayaran gaji
      * pada rentang tanggal yang dipilih.
      */

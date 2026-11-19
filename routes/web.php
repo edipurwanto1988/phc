@@ -152,6 +152,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
             Route::get('/reports', [AdminReportController::class, 'index'])->name('admin.reports.index');
             Route::get('/reports/detail', [AdminReportController::class, 'detail'])->name('admin.reports.detail');
             Route::get('/reports/penggajian', [AdminReportController::class, 'penggajian'])->name('admin.reports.penggajian');
+            Route::get('/reports/keuntungan', [AdminReportController::class, 'keuntungan'])->name('admin.reports.keuntungan');
         });
 
         // ---- Pengeluaran: lihat (Cleaner hanya gaji sendiri, dicek di controller), kelola butuh manage_expenses ----

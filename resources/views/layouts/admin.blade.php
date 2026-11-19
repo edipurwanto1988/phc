@@ -197,7 +197,7 @@
                   
                   @hasperm('view_reports')
                   @php
-                      $reportsActive = request()->is('admin/reports') || request()->is('admin/reports/detail') || request()->is('admin/reports/penggajian');
+                      $reportsActive = request()->is('admin/reports') || request()->is('admin/reports/detail') || request()->is('admin/reports/penggajian') || request()->is('admin/reports/keuntungan');
                   @endphp
                   <div x-data="{ open: {{ $reportsActive ? 'true' : 'false' }} }">
                       <button @click="open = !open" class="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg {{ $reportsActive ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}">
@@ -215,6 +215,9 @@
                           </a>
                           <a href="{{ route('admin.reports.penggajian') }}" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/reports/penggajian*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-650 hover:bg-gray-100' }}">
                               <i class="ri-checkbox-blank-circle-line text-xs"></i><span>Lap. Penggajian</span>
+                          </a>
+                          <a href="{{ route('admin.reports.keuntungan') }}" @click="sidebarOpen = false" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->is('admin/reports/keuntungan*') ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-650 hover:bg-gray-100' }}">
+                              <i class="ri-checkbox-blank-circle-line text-xs"></i><span>Lap. Keuntungan</span>
                           </a>
                       </div>
                   </div>
