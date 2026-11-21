@@ -28,7 +28,7 @@
         @if($periodeAktif)
         <div class="hidden mt-4 mb-6 inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-sm font-medium px-4 py-2 rounded-full">
             <i class="ri-calendar-check-line"></i>
-            Pendaftaran sedang dibuka: {{ $periodeAktif->nama }}
+            Pendaftaran sedang dibuka:
             @if($periodeAktif->tanggal_mulai || $periodeAktif->tanggal_selesai)
             <span class="font-normal text-green-600">
                 ({{ $periodeAktif->tanggal_mulai ? $periodeAktif->tanggal_mulai->translatedFormat('d M Y') : '...' }} - {{ $periodeAktif->tanggal_selesai ? $periodeAktif->tanggal_selesai->translatedFormat('d M Y') : '...' }})
